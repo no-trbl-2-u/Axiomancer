@@ -1,0 +1,2303 @@
+{
+  "stamp": {
+    "commit": "5085b096",
+    "date": "2026-10-15T17:35:13-04:00"
+  },
+  "ledgerStamp": "86eea99d",
+  "prs": [
+    {
+      "number": 505,
+      "title": "loop: measured-truth baseline — phase R12a",
+      "merge": "be6e827dc1f24df106a780030904c91b4d75624c",
+      "parent": "6adb3ef1c6cf9ba4fd052b57a28ed1edecd5fe79",
+      "files": [
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.measured-truth.test.ts",
+          "status": "added",
+          "freshTitles": [
+            "a player too deep to dent never drops below full",
+            "a defeat reads exactly 0",
+            "the low is never above the start or the end of the fight",
+            "aggregates a mean and a p10 no higher than it",
+            "percentile is nearest-rank",
+            "has one cell per ledger fight x spread x deck",
+            "carries every A1 key on every cell",
+            "meets each door at the full-clear level, against its pinned level",
+            "resolves both decks through the lane registry",
+            "rejects a lane the registry does not carry"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 10,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 0,
+            "failed": 0,
+            "message": "Cannot find module './combat.measured-truth' imported from '/tmp/eval-parent-replay-KaqQf6/axiomancer-mechanics/src/Combat/combat.measured-truth.test.ts'"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "does not load on the parent",
+          "couldNotFailCases": [],
+          "newCases": 10
+        },
+        {
+          "path": "axiomancer-mechanics/src/Game/act1-progression.test.ts",
+          "status": "changed",
+          "freshTitles": [
+            "records the level stepping up to every fight, doors included"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 5,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 4,
+            "failed": 1,
+            "message": ""
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 1
+        },
+        {
+          "path": "scripts/measured-compare.test.mjs",
+          "status": "added",
+          "freshTitles": [
+            "compare: the first line never drifts",
+            "compare: moves under every threshold are not drifts",
+            "compare: a move of exactly a threshold, either way, is a drift",
+            "compare: thresholds are read from the argument",
+            "compare: a cell with no counterpart is skipped",
+            "renderAuditRow: a [content] row naming fight, deck, metric, both values and both commits",
+            "fileDrifts: a new row goes under ## Pending",
+            "fileDrifts: an open row for the same (fight, deck, metric) gets evidence, not a twin",
+            "fileDrifts: two spreads of one key in one run file one row",
+            "fileDrifts: no Pending heading is an error only when there is a row to add",
+            "historyLine: stamps the report and slims each cell",
+            "renderLatest: stamped header, generated note and a row per fight",
+            "renderDigestSection: no run, a stale run, a first run, no drift and drifts"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 13,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 0,
+            "failed": 1,
+            "message": "# Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/tmp/eval-parent-replay-KaqQf6/scripts/measured-compare.mjs' imported from /tmp/eval-parent-replay-KaqQf6/scripts/measured-compare.test.mjs not ok 1 - scripts/measured-compare.test.mjs"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "does not load on the parent",
+          "couldNotFailCases": [],
+          "newCases": 13
+        }
+      ]
+    },
+    {
+      "number": 507,
+      "title": "loop: roster-health lenses — phase RH1",
+      "merge": "ae21c03f31cfc230c9056e112ab851f77b6143a0",
+      "parent": "33da305b92b0266f437f9961f425fd5c7351ff22",
+      "files": [
+        {
+          "path": "axiomancer-mechanics/src/World/e2e/roster-health.engine.test.ts",
+          "status": "added",
+          "freshTitles": [
+            "has no dangling reference",
+            "orphans match the pinned list",
+            "reads the four Act 1 maps and their pools",
+            "is empty",
+            "enemy-slug: an encounter names an unknown slug",
+            "loot-item: a loot table names an unknown consumable",
+            "loot-item: a cache names an unknown relic",
+            "shop-ware: a shop stocks an unknown item",
+            "relic-signature: a relic grants an unregistered signature",
+            "dialogue-next / dialogue-quest / dialogue-card: a choice names a missing node, quest and card",
+            "dialogue-quest: a quest chains into an undefined quest",
+            "map-npc: an interaction names nobody on the roster or the unstaged list",
+            "enemy-unpooled: a library enemy no pool draws or pins",
+            "enemy-unpooled: an encounter pin reaches the enemy; the dev dummy is never an orphan",
+            "item-ungranted: a consumable and a relic nothing grants",
+            "item-ungranted: a friendship reward grants",
+            "npc-unreached: a rostered NPC with a tree no interaction names",
+            "dialogue-node-unreached: a node neither the root nor a choice reaches",
+            "quest-unstarted: a quest nothing starts; a chained quest counts as started"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 19,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 0,
+            "failed": 0,
+            "message": "Cannot find module '../roster-health' imported from '/tmp/eval-parent-replay-KaqQf6/axiomancer-mechanics/src/World/e2e/roster-health.engine.test.ts'"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "does not load on the parent",
+          "couldNotFailCases": [],
+          "newCases": 19
+        }
+      ]
+    },
+    {
+      "number": 509,
+      "title": "loop: card-spec scaffold and card-rules lint — phase CS1",
+      "merge": "3f9b44e5fbb369fd93a04d29ca72dfe38023d258",
+      "parent": "be6e827dc1f24df106a780030904c91b4d75624c",
+      "files": [
+        {
+          "path": "axiomancer-mechanics/src/Cards/card-rules.test.ts",
+          "status": "added",
+          "freshTitles": [
+            "reads a plain card from its rider, mechanics and paidSummary",
+            "resolves number tokens and skips structural words",
+            "counts a Global trigger as a condition and its type as a printed word",
+            "counts a line requirement once when its text says the same",
+            "Ash allows one keyword beyond DEAL and GUARD",
+            "Splinter allows two keywords and one condition; Skull is unbudgeted",
+            "counts only the Card keywords it is given",
+            "flags a line whose whole effect is 1 Conviction, in any probed state",
+            "passes 2 Conviction, and 1 Conviction with anything else",
+            "passes a body with no duration and a PAID change that differs",
+            "flags a printed duration and a PAID line that changes nothing",
+            "flags a Global with no trigger and a trigger on a non-Global",
+            "reads each row with its section kind",
+            "flags a row with no carrier, a Card keyword under the bar and a printed word with no row",
+            "lets two enemies carry a Card keyword past the bar"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 15,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 0,
+            "failed": 0,
+            "message": "Cannot find module './card-rules' imported from '/tmp/eval-parent-replay-KaqQf6/axiomancer-mechanics/src/Cards/card-rules.test.ts'"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "does not load on the parent",
+          "couldNotFailCases": [],
+          "newCases": 15
+        },
+        {
+          "path": "axiomancer-mechanics/src/Cards/e2e/card-rules.engine.test.ts",
+          "status": "added",
+          "freshTitles": [
+            "runs over every library card, grey and trial",
+            "parses the atlas into Card, Rule and system rows",
+            "every exemption row is well formed",
+            "no card breaks it unless the fixture pins the break",
+            "every pinned break still happens (no stale exemption)",
+            "complexity budget: an Ash card with two keywords and a condition",
+            "scrap floor: a PAID line that only gains 1 Conviction",
+            "Global template: a body that prints its own duration",
+            "carrier rule: a card that prints a word with no atlas row"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 15,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 0,
+            "failed": 0,
+            "message": "Cannot find module '../card-rules' imported from '/tmp/eval-parent-replay-KaqQf6/axiomancer-mechanics/src/Cards/e2e/card-rules.engine.test.ts'"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "does not load on the parent",
+          "couldNotFailCases": [],
+          "newCases": 15
+        },
+        {
+          "path": "axiomancer-mechanics/src/test-utils/e2e/hermeticity.audit.test.ts",
+          "status": "changed",
+          "freshTitles": [],
+          "control": {
+            "ok": true,
+            "passed": 6,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": true,
+            "passed": 6,
+            "failed": 0,
+            "message": ""
+          },
+          "verdict": "could-not-fail",
+          "reason": "passes on the parent",
+          "couldNotFailCases": [],
+          "newCases": 0
+        },
+        {
+          "path": "scripts/check-prose.test.mjs",
+          "status": "changed",
+          "freshTitles": [
+            "the card libraries are content surfaces (B4 inventory F4)"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 20,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 19,
+            "failed": 1,
+            "message": "not ok 2 - the card libraries are content surfaces (B4 inventory F4)   name: 'AssertionError'"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 1
+        },
+        {
+          "path": "scripts/content-drift.test.mjs",
+          "status": "changed",
+          "freshTitles": [
+            "the atlas sorts every row into a Card, Rule or system section",
+            "the kind extractor throws on an atlas with no kind sections",
+            "the Blood Price lane ships exactly the slots the ledger keeps",
+            "the parity extractors applied Revision 2 and found the whole lane"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 12,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 0,
+            "failed": 1,
+            "message": "# SyntaxError: The requested module './content-drift.mjs' does not provide an export named 'atlasKeywordKinds' not ok 1 - scripts/content-drift.test.mjs"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "does not load on the parent",
+          "couldNotFailCases": [],
+          "newCases": 4
+        }
+      ]
+    },
+    {
+      "number": 512,
+      "title": "a11y: hide the faded title CTA under the menu (CRITIQUE pass 79 title a11y)",
+      "merge": "9f733f199f4ef6fac63172ad4e1cca0d61035f3a",
+      "parent": "781b046b8f99a0a039edf5fe6e72325f5f3ed0b4",
+      "files": [
+        {
+          "path": "axiomancer-mobile/components/__tests__/TitleScreen.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "hides the faded psalm and EMBARK from screen readers once the menu is up"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 8,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 7,
+            "failed": 1,
+            "message": "  ● TitleScreen › hides the faded psalm and EMBARK from screen readers once the menu is up\n\n    Unable to find an element with testID: title-cta\n\n    \u001b[36m<View\u001b[39m\n      \u001b[33mtestID\u001b[39m=\u001b[32m\"title-screen\"\u001b[39m\n    \u001b[36m>\u001b[39m\n      \u001b[36m<View\u001b[39m\n        \u001b[33mnativeID\u001b[39m=\u001b[32m\"16\"\u001b[39m\n        \u001b[33mpointerEvents\u001b[39m=\u001b[32m\"none\"\u001b[39m\n        \u001b[33mstyle\u001b[39m=\u001b[32m{\n          {\n            \"o"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 1
+        }
+      ]
+    },
+    {
+      "number": 514,
+      "title": "fix: P-07b's printed max holds (AUDIT bug P-07b)",
+      "merge": "b249f815be78dce6ad3cb870adfd3acdf00ccb33",
+      "parent": "999cd65d85fd0f748267bfe0134e1227ccee2ff6",
+      "files": [
+        {
+          "path": "axiomancer-mechanics/src/Cards/e2e/blood-price.engine.test.ts",
+          "status": "changed",
+          "freshTitles": [
+            "P-07b deals the VITAE you lost, unscaled, up to its printed max"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 40,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 39,
+            "failed": 1,
+            "message": ""
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 1
+        }
+      ]
+    },
+    {
+      "number": 516,
+      "title": "fix: refuse a die on a card that cannot be played now (AUDIT RC2 die spent on blocked card)",
+      "merge": "33145b7583df39c14b1c7e327cd04253485d1241",
+      "parent": "bac5595aabe28c8f4ae38eee9f13ffbd1cc548ca",
+      "files": [
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.colorlaw.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "a card whose PAID line is blocked rejects a direct hit and is skipped by a loose drop",
+            "reads disabled under a die drag, and its label names the reason",
+            "a tapped die is not taken, so APPLY stays FREE"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 19,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 16,
+            "failed": 3,
+            "message": "  ● resolveDieDropTarget — an illegal drop dispatches NOTHING › a card whose PAID line is blocked rejects a direct hit and is skipped by a loose drop\n\n    expect(received).toBeNull()\n\n    Received: \"u-body\"\n\n      147 |     it('a card whose PAID line is blocked rejects a direct hit and is skipped by a loose drop', () => {\n      148 |         const blockOf = (uid: string) => (uid === 'u-body' ? 'on"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 3
+        }
+      ]
+    },
+    {
+      "number": 520,
+      "title": "feat: Globals stack as independent instances (experimental) — phase GS1",
+      "merge": "23899c907a69962487c44f5c41fc9680cf28a801",
+      "parent": "9ae953b5acfd73dfd2f8a6fc2d5c791c772c15c0",
+      "files": [
+        {
+          "path": "axiomancer-mechanics/src/Cards/e2e/blood-price.engine.test.ts",
+          "status": "changed",
+          "freshTitles": [
+            "a FREE Global fires on 3 turn starts, then goes to discard",
+            "a second copy is playable and enters as its own instance",
+            "each copy fires its own trigger: one SACRIFICE, two P-10c, GUARD n twice",
+            "two ⟳ copies apply their SACRIFICE 2 and LEECH 1 twice per turn",
+            "each copy leaves on its own expiry: the FREE copy goes, the later PAID copy stays",
+            "the draw fallback takes one deck copy out per instance in play",
+            "the witness values a copy with one already in play, and a stacked deck sims to an outcome"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 47,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 41,
+            "failed": 6,
+            "message": ""
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [
+            "the draw fallback takes one deck copy out per instance in play",
+            "the witness values a copy with one already in play, and a stacked deck sims to an outcome"
+          ],
+          "newCases": 7
+        },
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.program-cards.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "two copies of a Global in play render as two chips, keyed by instance"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 4,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 2,
+            "failed": 2,
+            "message": "  ● CombatBoard — program cards › lists a Global in play and opens its card\n\n    Unable to find an element with testID: combat-global-undefined\n\n    \u001b[36m<View\u001b[39m\n      \u001b[33mtestID\u001b[39m=\u001b[32m\"combat-board\"\u001b[39m\n    \u001b[36m>\u001b[39m\n      \u001b[36m<View\u001b[39m\n        \u001b[33mnativeID\u001b[39m=\u001b[32m\"32\"\u001b[39m\n        \u001b[33mpointerEvents\u001b[39m=\u001b[32m\"box-none\"\u001b[39m\n        \u001b[33mtestID\u001b[39m=\u001b[32m\"combat-combatant-pane\"\u001b"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 1
+        }
+      ]
+    },
+    {
+      "number": 521,
+      "title": "feat(mobile): one card face (D91) — phase BT2a",
+      "merge": "3b0fcfb1e9cd27ab90cc80f71bbc6e31b47a0f3d",
+      "parent": "9aba6d088fc8ae2d6934fe079f2721c0c6fd91e5",
+      "files": [
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.handfan.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "the fixture fan overlaps at the phone width (non-vacuity)",
+            "every hand card, covered or not, keeps one line and no width cap",
+            "staged, reward offer and detail faces alike"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 9,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 6,
+            "failed": 3,
+            "message": "  ● NAME_BAND_LEFT_CHROME is derived, not guessed › equals the four SHIPPED styles it claims to sum\n\n    TypeError: Cannot read properties of undefined (reading 'width')\n\n      110 |             s.faceCard.borderWidth,          // card face's own left edge\n      111 |             s.plateBand.paddingHorizontal,   // the band's left half\n    > 112 |             s.plateRaritySpacer.width,       // th"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [
+            "the fixture fan overlaps at the phone width (non-vacuity)"
+          ],
+          "newCases": 3
+        },
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.paid-column.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "has no FREE cell and no rule in the ledger",
+            "prints keyword and value inside ONE single-line text, at one size",
+            "a PAID headline with no keyword prints its value alone, at the full 12pt",
+            "never stacks on the narrow faces either (reward offer 100, staged 92)",
+            "keeps a short line at full size",
+            "a value with no keyword fits alone",
+            "shrinks a long line to fit, floored",
+            "does not depend on the FREE line — the same PAID line renders the same with or without one",
+            "is present iff the card has a FREE line, in the card colour, with its value",
+            "takes the armed accent over the stance colour",
+            "pads the name band only when the pill is present",
+            "is drawn outside the clipping frame, on the large face too"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 12,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 0,
+            "failed": 12,
+            "message": "  ● the PAID line is die : PAID on one row › has no FREE cell and no rule in the ledger\n\n    expect(received).toHaveLength(expected)\n\n    Expected length: 2\n    Received length: 1\n    Received array:  [{\"$$typeof\": Symbol(react.transitional.element), \"_owner\": {\"_debugHookTypes\": [\"useSyncExternalStore\", \"useSyncExternalStore\", \"useSyncExternalStore\"], \"_debugInfo\": null, \"_debugNeedsRemount\": fal"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 12
+        },
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.playtest-2026-09-04.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "under NARROW_FACE_W the ledger is still one die : PAID line, sized not font-fit",
+            "at the hand width (120) the ledger is the same single row"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 6,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 5,
+            "failed": 1,
+            "message": "  ● CombatCardFace — the reward-draft mini face (100x147) is readable › under NARROW_FACE_W the ledger is still one die : PAID line, sized not font-fit\n\n    Unable to find an element with testID: combat-card-face-ledger\n\n    \u001b[36m<View>\u001b[39m\n      \u001b[36m<View>\u001b[39m\n        \u001b[36m<View\u001b[39m\n          \u001b[33mpointerEvents\u001b[39m=\u001b[32m\"none\"\u001b[39m\n          \u001b[33mtestID\u001b[39m=\u001b[32m\"combat-card-face-band\"\u001b[39m"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [
+            "at the hand width (120) the ledger is the same single row"
+          ],
+          "newCases": 2
+        },
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatCardFace.rarity-D4.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "draws no pip track and no pip, small or large",
+            "does NOT print it on a small face — the name band is the name’s",
+            "SAYS the band to a screen reader on every face"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 6,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 3,
+            "failed": 3,
+            "message": "  ● CombatCardFace — no rarity pips on any face › draws no pip track and no pip, small or large\n\n    expect(received).toBeNull()\n\n    Received: {\"_fiber\": {\"_debugHookTypes\": null, \"_debugInfo\": null, \"_debugNeedsRemount\": false, \"_debugOwner\": [FiberNode], \"_debugStack\": [Error: react-stack-top-frame], \"_debugTask\": null, \"actualDuration\": 1, \"actualStartTime\": 1792113811768, \"alternate\": null, \""
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [
+            "does NOT print it on a small face — the name band is the name’s"
+          ],
+          "newCases": 3
+        },
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatCardFace.seamless.test.tsx",
+          "status": "added",
+          "freshTitles": [
+            "the shipped sheet carries no mat, frame or rule",
+            "the rendered face, small and large, draws none of them"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 2,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 0,
+            "failed": 2,
+            "message": "  ● CombatCardFace — seamless art › the shipped sheet carries no mat, frame or rule\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 0\n    Received: 0.5\n\n      33 | const noBorder = (style: Record<string, unknown>) => {\n      34 |     for (const key of ['borderWidth', 'borderTopWidth', 'borderBottomWidth']) {\n    > 35 |         expect(style[key] ?? 0).toBe(0);\n         |  "
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 2
+        },
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatRewardsOverlay.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "the printed word agrees with what the face says to a screen reader on the same tile"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 14,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 13,
+            "failed": 1,
+            "message": "  ● CombatRewardsOverlay — D4 rarity, never colour alone › the printed word agrees with what the face says to a screen reader on the same tile\n\n    Unable to find an element with testID: combat-card-face-rarity-a11y\n\n    \u001b[36m<View\u001b[39m\n      \u001b[33mtestID\u001b[39m=\u001b[32m\"combat-rewards\"\u001b[39m\n    \u001b[36m>\u001b[39m\n      \u001b[36m<View>\u001b[39m\n        \u001b[36m<Text>\u001b[39m\n          \u001b[0m✦ SPOILS\u001b[0m\n        \u001b[36m</Text>\u001b["
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 1
+        }
+      ]
+    },
+    {
+      "number": 523,
+      "title": "feat: the SACRIFICE floor points at the VITAE ring — phase SF1",
+      "merge": "9b661291d730bb61ef8a5d8093a45e379347f03e",
+      "parent": "3b0fcfb1e9cd27ab90cc80f71bbc6e31b47a0f3d",
+      "files": [
+        {
+          "path": "axiomancer-mechanics/src/Cards/e2e/blood-price.engine.test.ts",
+          "status": "changed",
+          "freshTitles": [
+            "P-01a PAID at 4 VITAE cannot pay its SACRIFICE 4; at 5 it can",
+            "a \"SACRIFICE any amount\" line falls short only past the floor",
+            "is null for a card that is not in hand or has no program",
+            "is non-null exactly when the line is refused at the floor"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 51,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 47,
+            "failed": 4,
+            "message": ""
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 4
+        },
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.colorlaw.test.tsx",
+          "status": "changed",
+          "freshTitles": [],
+          "control": {
+            "ok": true,
+            "passed": 19,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": true,
+            "passed": 19,
+            "failed": 0,
+            "message": ""
+          },
+          "verdict": "could-not-fail",
+          "reason": "passes on the parent",
+          "couldNotFailCases": [],
+          "newCases": 0
+        },
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.sacfloor.test.tsx",
+          "status": "added",
+          "freshTitles": [
+            "covers the whole fill, then the overflow back from 12 o'clock",
+            "a cost equal to the VITAE held has no overflow; the overflow never laps the fill",
+            "a die tapped onto a card whose PAID SACRIFICE cannot be paid runs the callout",
+            "the VITAE ring's label names the numbers during the callout",
+            "a refused APPLY on a FREE line that cannot be paid runs it, and plays nothing",
+            "clears after the callout span",
+            "with reduced motion the outline holds still (no pulse)",
+            "a PAID line refused by a printed condition",
+            "a Global already in play, refused at APPLY",
+            "a card that already holds a die refuses a second one without the callout",
+            "a die dropped ON the card returns its PAID shortfall",
+            "a loose drop in the play area names the only staged card",
+            "a loose drop with two staged cards names no card",
+            "an off-colour die, or a card that already holds a die, is refused for another reason"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 14,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 0,
+            "failed": 0,
+            "message": "  ● Test suite failed to run\n\n    Configuration error:\n\n    Could not locate module @/components/combat/encounter/VitaeSacrificeCallout mapped as:\n    /tmp/eval-parent-replay-KaqQf6/axiomancer-mobile/$1.\n\n    Please check your configuration for these entries:\n    {\n      \"moduleNameMapper\": {\n        \"/^@\\/(.*)$/\": \"/tmp/eval-parent-replay-KaqQf6/axiomancer-mobile/$1\"\n      },\n      \"resolver\": /h"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "does not load on the parent",
+          "couldNotFailCases": [],
+          "newCases": 14
+        },
+        {
+          "path": "axiomancer-mobile/state/presenters/__tests__/card-program.engine.test.ts",
+          "status": "changed",
+          "freshTitles": [
+            "carries the engine shortfall on the VM: the cost and the VITAE held, null when payable"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 9,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 8,
+            "failed": 1,
+            "message": "  ● a line that cannot be paid › carries the engine shortfall on the VM: the cost and the VITAE held, null when payable\n\n    expect(received).toEqual(expected) // deep equality\n\n    Expected: {\"cost\": 2, \"vitae\": 1}\n    Received: undefined\n\n       96 |         const cost = Number(/^SACRIFICE (\\d+)/.exec(freeText(SACRIFICE_FREE))![1]);\n       97 |         const low = buildCombatViewModel(encounter("
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 1
+        },
+        {
+          "path": "scripts/loop-issue.test.mjs",
+          "status": "changed",
+          "freshTitles": [
+            "fillGhEnv: no token borrows the gh keyring login; GH_REPO defaults to this repo",
+            "fillGhEnv: a token or repo already set is kept, and gh is not asked",
+            "fillGhEnv: a failed keyring read leaves GH_TOKEN unset"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 48,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 0,
+            "failed": 1,
+            "message": "# SyntaxError: The requested module './loop-issue.mjs' does not provide an export named 'fillGhEnv' not ok 1 - scripts/loop-issue.test.mjs"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "does not load on the parent",
+          "couldNotFailCases": [],
+          "newCases": 3
+        }
+      ]
+    },
+    {
+      "number": 526,
+      "title": "fix(ci): pr-resolve resolves on a dispatched run, not on push (AUDIT infra pr-resolve)",
+      "merge": "e6e98cbb4367f154d54b7f5a166b99a2f918f154",
+      "parent": "84580130c4d0750bfa0cb557dca26f1c16077779",
+      "files": [
+        {
+          "path": "scripts/loop-pr.test.mjs",
+          "status": "changed",
+          "freshTitles": [
+            "pr-resolve runs Claude only on a dispatched run, never on push"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 25,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 24,
+            "failed": 1,
+            "message": "not ok 9 - pr-resolve runs Claude only on a dispatched run, never on push   name: 'AssertionError'"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 1
+        }
+      ]
+    },
+    {
+      "number": 528,
+      "title": "fix: sealed map nodes draw their mark (CRITIQUE pass 84 sealed node mark)",
+      "merge": "916e236cd1a22f2cd440b229726d476a1b4c92b5",
+      "parent": "ca37d8c7cb4bb33e6742d20faef23969e32813f9",
+      "files": [
+        {
+          "path": "axiomancer-mobile/components/exploration/__tests__/ExplorationNode.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "draws a sealed node at full wrapper opacity, so only NodeMark dims it",
+            "prints the sealed ring and disc at an effective opacity that still reads, but below a full mark"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 13,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 11,
+            "failed": 2,
+            "message": "  ● the sealed mark shows where a road ends (critique pass 84) › draws a sealed node at full wrapper opacity, so only NodeMark dims it\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 1\n    Received: 0.45\n\n      84 |         );\n      85 |         const style = StyleSheet.flatten(getByTestId('node-sealed-1').props.style);\n    > 86 |         expect(style.opacity ?? 1).toBe(1"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 2
+        }
+      ]
+    },
+    {
+      "number": 529,
+      "title": "feat(mobile): combat footer dock, full-width hand, intent top-left — phase BT2b",
+      "merge": "93f05dfe2ecefc04c7a56a4366be70e83efb38ff",
+      "parent": "e6e98cbb4367f154d54b7f5a166b99a2f918f154",
+      "files": [
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.S1-board.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "insets the fan by the board edge only, the same on both sides",
+            "a hand that fits the band stays inside it"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 10,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 8,
+            "failed": 2,
+            "message": "  ● S1-board-C11 — the hand fan lays out across the full board width (D92) › insets the fan by the board edge only, the same on both sides\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 12\n    Received: undefined\n\n       97 |         renderBoard();\n       98 |         const fan = flat('combat-hand');\n    >  99 |         expect(fan.paddingHorizontal).toBe(HAND_FAN_BOARD_E"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 2
+        },
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.footer-dock.test.tsx",
+          "status": "added",
+          "freshTitles": [
+            "the avatar and END both live inside the dock",
+            "reads avatar, VITAE column, END, left to right",
+            "stacks the VITAE line, the fill bar and the phase ledger, in that order",
+            "the avatar is a 48pt round button that opens the pilgrim modal",
+            "END is a wide thumb button that still ends the phase",
+            "END dims and refuses while a phase resolves",
+            "respects the bottom safe-area inset and grows rather than clips",
+            "vitaeBarFill: width is hp / max, low strictly below a quarter",
+            "is an 8pt bar announced as VITAE"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 13,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 0,
+            "failed": 0,
+            "message": "  ● Test suite failed to run\n\n    Configuration error:\n\n    Could not locate module @/components/combat/encounter/CombatFooterDock mapped as:\n    /tmp/eval-parent-replay-KaqQf6/axiomancer-mobile/$1.\n\n    Please check your configuration for these entries:\n    {\n      \"moduleNameMapper\": {\n        \"/^@\\/(.*)$/\": \"/tmp/eval-parent-replay-KaqQf6/axiomancer-mobile/$1\"\n      },\n      \"resolver\": /home/r"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "does not load on the parent",
+          "couldNotFailCases": [],
+          "newCases": 9
+        },
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.fresh-eyes-repair.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "every hand size takes the same full band, phone and desktop alike",
+            "lays the fan out as the reference board-band layout does, and on-board"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 8,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 6,
+            "failed": 2,
+            "message": "  ● C11-R — the hand lays out across the full board band (D92) › every hand size takes the same full band, phone and desktop alike\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 351\n    Received: 183\n\n      145 |     it('every hand size takes the same full band, phone and desktop alike', () => {\n      146 |         for (const n of [1, 2, 3, 5, 8]) {\n    > 147 |          "
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 2
+        },
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.handfan.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "a five-card fan at 375 shows the start of every covered name (A6)",
+            "a five-card fan at 375 keeps the outer card’s FREE pill on screen",
+            "renders no tap hint over the fan (BT2b A8)",
+            "the hand dock keeps the FREE pill overhang above the card tops, inside its clip"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 11,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 8,
+            "failed": 3,
+            "message": "  ● the hand fan prints every name on one uncapped line › a five-card fan at 375 keeps the outer card’s FREE pill on screen\n\n    expect(received).toBeGreaterThanOrEqual(expected)\n\n    Expected: >= 0\n    Received:    -2.8698184896499015\n\n      150 |         const theta = (6 * Math.PI) / 180;\n      151 |         const swing = (HAND_CARD_H / 2) * Math.sin(theta) - (HAND_CARD_W / 2) * (1 - Math.cos(th"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [
+            "a five-card fan at 375 shows the start of every covered name (A6)"
+          ],
+          "newCases": 4
+        },
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.playtest-2026-09-04.test.tsx",
+          "status": "changed",
+          "freshTitles": [],
+          "control": {
+            "ok": true,
+            "passed": 6,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 0,
+            "failed": 0,
+            "message": "  ● Test suite failed to run\n\n    Configuration error:\n\n    Could not locate module @/components/combat/encounter/CombatFooterDock mapped as:\n    /tmp/eval-parent-replay-KaqQf6/axiomancer-mobile/$1.\n\n    Please check your configuration for these entries:\n    {\n      \"moduleNameMapper\": {\n        \"/^@\\/(.*)$/\": \"/tmp/eval-parent-replay-KaqQf6/axiomancer-mobile/$1\"\n      },\n      \"resolver\": /home/r"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "does not load on the parent",
+          "couldNotFailCases": [],
+          "newCases": 0
+        },
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.sacfloor.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "draws on the footer dock's avatar, at the avatar's size (BT2b)"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 15,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 14,
+            "failed": 1,
+            "message": "  ● CombatBoard — a refusal at the SACRIFICE floor flags the VITAE ring › draws on the footer dock's avatar, at the avatar's size (BT2b)\n\n    Unable to find an element with testID: combat-vitae-callout\n\n    \u001b[36m<View\u001b[39m\n      \u001b[33mtestID\u001b[39m=\u001b[32m\"combat-board\"\u001b[39m\n    \u001b[36m>\u001b[39m\n      \u001b[36m<View\u001b[39m\n        \u001b[33mnativeID\u001b[39m=\u001b[32m\"28\"\u001b[39m\n        \u001b[33mpointerEvents\u001b[39m=\u001b[32m\"box-none\"\u001b["
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 1
+        },
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.sig-column.test.tsx",
+          "status": "added",
+          "freshTitles": [
+            "the under-bar block and the intent column align left",
+            "the foe's status chips wrap left to right",
+            "the column height constants match the shipped stylesheet",
+            "is undefined until the HUD, the tray and the column have all measured",
+            "five runes fit between the intent block and the tray at 375x812",
+            "on a shorter screen the tray clamp wins and the column rises",
+            "the board anchors the column off the measured HUD"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 7,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 0,
+            "failed": 0,
+            "message": "  ● Test suite failed to run\n\n    Configuration error:\n\n    Could not locate module @/components/combat/encounter/CombatFooterDock mapped as:\n    /tmp/eval-parent-replay-KaqQf6/axiomancer-mobile/$1.\n\n    Please check your configuration for these entries:\n    {\n      \"moduleNameMapper\": {\n        \"/^@\\/(.*)$/\": \"/tmp/eval-parent-replay-KaqQf6/axiomancer-mobile/$1\"\n      },\n      \"resolver\": /home/r"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "does not load on the parent",
+          "couldNotFailCases": [],
+          "newCases": 7
+        },
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatEncounterPanel.log.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "the board itself carries no LOG button",
+            "the pilgrim modal opens on its stats view with a LOG button",
+            "LOG swaps the modal body to the log; BACK returns to the stats view",
+            "closing the modal resets it to the stats view",
+            "a tap on the backdrop closes and resets it too"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 6,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 1,
+            "failed": 5,
+            "message": "  ● CombatEncounterPanel — the combat log lives in the pilgrim modal › the board itself carries no LOG button\n\n    expect(received).toBeNull()\n\n    Received: {\"_fiber\": {\"_debugHookTypes\": null, \"_debugInfo\": null, \"_debugNeedsRemount\": false, \"_debugOwner\": [FiberNode], \"_debugStack\": [Error: react-stack-top-frame], \"_debugTask\": null, \"actualDuration\": 0, \"actualStartTime\": 1792113863451, \"alter"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 5
+        }
+      ]
+    },
+    {
+      "number": 531,
+      "title": "fix: village stall prices read SHILLINGS (CRITIQUE pass 84 village shillings)",
+      "merge": "0b769a30fdd0af6bbd008621d63472c4a52be941",
+      "parent": "916e236cd1a22f2cd440b229726d476a1b4c92b5",
+      "files": [
+        {
+          "path": "axiomancer-mobile/state/e2e/stall-price-shillings.critique-84.test.tsx",
+          "status": "added",
+          "freshTitles": [
+            "the purse, a buy row and a sell row all say SHILLINGS"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 1,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 0,
+            "failed": 1,
+            "message": "  ● stall prices name the currency (critique pass 84) › the purse, a buy row and a sell row all say SHILLINGS\n\n    Unable to find an element with testID: village-ware-healing-potion-price\n\n    \u001b[36m<RNCSafeAreaView>\u001b[39m\n      \u001b[36m<View>\u001b[39m\n        \u001b[36m<ViewManagerAdapter_ExpoImage\u001b[39m\n          \u001b[33mplaceholder\u001b[39m=\u001b[32m{[]}\u001b[39m\n          \u001b[33mtestID\u001b[39m=\u001b[32m\"screen-backdrop\"\u001b[39m\n      "
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 1
+        }
+      ]
+    },
+    {
+      "number": 534,
+      "title": "fix: A Plain Blow wears its FREE pill (CRITIQUE pass 85 Blow FREE pill)",
+      "merge": "f0b58df3486cd4f9a4484c1327816bd581758f02",
+      "parent": "963ae4627eddfcec6c8486c7b551d1be07cbcea1",
+      "files": [
+        {
+          "path": "axiomancer-mobile/state/presenters/__tests__/card-program.engine.test.ts",
+          "status": "changed",
+          "freshTitles": [],
+          "control": {
+            "ok": true,
+            "passed": 9,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 8,
+            "failed": 1,
+            "message": "  ● program faces › headline a registry keyword as KEYWORD · value and DEAL as a plain hero line\n\n    expect(received).toEqual(expected) // deep equality\n\n    Expected: {\"keyword\": \"DEAL\", \"value\": \"3\"}\n    Received: null\n\n      64 |         expect(programFreeCell('SACRIFICE 2, DEAL 5.')).toEqual({ keyword: 'SACRIFICE', value: '−2' });\n      65 |         // D91: a FREE line always wears a pill, so"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 0
+        },
+        {
+          "path": "axiomancer-mobile/state/presenters/__tests__/combat-card-vm.test.ts",
+          "status": "changed",
+          "freshTitles": [
+            "A Plain Blow → the DEAL pill with its free damage (critique pass 85)",
+            "A Plain Blow pill carries the stat-scaled free damage the engine deals",
+            "every lane card: a FREE line if and only if the face shows a pill (glyph and value)"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 19,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 16,
+            "failed": 3,
+            "message": "  ● D91 FREE corner pill — a pill whenever the card has a FREE line › A Plain Blow → the DEAL pill with its free damage (critique pass 85)\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: \"⚔\"\n    Received: \"\"\n\n      147 |         const f = faceStats(card, sourceCard);\n      148 |         expect(sourceCard!.free?.damage).toBe(2);\n    > 149 |         expect(f.freeGlyph).toBe"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 3
+        }
+      ]
+    },
+    {
+      "number": 535,
+      "title": "fix: cap the combat dock's VITAE column on wide windows (CRITIQUE pass 85 footer dock)",
+      "merge": "f6bc4f1963f0ecc3ff5f8fcbeee175491ae81813",
+      "parent": "f0b58df3486cd4f9a4484c1327816bd581758f02",
+      "files": [
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.footer-dock.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "caps the VITAE column on a wide window, never on a phone (CRITIQUE pass 85)"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 14,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 13,
+            "failed": 1,
+            "message": "  ● A4 — the footer dock › caps the VITAE column on a wide window, never on a phone (CRITIQUE pass 85)\n\n    expect(received).toBeLessThan(expected)\n\n    Matcher error: expected value must be a number or bigint\n\n    Expected has value: undefined\n\n      135 |         const phoneColumn = (width: number) =>\n      136 |             width - DOCK_PAD_H * 2 - DOCK_GAP * 2 - PLAYER_AVATAR_SIZE - END_BTN_W;"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 1
+        }
+      ]
+    },
+    {
+      "number": 537,
+      "title": "fix: critique drive waits for the title and dice to settle; EMBARK guard; dice springs rest (CRITIQUE pass 79 drive settle)",
+      "merge": "4c2a08bf2e78330d383e2c9b4ff989a88dffd3b7",
+      "parent": "f6bc4f1963f0ecc3ff5f8fcbeee175491ae81813",
+      "files": [
+        {
+          "path": "axiomancer-mobile/components/__tests__/TitleScreen.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "ignores EMBARK until it starts to fade in, so a tap during the lift opens nothing"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 9,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 8,
+            "failed": 1,
+            "message": "  ● TitleScreen › ignores EMBARK until it starts to fade in, so a tap during the lift opens nothing\n\n    expect(received).toBeNull()\n\n    Received: {\"_fiber\": {\"_debugHookTypes\": null, \"_debugInfo\": null, \"_debugNeedsRemount\": false, \"_debugOwner\": {\"_debugHookTypes\": null, \"_debugInfo\": null, \"_debugNeedsRemount\": false, \"_debugOwner\": null, \"_debugStack\": [Error: react-stack-top-frame], \"_debugT"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 1
+        },
+        {
+          "path": "axiomancer-mobile/scripts/critique-drive.test.mjs",
+          "status": "changed",
+          "freshTitles": [
+            "the title, onboarding and combat-board screens wait for their entrance to finish"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 3,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 2,
+            "failed": 1,
+            "message": "not ok 3 - the title, onboarding and combat-board screens wait for their entrance to finish   name: 'TypeError'"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 1
+        },
+        {
+          "path": "axiomancer-mobile/state/combat/__tests__/dice-roll-ritual.test.ts",
+          "status": "changed",
+          "freshTitles": [],
+          "control": {
+            "ok": true,
+            "passed": 28,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 26,
+            "failed": 2,
+            "message": "  ● DICE_ROLL_TIMING springs › landSpring comes to rest inside a second\n\n    expect(received).toBeLessThan(expected)\n\n    Expected: < 1\n    Received:   NaN\n\n      188 |\n      189 |     it.each(['landSpring', 'settleSpring'] as const)('%s comes to rest inside a second', (key) => {\n    > 190 |         expect(finishSeconds(DICE_ROLL_TIMING[key])).toBeLessThan(1);\n          |                          "
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 0
+        }
+      ]
+    },
+    {
+      "number": 539,
+      "title": "a11y: the dock's phase ledger speaks as one line (CRITIQUE pass 85 ledger a11y)",
+      "merge": "f05f1759e4aed0fca2e4ee06ed3fc7fc9d1489c2",
+      "parent": "4c2a08bf2e78330d383e2c9b4ff989a88dffd3b7",
+      "files": [
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.footer-dock.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "speaks the phase ledger as one line, run by run (CRITIQUE pass 85)"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 15,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 14,
+            "failed": 1,
+            "message": "  ● A4 — the footer dock › speaks the phase ledger as one line, run by run (CRITIQUE pass 85)\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: true\n    Received: undefined\n\n      126 |         renderBoard({ shape: (vm) => ({ ...vm, ledger: ['clear', 'overwhelmed', 'pending', 'pending', 'pending'] }) });\n      127 |         const ledger = screen.getByTestId('combat-ledger')"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 1
+        }
+      ]
+    },
+    {
+      "number": 541,
+      "title": "fix: forge prices read SHILLINGS (CRITIQUE anvil shillings)",
+      "merge": "ed2e61a8da7c031442fec4b79465226d7119447f",
+      "parent": "f05f1759e4aed0fca2e4ee06ed3fc7fc9d1489c2",
+      "files": [
+        {
+          "path": "axiomancer-mobile/state/e2e/forge-vocabulary.S5-talk-C12.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "spells the purse out in SHILLINGS, the unit the prices are in",
+            "prints each offer's price in SHILLINGS, not a bare `s`"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 6,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 5,
+            "failed": 1,
+            "message": "  ● the forging table decodes its own readouts (S5-talk-C12) › prints each offer's price in SHILLINGS, not a bare `s`\n\n    Unable to find an element with testID: blacksmith-offer-hone:heart-price\n\n    \u001b[36m<RNCSafeAreaView>\u001b[39m\n      \u001b[36m<View>\u001b[39m\n        \u001b[36m<ViewManagerAdapter_ExpoImage\u001b[39m\n          \u001b[33mplaceholder\u001b[39m=\u001b[32m{[]}\u001b[39m\n          \u001b[33mtestID\u001b[39m=\u001b[32m\"screen-backdrop\"\u001b[39"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [
+            "spells the purse out in SHILLINGS, the unit the prices are in"
+          ],
+          "newCases": 2
+        },
+        {
+          "path": "axiomancer-mobile/state/presenters/__tests__/blacksmith.engine.test.ts",
+          "status": "changed",
+          "freshTitles": [],
+          "control": {
+            "ok": true,
+            "passed": 10,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 9,
+            "failed": 1,
+            "message": "  ● FE-023: forge prices carry the shilling suffix, never the conviction glyph › an unaffordable offer states its price in shillings\n\n    expect(received).toMatch(expected)\n\n    Expected pattern: /costs \\d+ SHILLINGS\\b/\n    Received string:  \"costs 3s — you can't cover it\"\n\n      110 |         const heart = vm.dice.find((d) => d.color === 'heart')!;\n      111 |         expect(heart.hone.enabled).t"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 0
+        }
+      ]
+    },
+    {
+      "number": 543,
+      "title": "fix: pr-resolve union merge splits moved queue rows (AUDIT pr-resolve union merge)",
+      "merge": "5150c63410d1717083618a3967106a98a3c73cf3",
+      "parent": "49884b74f7c305dd532626dda61133f92520cb61",
+      "files": [
+        {
+          "path": "axiomancer-mobile/state/presenters/__tests__/card-program.engine.test.ts",
+          "status": "changed",
+          "freshTitles": [],
+          "control": {
+            "ok": true,
+            "passed": 9,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": true,
+            "passed": 9,
+            "failed": 0,
+            "message": ""
+          },
+          "verdict": "could-not-fail",
+          "reason": "passes on the parent",
+          "couldNotFailCases": [],
+          "newCases": 0
+        },
+        {
+          "path": "scripts/loop-pr.test.mjs",
+          "status": "changed",
+          "freshTitles": [
+            "unionMerge moves a row whole when one side moves it Pending to Done (lesson union-anchor-split)"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 26,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 25,
+            "failed": 1,
+            "message": "not ok 23 - unionMerge moves a row whole when one side moves it Pending to Done (lesson union-anchor-split)   name: 'AssertionError'"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 1
+        }
+      ]
+    },
+    {
+      "number": 545,
+      "title": "fix: hazard cast and stamp springs name mass and energyThreshold (AUDIT hazard springs mass 4)",
+      "merge": "ba23efa710767dd5b48c9d052cedd297575f5834",
+      "parent": "5150c63410d1717083618a3967106a98a3c73cf3",
+      "files": [
+        {
+          "path": "axiomancer-mobile/components/hazard/__tests__/HazardOverlays.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "comes to rest inside a second"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 11,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 10,
+            "failed": 1,
+            "message": "  ● STAMP_SPRING › comes to rest inside a second\n\n    TypeError: Cannot read properties of undefined (reading 'mass')\n\n      91 |     it('comes to rest inside a second', () => {\n      92 |         const s = STAMP_SPRING;\n    > 93 |         expect((s.mass * Math.log(1 / s.energyThreshold)) / s.damping).toBeLessThan(1);\n         |                   ^\n      94 |     });\n      95 | });\n      96 |\n\n   "
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 1
+        }
+      ]
+    },
+    {
+      "number": 549,
+      "title": "perf(mobile): Sentry performance on preview builds, combat drag spans — phase PF3",
+      "merge": "48aa808f2b60bae4cb556f5fab0dc66145ce26cc",
+      "parent": "3762c2f6bcebb1c8f7d3c5f0fb232eee4ea93c39",
+      "files": [
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatEncounterPanel.drag-spans.test.tsx",
+          "status": "added",
+          "freshTitles": [
+            "a cancelled hand-card drag opens hand-to-play and ends it once as cancelled",
+            "a released drag ends as dropped, whatever the drop resolves to",
+            "a die drag finalized by the interrupt recovery ends as interrupted, once",
+            "a card dragged from play is play-to-hand",
+            "unmounting mid-drag closes the open span"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 5,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 0,
+            "failed": 5,
+            "message": "  ● CombatEncounterPanel — drag spans › a cancelled hand-card drag opens hand-to-play and ends it once as cancelled\n\n    expect(received).toEqual(expected) // deep equality\n\n    - Expected  - 8\n    + Received  + 1\n\n    - Array [\n    -   Object {\n    -     \"ends\": Array [\n    -       \"cancelled\",\n    -     ],\n    -     \"kind\": \"hand-to-play\",\n    -   },\n    - ]\n    + Array []\n\n      65 |         ac"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 5
+        },
+        {
+          "path": "axiomancer-mobile/lib/__tests__/monitoring.test.ts",
+          "status": "added",
+          "freshTitles": [
+            "samples traces on preview, with frames, app start and navigation on",
+            "starts nothing without a DSN, even on preview",
+            "the rate table is preview-only",
+            "is a no-op when tracing is off",
+            "opens combat.drag.<kind> with op ui.drag and ends it once with its outcome",
+            "carries no attribute but the outcome",
+            "never throws when the SDK does",
+            "mirrors the drag span surface as a no-op"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 12,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 0,
+            "failed": 12,
+            "message": "  ● initCrashReporting — trace rate per build profile (A1, A2) › samples traces on preview, with frames, app start and navigation on\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: undefined\n    Received: 0\n\n      54 |         m.initCrashReporting();\n      55 |         const opts = lastInit();\n    > 56 |         expect(opts.tracesSampleRate).toBe(m.PREVIEW_TRACES_SAMPLE_R"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 8
+        }
+      ]
+    },
+    {
+      "number": 553,
+      "title": "perf(mobile): no exploration map under live combat — phase PF4",
+      "merge": "1df5499ed37a860c135215d114c8fb07cccf897c",
+      "parent": "78f0e268d314226dee911c78ee6e943f2f1c0a76",
+      "files": [
+        {
+          "path": "axiomancer-mobile/components/event/__tests__/EncounterModalOverlay.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "reports prelude on mount, then combat on the engage, then aftermath",
+            "a resumed fight reports combat on mount, never prelude",
+            "leaving it out changes nothing"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 29,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 27,
+            "failed": 2,
+            "message": "  ● EncounterModalOverlay: onModeChange › reports prelude on mount, then combat on the engage, then aftermath\n\n    expect(received).toEqual(expected) // deep equality\n\n    - Expected  - 4\n    + Received  + 1\n\n    - Array [\n    -   \"prelude\",\n    -   \"combat\",\n    - ]\n    + Array []\n\n      879 |             ),\n      880 |         );\n    > 881 |         expect(onModeChange.mock.calls.map((c) => c[0]"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [
+            "leaving it out changes nothing"
+          ],
+          "newCases": 3
+        },
+        {
+          "path": "axiomancer-mobile/state/e2e/map-under-combat-modes.engine.test.tsx",
+          "status": "added",
+          "freshTitles": [
+            "prelude: the map stays mounted behind the modal",
+            "combat: the map and region header are unmounted",
+            "aftermath: the map comes back behind the modal"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 3,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 2,
+            "failed": 1,
+            "message": "  ● the exploration map follows the encounter modal mode › combat: the map and region header are unmounted\n\n    expect(received).toBeNull()\n\n    Received: {\"_fiber\": {\"_debugHookTypes\": null, \"_debugInfo\": null, \"_debugNeedsRemount\": false, \"_debugOwner\": [FiberNode], \"_debugStack\": [Error: react-stack-top-frame], \"_debugTask\": null, \"actualDuration\": 81, \"actualStartTime\": 1792113957592, \"alterna"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [
+            "prelude: the map stays mounted behind the modal",
+            "aftermath: the map comes back behind the modal"
+          ],
+          "newCases": 3
+        },
+        {
+          "path": "axiomancer-mobile/state/e2e/map-under-combat.engine.test.tsx",
+          "status": "added",
+          "freshTitles": [
+            "no encounter: the map is mounted",
+            "live combat: the map is not mounted, the fight is",
+            "aftermath keeps the map behind it, and CARRY ON leaves the map up",
+            "WITHDRAW brings the map back",
+            "a fight resumed after a reload opens with the map unmounted"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 5,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 1,
+            "failed": 4,
+            "message": "  ● the exploration map under an encounter › live combat: the map is not mounted, the fight is\n\n    expect(received).toBeNull()\n\n    Received: {\"_fiber\": {\"_debugHookTypes\": null, \"_debugInfo\": null, \"_debugNeedsRemount\": false, \"_debugOwner\": [FiberNode], \"_debugStack\": [Error: react-stack-top-frame], \"_debugTask\": null, \"actualDuration\": 121, \"actualStartTime\": 1792113957607, \"alternate\": [Fiber"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [
+            "no encounter: the map is mounted"
+          ],
+          "newCases": 5
+        }
+      ]
+    },
+    {
+      "number": 555,
+      "title": "fix(combat): END keeps the dock's right edge on a wide window (CRITIQUE pass 87)",
+      "merge": "b5b395ad2688bdbeacdba751c917c444524a04b9",
+      "parent": "376d87dbe871c30ae4224a194e1aa04da777b9e9",
+      "files": [
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.footer-dock.test.tsx",
+          "status": "changed",
+          "freshTitles": [],
+          "control": {
+            "ok": true,
+            "passed": 15,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 14,
+            "failed": 1,
+            "message": "  ● A4 — the footer dock › caps the VITAE column on a wide window, never on a phone (CRITIQUE pass 85)\n\n    Unable to find an element with testID: combat-end-wrap\n\n    \u001b[36m<View\u001b[39m\n      \u001b[33mtestID\u001b[39m=\u001b[32m\"combat-board\"\u001b[39m\n    \u001b[36m>\u001b[39m\n      \u001b[36m<View\u001b[39m\n        \u001b[33mnativeID\u001b[39m=\u001b[32m\"100\"\u001b[39m\n        \u001b[33mpointerEvents\u001b[39m=\u001b[32m\"box-none\"\u001b[39m\n        \u001b[33mtestID\u001b[39m=\u001b[32m\"com"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 0
+        }
+      ]
+    },
+    {
+      "number": 557,
+      "title": "fix(combat): HUD clock line in full at 11px (CRITIQUE pass 88)",
+      "merge": "d82f536557b40bfeb8d297728231a87b2ea25cbc",
+      "parent": "045eb33d79a2ef2876d918940341e2ae98325ec7",
+      "files": [
+        {
+          "path": "axiomancer-mobile/state/presenters/__tests__/legibility-sweep.engine.test.ts",
+          "status": "changed",
+          "freshTitles": [
+            "spells out phase, round and turn in full"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 6,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 5,
+            "failed": 1,
+            "message": "  ● CombatViewModel.metaLine — the HUD clock beside the foe name › spells out phase, round and turn in full\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: \"PHASE 1/5 · ROUND 1 · TURN 1\"\n    Received: undefined\n\n      94 |         const s = openState();\n      95 |         const vm = buildCombatViewModel(s);\n    > 96 |         expect(vm.metaLine).toBe(`${vm.phaseBadge} · R"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 1
+        }
+      ]
+    },
+    {
+      "number": 559,
+      "title": "a11y: announce the SACRIFICE floor line on each refusal (CRITIQUE antagonist PR #523)",
+      "merge": "691ec550e3e2b0fc675298e13be847d9567d4b73",
+      "parent": "162d61b2e6e7edbbaf4b8901a093629e5f16fd68",
+      "files": [
+        {
+          "path": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.sacfloor.test.tsx",
+          "status": "changed",
+          "freshTitles": [
+            "announces the floor line once to a screen reader"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 16,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 15,
+            "failed": 1,
+            "message": "  ● CombatBoard — a refusal at the SACRIFICE floor flags the VITAE ring › announces the floor line once to a screen reader\n\n    expect(jest.fn()).toHaveBeenCalledTimes(expected)\n\n    Expected number of calls: 1\n    Received number of calls: 0\n\n      124 |         const { die } = boardWith({ freeBlock: null, paidBlock: FLOOR, freeShortfall: null, paidShortfall: SHORT });\n      125 |         await t"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 1
+        }
+      ]
+    },
+    {
+      "number": 562,
+      "title": "fix: a hazard scar mends at any rest, not only at an inn (AUDIT Scarred never clears)",
+      "merge": "44719db2fafbe6ae1e1eb35983750bd0b3bb0e1c",
+      "parent": "691ec550e3e2b0fc675298e13be847d9567d4b73",
+      "files": [
+        {
+          "path": "axiomancer-mechanics/src/World/MapEvents/e2e/rest-shelter.engine.test.ts",
+          "status": "changed",
+          "freshTitles": [],
+          "control": {
+            "ok": true,
+            "passed": 9,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": true,
+            "passed": 9,
+            "failed": 0,
+            "message": ""
+          },
+          "verdict": "could-not-fail",
+          "reason": "passes on the parent",
+          "couldNotFailCases": [],
+          "newCases": 0
+        },
+        {
+          "path": "axiomancer-mobile/state/e2e/hazard-scar-rest-recovery.engine.test.ts",
+          "status": "changed",
+          "freshTitles": [
+            "a camp watch mends the scar too and clears the flag",
+            "a rest with NO authored shelter mends the scar",
+            "a Charcoal Wood camp routes a CAMP rest through the live interceptor, and it mends"
+          ],
+          "control": {
+            "ok": true,
+            "passed": 7,
+            "failed": 0,
+            "message": ""
+          },
+          "parent": {
+            "ok": false,
+            "passed": 4,
+            "failed": 3,
+            "message": "  ● hazard scar recovery at rest › a camp watch mends the scar too and clears the flag\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 5\n    Received: 0\n\n      139 |\n      140 |         expect(result.applied).toBe(true);\n    > 141 |         expect(result.scarMended).toBe(scar);\n          |                                   ^\n      142 |\n      143 |         const after = s"
+          },
+          "verdict": "fails-on-parent",
+          "reason": "a case fails on the parent",
+          "couldNotFailCases": [],
+          "newCases": 3
+        }
+      ]
+    }
+  ],
+  "ticks": [
+    {
+      "pr": 505,
+      "id": "A1",
+      "text": "`npm run measured-truth -w axiomancer-mechanics -- --json` prints one cell per fight × spread × deck with every listed key, plus per-deck `deadCardRate` and `deckCards`",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 505,
+      "id": "A2",
+      "text": "the cell axis is `act1FightLedger()` + `walkAct1()` levels × the three `StatSpread`s; the enemy is at its pin",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 505,
+      "id": "A3",
+      "text": "`CombatSimStats` gains `lowestVitaeFractionMean` / `lowestVitaeFractionP10`, with scripted tests (a full-VITAE player reads ~1, a defeat reads 0)",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 505,
+      "id": "A4",
+      "text": "`scripts/measured-truth.mjs` appends `{ date, commit, runs, seed, cells, decks }` and rewrites the stamped `latest.md`",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 505,
+      "id": "A5",
+      "text": "`compare` / `renderAuditRow` / `renderDigestSection` are pure and covered by `scripts/measured-compare.test.mjs` (in `npm test`)",
+      "named": [
+        {
+          "kind": "file",
+          "name": "scripts/measured-compare.test.mjs",
+          "couldNotFail": false
+        }
+      ],
+      "unproven": false
+    },
+    {
+      "pr": 505,
+      "id": "A6",
+      "text": "workflow on push (mechanics src), Sunday cron and dispatch; `nexus-loop` group; commits to main; fails only on a measurer crash; `loop-pr.test.mjs` passes",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 505,
+      "id": "A7",
+      "text": "each drift files one `[content]` row (+ issue), deduplicated by (fight, deck, metric) against open rows",
+      "named": [
+        {
+          "kind": "case",
+          "name": "measured-compare.test.mjs > renderAuditRow: a [content] row naming fight, deck, metric, both values and both commits",
+          "couldNotFail": false
+        }
+      ],
+      "unproven": false
+    },
+    {
+      "pr": 505,
+      "id": "A8",
+      "text": "`skills/digest.md` gains the \"Measured truth\" step (one line when there has been no run since the last entry)",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 505,
+      "id": "A9",
+      "text": "`docs/truth-sources.md` \"Measured truth\" rewritten",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 507,
+      "id": "A1",
+      "text": "`auditRosterHealth(): RosterHealthReport`, pure over the registered libraries and pools, self-registering when the registry is empty; findings `{ lens, subject, id, where, detail }`",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 507,
+      "id": "A2",
+      "text": "dangling lenses: enemy slug, loot/cache/shop item, relic signature, dialogue next node / quest / card, map interaction NPC (via `sceneryAsPeople`)",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 507,
+      "id": "A3",
+      "text": "orphan lenses: unpooled enemy (Sandbag excluded), ungranted consumable or relic (dev menu excluded), unreached NPC, unreached dialogue node, unstarted quest",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 507,
+      "id": "A4",
+      "text": "engine test: dangling empty, orphans pinned by id",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 507,
+      "id": "A5",
+      "text": "`npm run roster-health -w axiomancer-mechanics` table; `-- --json` report only",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 507,
+      "id": "A6",
+      "text": "`skills/iterate.md` §4 H plus the §5 Step 1 example row; dedupe by (lens, id)",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 507,
+      "id": "A7",
+      "text": "hard rule in the skill text and the module header (no workflow added)",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 507,
+      "id": "A8",
+      "text": "`docs/game-model.md` line pointing at the CLI",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 509,
+      "id": "A1",
+      "text": "`docs/card-spec.md` exists: 17 sections in order, each with Live rule / Ratified, not built / T's call (the ballot export, dated)",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 509,
+      "id": "A2",
+      "text": "DRAFT status header; no rule the inventory does not record; passes `check-lexicon`",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 509,
+      "id": "A3",
+      "text": "`card-rules.engine.test.ts` enforces the four rules over every library card against `card-rules.exemptions.json`, failing on unlisted and stale entries",
+      "named": [
+        {
+          "kind": "file",
+          "name": "axiomancer-mechanics/src/Cards/e2e/card-rules.engine.test.ts",
+          "couldNotFail": false
+        }
+      ],
+      "unproven": false
+    },
+    {
+      "pr": 509,
+      "id": "A4",
+      "text": "fixture seeded with `CARD_RULES_SEED=1` (reason \"pinned at CS1, awaits T's card session\"); `[content]` AUDIT rows filed, grouped by rule, `next:` T's next card session (D37)",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 509,
+      "id": "A5",
+      "text": "`check-prose` `CONTENT_SURFACES` lists `Cards/library/*.ts`; no findings, so no exemptions were needed",
+      "named": [
+        {
+          "kind": "file",
+          "name": "scripts/check-prose.test.mjs",
+          "couldNotFail": false
+        }
+      ],
+      "unproven": false
+    },
+    {
+      "pr": 509,
+      "id": "A6",
+      "text": "`content-drift` ledger to library parity with self-checking extractors, tested in `content-drift.test.mjs`",
+      "named": [
+        {
+          "kind": "file",
+          "name": "scripts/content-drift.test.mjs",
+          "couldNotFail": false
+        }
+      ],
+      "unproven": false
+    },
+    {
+      "pr": 509,
+      "id": "A7",
+      "text": "spec §17 maps rule to test to fixture; `docs/truth-sources.md` records the spec as DRAFT",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 509,
+      "id": "A8",
+      "text": "no file under `Cards/library/` changes, and no keyword registry, atlas row or gloss changes (`git diff --stat origin/main`)",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 520,
+      "id": "A1",
+      "text": "`programIllegalReason` no longer returns \"that Global is already in play\"; an engine test plays two copies of P-10c and finds two `GlobalInPlay` entries.",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 520,
+      "id": "A2",
+      "text": "Two P-10c copies: one SACRIFICE fires GUARD n twice; two E-03d copies apply SACRIFICE 2 and LEECH 1 twice per turn.",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 520,
+      "id": "A3",
+      "text": "A FREE copy played on turn t leaves after `GLOBAL_FREE_TURNS`; the PAID copy played later stays.",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 520,
+      "id": "A4",
+      "text": "`programDrawFallback` removes one deck copy per instance in play, pinned with two copies.",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 520,
+      "id": "A5",
+      "text": "The Globals row keys each chip by instance; a jest case renders two copies with no key warning.",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 520,
+      "id": "A6",
+      "text": "The rule text is marked experimental in `plan/revamp/cards.md` and `docs/card-spec.md` (and `docs/game-model.md`, the keyword atlas, the in-game gloss).",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 520,
+      "id": "A7",
+      "text": "The witness values a copy with one in play, and a stacked Global deck sims to an outcome on three seeds; existing sim tests pass.",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 521,
+      "id": "A1",
+      "text": "FREE corner pill on every face with a FREE line, in the card's colour, value in white; band padding only with the pill; drawn as a sibling of the frame",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 521,
+      "id": "A2",
+      "text": "No rarity pips on any face; word on the large face; rarity in the accessibility label everywhere",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 521,
+      "id": "A3",
+      "text": "Names on one line; `namePeek` / `nameColumnPeek` removed",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 521,
+      "id": "A4",
+      "text": "Ledger is die : PAID on one line; never stacks; `paidLedgerFit` drops the FREE reservation",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 521,
+      "id": "A5",
+      "text": "Seamless art: no mat, frame or rules",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 521,
+      "id": "A6",
+      "text": "375x812 web screenshots of the grey hand, the Blood Price hand and one card detail (`axiomancer-mobile/screenshots/bt2a/`)",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 523,
+      "id": "A1",
+      "text": "`programLineShortfall` returns `{ cost, vitae }` exactly when `programLineBlock` gives the floor reason (P-01a PAID at 4 VITAE: `{ cost: 4, vitae: 4 }`; null when payable). There is also a sweep across every lane card, both lines and five VITAE levels.",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 523,
+      "id": "A2",
+      "text": "The card play VM carries `play.paidShortfall` / `play.freeShortfall` from A1.",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 523,
+      "id": "A3",
+      "text": "A refused stage, die drop, die tap or APPLY with a shortfall runs the pulse, the ghost segment and the `SACRIFICE <cost>` tag on the VITAE ring. [T to confirm the look]",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 523,
+      "id": "A4",
+      "text": "Reduced motion gives a static red outline and ghost segment for the same duration.",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 523,
+      "id": "A5",
+      "text": "The ring's label reads `VITAE <vitae> of <max>. SACRIFICE <cost> would leave you below 1.` during the callout.",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 523,
+      "id": "A6",
+      "text": "Other refusals (a printed condition, a Global in play, a card already holding a die) do not trigger it. Jest pins both directions.",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 529,
+      "id": "A1",
+      "text": "Intent top-left: the under-bar block and its chips are left-aligned and wrap left to right (`CombatBoard.sig-column.test.tsx`).",
+      "named": [
+        {
+          "kind": "file",
+          "name": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.sig-column.test.tsx",
+          "couldNotFail": false
+        }
+      ],
+      "unproven": false
+    },
+    {
+      "pr": 529,
+      "id": "A2",
+      "text": "LOG leaves the board and lives in the pilgrim modal, with LOG / BACK / close-resets (`CombatEncounterPanel.log.test.tsx`).",
+      "named": [
+        {
+          "kind": "file",
+          "name": "axiomancer-mobile/components/combat/encounter/__tests__/CombatEncounterPanel.log.test.tsx",
+          "couldNotFail": false
+        }
+      ],
+      "unproven": false
+    },
+    {
+      "pr": 529,
+      "id": "A3",
+      "text": "Corner medallions removed; the avatar and END are inside the dock (`CombatBoard.footer-dock.test.tsx`).",
+      "named": [
+        {
+          "kind": "file",
+          "name": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.footer-dock.test.tsx",
+          "couldNotFail": false
+        }
+      ],
+      "unproven": false
+    },
+    {
+      "pr": 529,
+      "id": "A4",
+      "text": "Footer dock: avatar, VITAE column, wide END; safe-area inset respected (`CombatBoard.footer-dock.test.tsx`, `CombatBoard.playtest-2026-09-04.test.tsx`).",
+      "named": [
+        {
+          "kind": "file",
+          "name": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.footer-dock.test.tsx",
+          "couldNotFail": false
+        },
+        {
+          "kind": "file",
+          "name": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.playtest-2026-09-04.test.tsx",
+          "couldNotFail": false
+        }
+      ],
+      "unproven": false
+    },
+    {
+      "pr": 529,
+      "id": "A5",
+      "text": "VITAE bar: `AXM.heal`, `AXM.blood` below 25%, width and colour pinned at 0, 24, 25 and 100%.",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 529,
+      "id": "A6",
+      "text": "Full-width hand: the corner band and its constants are deleted; at 375 with five cards every covered name shows its start (`CombatBoard.handfan.test.tsx`, `.S1-board`, `.fresh-eyes-repair`).",
+      "named": [
+        {
+          "kind": "file",
+          "name": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.S1-board.test.tsx",
+          "couldNotFail": false
+        },
+        {
+          "kind": "file",
+          "name": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.fresh-eyes-repair.test.tsx",
+          "couldNotFail": false
+        },
+        {
+          "kind": "file",
+          "name": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.handfan.test.tsx",
+          "couldNotFail": false
+        }
+      ],
+      "unproven": false
+    },
+    {
+      "pr": 529,
+      "id": "A7",
+      "text": "The signature column sits under the intent block and is clamped above the tray. A pure-function test fits five runes at 375x812, and the clamp wins on a 667pt screen (`CombatBoard.sig-column.test.tsx`).",
+      "named": [
+        {
+          "kind": "file",
+          "name": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.sig-column.test.tsx",
+          "couldNotFail": false
+        }
+      ],
+      "unproven": false
+    },
+    {
+      "pr": 529,
+      "id": "A8",
+      "text": "Tap hint removed; tapping a card still opens it (`CombatBoard.handfan.test.tsx`).",
+      "named": [
+        {
+          "kind": "file",
+          "name": "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.handfan.test.tsx",
+          "couldNotFail": false
+        }
+      ],
+      "unproven": false
+    },
+    {
+      "pr": 529,
+      "id": "A9",
+      "text": "375x812 web screenshots: `axiomancer-mobile/screenshots/bt2b/1-grey-board.jpg`, `2-blood-price-board.jpg`, `3-pilgrim-modal.jpg` and `4-log-view.jpg`, next to `screenshots/bt2-prototype/`. Still for T at review: a phone build at 360-412dp (no clipped END, avatar or pill; D86).",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 549,
+      "id": "A1",
+      "text": "`tracesSampleRate` non-zero only on `preview`; one exported constant",
+      "named": [
+        {
+          "kind": "case",
+          "name": "monitoring.test.ts > samples traces on preview, with frames, app start and navigation on",
+          "couldNotFail": false
+        },
+        {
+          "kind": "case",
+          "name": "monitoring.test.ts > starts nothing without a DSN, even on preview",
+          "couldNotFail": false
+        },
+        {
+          "kind": "case",
+          "name": "monitoring.test.ts > the rate table is preview-only",
+          "couldNotFail": false
+        }
+      ],
+      "unproven": false
+    },
+    {
+      "pr": 549,
+      "id": "A2",
+      "text": "Native frames and app-start tracking on whenever tracing is on, set explicitly",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 549,
+      "id": "A3",
+      "text": "`startDragSpan(kind)` returns `end(outcome)`; no-op when off, never throws; web twin matches",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 549,
+      "id": "A4",
+      "text": "Panel starts the span in `begin` and ends it exactly once on drop, cancel and interrupt",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 549,
+      "id": "A5",
+      "text": "Span names `combat.drag.<kind>`, op `ui.drag`; no game state or ids",
+      "named": [
+        {
+          "kind": "case",
+          "name": "monitoring.test.ts > opens combat.drag.<kind> with op ui.drag and ends it once with its outcome",
+          "couldNotFail": false
+        }
+      ],
+      "unproven": false
+    },
+    {
+      "pr": 549,
+      "id": "A6",
+      "text": "`lib/__tests__/monitoring.test.ts` and `CombatEncounterPanel.drag-spans.test.tsx`; drag-commits test still green",
+      "named": [
+        {
+          "kind": "file",
+          "name": "axiomancer-mobile/components/combat/encounter/__tests__/CombatEncounterPanel.drag-spans.test.tsx",
+          "couldNotFail": false
+        },
+        {
+          "kind": "file",
+          "name": "axiomancer-mobile/lib/__tests__/monitoring.test.ts",
+          "couldNotFail": false
+        }
+      ],
+      "unproven": false
+    },
+    {
+      "pr": 549,
+      "id": "A7",
+      "text": "`docs/logging.md` \"Performance (Sentry)\"",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 553,
+      "id": "A1",
+      "text": "`EncounterModalOverlay` reports its mode through an optional `onModeChange(mode)`, on mount and on every change; omitting it changes nothing.",
+      "named": [
+        {
+          "kind": "file",
+          "name": "axiomancer-mobile/components/event/__tests__/EncounterModalOverlay.test.tsx",
+          "couldNotFail": false
+        }
+      ],
+      "unproven": false
+    },
+    {
+      "pr": 553,
+      "id": "A2",
+      "text": "In combat mode the map canvas, node grid, overlays, confirm panel, badge, toast and region header are not mounted; a test asserts `map-canvas-wrapper` is absent.",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 553,
+      "id": "A3",
+      "text": "In prelude and aftermath the map is mounted behind the overlay; tests assert `map-canvas-wrapper` is present in both.",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 553,
+      "id": "A4",
+      "text": "Closing the encounter (victory, withdraw) remounts the map; a resumed fight opens with the map unmounted.",
+      "named": [],
+      "unproven": false
+    },
+    {
+      "pr": 553,
+      "id": "A5",
+      "text": "No store, save, engine or selector change; the verify gate and the three e2e journeys pass.",
+      "named": [],
+      "unproven": false
+    }
+  ],
+  "seedTicks": [
+    {
+      "pr": 521,
+      "id": "A4",
+      "status": "names no replayed test, so the replay can neither prove nor clear it"
+    },
+    {
+      "pr": 523,
+      "id": "A6",
+      "status": "names no replayed test, so the replay can neither prove nor clear it"
+    }
+  ]
+}
