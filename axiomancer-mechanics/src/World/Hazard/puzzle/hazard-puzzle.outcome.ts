@@ -1,0 +1,87 @@
+/**
+ * Hazard puzzle — the outcome of one resolve.
+ *
+ * One pure function turns a resolve into what the player gains and loses.
+ * It takes a context object, so later inputs (level bands, scars already
+ * banked, a dynamic failure curve) are new optional fields, not new
+ * parameters. Applying the outcome to a game state is
+ * `claimHazardPuzzleOutcome` (`Game/hazard-puzzle.claim.ts`).
+ *
+ *  - Always: XP (per player level), one modest consumable roll and one
+ *    material from the region's gathering list.
+ *  - Full completion (p = 1): the route's shillings purse and an XP bonus.
+ *  - Short of the goal (p < 1): VITAE lost in proportion to the shortfall;
+ *    under half the goal, the max-VITAE scar as well.
+ */
+
+import { rollCacheReward } from '../../../Items/cache-reward';
+import type { Item } from '../../../Items/types';
+import type { MapName } from '../../map.library';
+import type { HazardRouteKey } from '../hazard.types';
+import { hazardRegionMaterials } from './hazard-puzzle.region';
+import { HAZARD_PUZZLE_FAILURE, HAZARD_PUZZLE_REWARDS } from './hazard-puzzle.tuning';
+import type { HazardPuzzleResult } from './hazard-puzzle.types';
+
+export interface HazardPuzzleOutcomeContext {
+    /** The route the puzzle was played on. */
+    route: HazardRouteKey;
+    /** The resolve, from `confirmHazardPuzzle`. Only `p` is read. */
+    result: Pick<HazardPuzzleResult, 'p'>;
+    /** The player's level (XP scales with it). */
+    playerLevel: number;
+    /** The region whose gathering list gives the material. */
+    region: MapName;
+    /** Drives the consumable roll and the material pick. Same seed, same loot. */
+    seed: number;
+}
+
+export interface HazardPuzzleOutcome {
+    route: HazardRouteKey;
+    /** The resolve's p, clamped to [0, 1]. */
+    p: number;
+    /** p reached 1: the purse and the XP bonus are paid. */
+    completed: boolean;
+    xp: number;
+    /** The consumable roll, then the region material (if the region has one). */
+    items: Item[];
+    shillings: number;
+    /** VITAE lost: round(max × (1 − p)) short of the goal, else 0. */
+    vitaeLoss: number;
+    /** Max VITAE the scar takes: the scar under half the goal, else 0. */
+    scar: number;
+}
+
+function clamp01(n: number): number {
+    if (!Number.isFinite(n)) return 0;
+    return Math.min(1, Math.max(0, n));
+}
+
+/** Picks one material from the region's list by seed. `null` for a region with none. */
+function pickMaterial(region: MapName, seed: number): Item | null {
+    const materials = hazardRegionMaterials(region);
+    if (materials.length === 0) return null;
+    return materials[(seed >>> 0) % materials.length]!;
+}
+
+export function hazardPuzzleOutcome(ctx: HazardPuzzleOutcomeContext): HazardPuzzleOutcome {
+    const p = clamp01(ctx.result.p);
+    const completed = p >= 1;
+    const level = Math.max(1, Math.floor(ctx.playerLevel));
+
+    const baseXp = HAZARD_PUZZLE_REWARDS.xpPerLevel * level;
+    const xp = Math.round(completed ? baseXp * (1 + HAZARD_PUZZLE_REWARDS.completionXpBonus) : baseXp);
+
+    const items: Item[] = rollCacheReward({
+        playerLevel: level,
+        seed: ctx.seed,
+        tier: HAZARD_PUZZLE_REWARDS.consumableTier,
+    });
+    const material = pickMaterial(ctx.region, ctx.seed);
+    if (material) items.push(material);
+
+    const shillings = completed ? HAZARD_PUZZLE_REWARDS.purse[ctx.route] : 0;
+    const vitaeLoss = completed ? 0 : Math.round(HAZARD_PUZZLE_FAILURE.maxVitaeLoss[ctx.route] * (1 - p));
+    const scar = p < HAZARD_PUZZLE_FAILURE.scarBelow ? HAZARD_PUZZLE_FAILURE.scar : 0;
+
+    return { route: ctx.route, p, completed, xp, items, shillings, vitaeLoss, scar };
+}

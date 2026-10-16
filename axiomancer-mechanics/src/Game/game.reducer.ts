@@ -409,6 +409,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             return { ...state, player: unequipItemReducer(state.player, action.payload.slot, action.payload.index) };
         }
 
+        case 'GRANT_XP': {
+            const amount = Math.max(0, Math.floor(action.payload.amount));
+            if (amount === 0) return state;
+            return { ...state, player: { ...state.player, experience: state.player.experience + amount } };
+        }
+
         case 'LEVEL_UP': {
             return { ...state, player: applyLevelUps(state.player) };
         }

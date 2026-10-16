@@ -283,6 +283,14 @@ export type {
     HazardPuzzleStat, HazardPuzzleUnlock, HazardPuzzleUnlockGrant,
     HazardPuzzleValidation,
 } from './World/Hazard';
+// Hazard puzzle outcome: what a resolve pays and costs, and its claim.
+export {
+    HAZARD_PUZZLE_FAILURE, HAZARD_PUZZLE_REWARDS, hazardPuzzleOutcome,
+    hazardRegionMaterials,
+} from './World/Hazard';
+export type { HazardPuzzleOutcome, HazardPuzzleOutcomeContext } from './World/Hazard';
+export { claimHazardPuzzleOutcome, HAZARD_SCAR_FLAG_PREFIX } from './Game';
+export type { HazardPuzzleClaim } from './Game';
 
 // Blacksmith encounter ("The Anvil" — die-gear upgrades: HONE / TEMPER /
 // gear swap).

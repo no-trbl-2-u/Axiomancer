@@ -14,6 +14,9 @@ export type { GameState, CodexEntry } from './types';
 
 export { migrate, dropUnknownCardIds, dropRetiredFlags } from './game.migrate';
 
+export { claimHazardPuzzleOutcome, HAZARD_SCAR_FLAG_PREFIX } from './hazard-puzzle.claim';
+export type { HazardPuzzleClaim } from './hazard-puzzle.claim';
+
 export {
     LEGACY_SLOT_MAP, reslotLegacyEquipment, reslotLegacyLoadout,
 } from './legacy-slots';
