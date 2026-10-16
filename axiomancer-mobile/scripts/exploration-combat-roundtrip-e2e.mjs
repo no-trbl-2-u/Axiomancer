@@ -39,6 +39,7 @@ import { existsSync } from 'node:fs'
 import { resolve, dirname, join, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { injectStateFixture } from './fixture-injector.mjs'
+import { openDevSection } from './dev-section.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..')
@@ -187,6 +188,7 @@ async function runRoundTrip(page, baseUrl) {
     await openDevTools(page)
 
     log('arming an encounter via the COMBAT dev trigger ...')
+    await openDevSection(page, 'encounters', 'debug-trigger-encounter-encounter')
     const trigger = page.getByTestId('debug-trigger-encounter-encounter')
     await trigger.waitFor({ state: 'visible', timeout: 15000 })
     await trigger.click()

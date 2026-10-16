@@ -70,6 +70,7 @@ import { readFile, stat, mkdir, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { resolve, dirname, join, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { openDevSection } from './dev-section.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..')
@@ -480,6 +481,7 @@ async function enterLive(page, baseUrl, seed) {
     // the take-a-card walk below, actually reachable in CI.
     const preset = (process.env.PRESET ?? '').toLowerCase()
     if (preset) {
+        await openDevSection(page, 'player', `debug-preset-${preset}`)
         const btn = page.getByTestId(`debug-preset-${preset}`)
         await btn.waitFor({ state: 'visible', timeout: 15000 })
         await btn.click()
@@ -487,6 +489,7 @@ async function enterLive(page, baseUrl, seed) {
         log(`live: applied player preset "${preset}"`)
     }
     if (LEVEL_UP) {
+        await openDevSection(page, 'player', 'debug-xp-grant-button')
         const grant = page.getByTestId('debug-xp-grant-button')
         await grant.waitFor({ state: 'visible', timeout: 15000 })
         for (let i = 0; i < XP_GRANT_CLICKS; i++) {
@@ -497,6 +500,7 @@ async function enterLive(page, baseUrl, seed) {
             + `${XP_GAP_TO_LEVEL - XP_GRANT_CLICKS * XP_GRANT_STEP} short of the next-level threshold, `
             + 'so a won fight\'s own XP reward crosses it mid-aftermath')
     }
+    await openDevSection(page, 'encounters', `debug-trigger-encounter-${ENCOUNTER_KIND}`)
     const trigger = page.getByTestId(`debug-trigger-encounter-${ENCOUNTER_KIND}`)
     await trigger.waitFor({ state: 'visible', timeout: 15000 })
     await trigger.click({ force: true })

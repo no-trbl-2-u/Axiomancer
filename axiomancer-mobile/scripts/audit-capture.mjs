@@ -21,6 +21,7 @@ import { mkdir } from 'node:fs/promises'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { injectMinigameSeeds } from './minigame-seed-injector.mjs'
+import { openDevSection } from './dev-section.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO = resolve(__dirname, '..')
@@ -120,6 +121,7 @@ const SCREENS = [
         id: 'hazard', file: '13-hazard.png', drive: async (p) => {
             await goto(p, '/character')
             await openDevMenu(p)
+            await openDevSection(p, 'rewards', 'debug-hazard-button')
             await p.getByTestId('debug-hazard-button').click()
             await settle(p, 1600)
         },
@@ -157,6 +159,7 @@ const SCREENS = [
         id: 'hazard-board', file: '14-hazard-board.png', drive: async (p) => {
             await goto(p, '/character')
             await openDevMenu(p)
+            await openDevSection(p, 'rewards', 'debug-hazard-button')
             await p.getByTestId('debug-hazard-button').click()
             await settle(p, 1600)
             // Dismiss the danger intro to reach the board, if present.
@@ -174,6 +177,7 @@ const SCREENS = [
 async function debugLaunch(page, testId, settleMs) {
     await goto(page, '/character')
     await openDevMenu(page)
+    await openDevSection(page, 'rewards', testId)
     const btn = page.getByTestId(testId)
     await btn.waitFor({ state: 'visible', timeout: 15000 })
     await btn.click()
@@ -185,6 +189,7 @@ async function debugLaunch(page, testId, settleMs) {
 async function triggerMinigame(page, kind) {
     await goto(page, '/character')
     await openDevMenu(page)
+    await openDevSection(page, 'encounters', `debug-trigger-encounter-${kind}`)
     const btn = page.getByTestId(`debug-trigger-encounter-${kind}`)
     await btn.waitFor({ state: 'visible', timeout: 15000 })
     await btn.click()
@@ -226,6 +231,7 @@ async function playRound(page) {
 async function triggerEncounter(page, kind) {
     await goto(page, '/character')
     await openDevMenu(page)
+    await openDevSection(page, 'encounters', `debug-trigger-encounter-${kind}`)
     const btn = page.getByTestId(`debug-trigger-encounter-${kind}`)
     await btn.waitFor({ state: 'visible', timeout: 15000 })
     await btn.click()
