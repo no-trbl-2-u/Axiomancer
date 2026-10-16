@@ -25,8 +25,11 @@
  * session logged.
  *
  * PERFORMANCE, PREVIEW ONLY. On an EAS `preview` build the client also
- * samples traces: native slow/frozen frames, app start, one transaction per
- * screen (React Navigation), and one span per combat drag (`startDragSpan`).
+ * samples traces: native slow/frozen frames, app start, JS stalls, one
+ * transaction per screen (React Navigation) with its time to initial
+ * display, user-interaction transactions, and one span per combat drag
+ * (`startDragSpan`). Profiling stays off: the free plan has no profile
+ * quota, so profiles would be dropped on ingest.
  * Production keeps its quota for crashes; web never starts a client at all.
  * `docs/logging.md` → "Performance (Sentry)" says where to read it.
  *
@@ -63,9 +66,10 @@ export function tracesSampleRateFor(profile: string | null): number {
     return profile === 'preview' ? PREVIEW_TRACES_SAMPLE_RATE : 0;
 }
 
-/** Per-screen transactions. Registered on the root container by
- *  `registerNavigationTracing` once it is ready. */
-const navigationTracing = Sentry.reactNavigationIntegration();
+/** Per-screen transactions, each with its time to initial display.
+ *  Registered on the root container by `registerNavigationTracing` once it
+ *  is ready. */
+const navigationTracing = Sentry.reactNavigationIntegration({ enableTimeToInitialDisplay: true });
 
 /** Log levels worth carrying as breadcrumbs, mapped to Sentry's own
  *  vocabulary (`warn` is `warning` there). `debug`/`trace` are deliberately
@@ -103,6 +107,10 @@ export function initCrashReporting(): void {
             // with it and off without it, never left to the SDK's defaults.
             enableNativeFramesTracking: traced,
             enableAppStartTracking: traced,
+            // JS event-loop stalls on every transaction, and one transaction
+            // per tap on a labelled element.
+            enableStallTracking: traced,
+            enableUserInteractionTracing: traced,
             integrations: traced ? [navigationTracing] : [],
             // The reported crash is native; this is the whole point.
             enableNative: true,

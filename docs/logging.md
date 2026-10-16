@@ -230,6 +230,9 @@ What a preview APK sends:
 | --- | --- | --- |
 | Slow and frozen frames, per screen | `enableNativeFramesTracking` + `reactNavigationIntegration` (registered on the root container's `onReady` in `app/_layout.tsx`) | Insights → Mobile → Screen Rendering (or Performance → the route-named transaction) |
 | App start (cold/warm) | `enableAppStartTracking` | Insights → Mobile → App Starts |
+| Time to initial display, per screen | `reactNavigationIntegration({ enableTimeToInitialDisplay: true })` | Insights → Mobile → Screen Loads |
+| JS event-loop stalls | `enableStallTracking` (measurements on every transaction) | the transaction's `stall_*` measurements |
+| One transaction per tap on a labelled element | `enableUserInteractionTracing` | Performance → Transactions, op `ui.action.touch` |
 | One span per combat drag | `startDragSpan(kind)` in `CombatEncounterPanel`'s `begin`, ended on every exit | Performance → Transactions, search `combat.drag` |
 
 Drag spans are named `combat.drag.<kind>` with op `ui.drag`, where kind is
@@ -245,4 +248,5 @@ Spans start and end in the panel's JS `begin`/`end` callbacks, never in the
 gesture worklets, so the per-frame drag cost is unchanged. Filter the
 `environment` to `preview`. If the span quota runs short, lower
 `PREVIEW_TRACES_SAMPLE_RATE`; that is the one knob. The free plan allows
-5,000,000 spans and 5,000 errors a month.
+5,000,000 spans and 5,000 errors a month. Profiling is off: the plan has no
+profile quota, so profiles would be dropped on ingest.
