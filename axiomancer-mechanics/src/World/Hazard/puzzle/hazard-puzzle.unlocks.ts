@@ -29,9 +29,18 @@ function sameUnlock(a: HazardPuzzleUnlock, b: HazardPuzzleUnlock): boolean {
     return JSON.stringify(a) === JSON.stringify(b);
 }
 
-/** True when every unlock in `unlocks` is one the layout declares. */
+/**
+ * True when every unlock in `unlocks` is one the layout declares, each
+ * declaration used at most once, so a grant is never applied twice.
+ */
 export function hazardPuzzleDeclaresUnlocks(layout: HazardPuzzleLayout, unlocks: readonly HazardPuzzleUnlock[]): boolean {
-    return unlocks.every((u) => layout.unlocks.some((d) => sameUnlock(d, u)));
+    const unused = layout.unlocks.slice();
+    return unlocks.every((u) => {
+        const i = unused.findIndex((d) => sameUnlock(d, u));
+        if (i < 0) return false;
+        unused.splice(i, 1);
+        return true;
+    });
 }
 
 /** The layout's hand and dice with `unlocks` granted (a new layout; the input is not changed). */

@@ -91,6 +91,12 @@ describe('grants at session start (A9)', () => {
         expect(() => createHazardPuzzleSession(LAYOUT, 'safe', [MIND_DIE])).toThrow(/does not declare/);
     });
 
+    it('refuses a declared unlock passed twice, so it is never granted twice', () => {
+        expect(() => createHazardPuzzleSession(LAYOUT, 'safe', [BODY_DIE, BODY_DIE])).toThrow(/does not declare/);
+        const twice = testLayout({ id: 'twice', hand: ['haul'], unlocks: [BODY_DIE, BODY_DIE] });
+        expect(createHazardPuzzleSession(twice, 'safe', [BODY_DIE, BODY_DIE]).board.dice).toHaveLength(2);
+    });
+
     it('the validator rejects a threshold that is not a whole number', () => {
         const bad = testLayout({ id: 'bad-min', hand: ['haul'], unlocks: [{ ...BODY_DIE, min: 1.5 }] });
         expect(validateHazardPuzzleLayout(bad).reasons).toEqual([expect.stringMatching(/unlocks\[0\]: min 1.5/)]);
