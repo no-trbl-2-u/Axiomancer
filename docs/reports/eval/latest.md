@@ -66,3 +66,98 @@ A follow-up is a fix or revert landing on `main` within 7 days that touched one 
 | #562 fix: a hazard scar mends at any rest, not only at an inn (AUDIT Scarred never clears) | 2026-10-15T15:05Z | 4ed594e9 | Cloudflare Pages: axiomancer success; verify-mechanics success; verify-mobile success; verify-prose success | verify-drift | none | none | none |
 
 <!-- eval:ledger:end -->
+
+<!-- eval:parent-replay:start -->
+
+## Do the tests fail on the parent? (EV1b)
+
+Stamp: commit `5085b096` (2026-10-15T17:35:13-04:00), over the ledger at `86eea99d`. Regenerate with `node scripts/eval/parent-replay.mjs`; the data is `docs/reports/eval/parent-replay.json`.
+
+Each test file a ledger PR added or changed runs twice in a detached worktree: at the PR's merge (the control), then at the merge's first parent with the PR's version of the file laid over. A file that passes on the parent could not fail: the code it pins was not there yet. A new case is a test title in the PR's version that the parent's version lacks; dynamic titles are not matched. A new case passing on the parent is not a defect by itself: a guard of behaviour the PR must not change (the other direction of a pinned rule) passes there by design.
+
+| Count | Value |
+|---|---|
+| Test files replayed | 58 |
+| Fail on the parent | 54 (11 do not load there) |
+| Could not fail (pass on the parent) | 4 |
+| Inconclusive (fail at their own merge) | 0 |
+| New cases that pass on the parent | 11 |
+| Ticked acceptance lines | 65 |
+| Ticked lines naming no replayed test | 49 |
+| Unproven ticks | 0 |
+
+### Unproven ticks
+
+A ticked acceptance line is unproven when it names at least one test (a file by name, or a new case by a backticked token in the line) and every test it names could not fail.
+
+None.
+
+### Seed S3
+
+- #521 A4: names no replayed test, so the replay can neither prove nor clear it
+- #523 A6: names no replayed test, so the replay can neither prove nor clear it
+
+### Every replayed test file
+
+| PR | Test file | In the PR | Verdict | New cases passing on the parent |
+|---|---|---|---|---|
+| #505 | combat.measured-truth.test.ts | added | fails-on-parent (does not load on the parent) | 0 of 10 |
+| #505 | act1-progression.test.ts | changed | fails-on-parent (a case fails on the parent) | 0 of 1 |
+| #505 | measured-compare.test.mjs | added | fails-on-parent (does not load on the parent) | 0 of 13 |
+| #507 | roster-health.engine.test.ts | added | fails-on-parent (does not load on the parent) | 0 of 19 |
+| #509 | card-rules.test.ts | added | fails-on-parent (does not load on the parent) | 0 of 15 |
+| #509 | card-rules.engine.test.ts | added | fails-on-parent (does not load on the parent) | 0 of 15 |
+| #509 | hermeticity.audit.test.ts | changed | could-not-fail (passes on the parent) | 0 of 0 |
+| #509 | check-prose.test.mjs | changed | fails-on-parent (a case fails on the parent) | 0 of 1 |
+| #509 | content-drift.test.mjs | changed | fails-on-parent (does not load on the parent) | 0 of 4 |
+| #512 | TitleScreen.test.tsx | changed | fails-on-parent (a case fails on the parent) | 0 of 1 |
+| #514 | blood-price.engine.test.ts | changed | fails-on-parent (a case fails on the parent) | 0 of 1 |
+| #516 | CombatBoard.colorlaw.test.tsx | changed | fails-on-parent (a case fails on the parent) | 0 of 3 |
+| #520 | blood-price.engine.test.ts | changed | fails-on-parent (a case fails on the parent) | 2 of 7: the draw fallback takes one deck copy out per instance in play; the witness values a copy with one already in play, and a stacked deck si... |
+| #520 | CombatBoard.program-cards.test.tsx | changed | fails-on-parent (a case fails on the parent) | 0 of 1 |
+| #521 | CombatBoard.handfan.test.tsx | changed | fails-on-parent (a case fails on the parent) | 1 of 3: the fixture fan overlaps at the phone width (non-vacuity) |
+| #521 | CombatBoard.paid-column.test.tsx | changed | fails-on-parent (a case fails on the parent) | 0 of 12 |
+| #521 | CombatBoard.playtest-2026-09-04.test.tsx | changed | fails-on-parent (a case fails on the parent) | 1 of 2: at the hand width (120) the ledger is the same single row |
+| #521 | CombatCardFace.rarity-D4.test.tsx | changed | fails-on-parent (a case fails on the parent) | 1 of 3: does NOT print it on a small face — the name band is the name’s |
+| #521 | CombatCardFace.seamless.test.tsx | added | fails-on-parent (a case fails on the parent) | 0 of 2 |
+| #521 | CombatRewardsOverlay.test.tsx | changed | fails-on-parent (a case fails on the parent) | 0 of 1 |
+| #523 | blood-price.engine.test.ts | changed | fails-on-parent (a case fails on the parent) | 0 of 4 |
+| #523 | CombatBoard.colorlaw.test.tsx | changed | could-not-fail (passes on the parent) | 0 of 0 |
+| #523 | CombatBoard.sacfloor.test.tsx | added | fails-on-parent (does not load on the parent) | 0 of 14 |
+| #523 | card-program.engine.test.ts | changed | fails-on-parent (a case fails on the parent) | 0 of 1 |
+| #523 | loop-issue.test.mjs | changed | fails-on-parent (does not load on the parent) | 0 of 3 |
+| #526 | loop-pr.test.mjs | changed | fails-on-parent (a case fails on the parent) | 0 of 1 |
+| #528 | ExplorationNode.test.tsx | changed | fails-on-parent (a case fails on the parent) | 0 of 2 |
+| #529 | CombatBoard.S1-board.test.tsx | changed | fails-on-parent (a case fails on the parent) | 0 of 2 |
+| #529 | CombatBoard.footer-dock.test.tsx | added | fails-on-parent (does not load on the parent) | 0 of 9 |
+| #529 | CombatBoard.fresh-eyes-repair.test.tsx | changed | fails-on-parent (a case fails on the parent) | 0 of 2 |
+| #529 | CombatBoard.handfan.test.tsx | changed | fails-on-parent (a case fails on the parent) | 1 of 4: a five-card fan at 375 shows the start of every covered name (A6) |
+| #529 | CombatBoard.playtest-2026-09-04.test.tsx | changed | fails-on-parent (does not load on the parent) | 0 of 0 |
+| #529 | CombatBoard.sacfloor.test.tsx | changed | fails-on-parent (a case fails on the parent) | 0 of 1 |
+| #529 | CombatBoard.sig-column.test.tsx | added | fails-on-parent (does not load on the parent) | 0 of 7 |
+| #529 | CombatEncounterPanel.log.test.tsx | changed | fails-on-parent (a case fails on the parent) | 0 of 5 |
+| #531 | stall-price-shillings.critique-84.test.tsx | added | fails-on-parent (a case fails on the parent) | 0 of 1 |
+| #534 | card-program.engine.test.ts | changed | fails-on-parent (a case fails on the parent) | 0 of 0 |
+| #534 | combat-card-vm.test.ts | changed | fails-on-parent (a case fails on the parent) | 0 of 3 |
+| #535 | CombatBoard.footer-dock.test.tsx | changed | fails-on-parent (a case fails on the parent) | 0 of 1 |
+| #537 | TitleScreen.test.tsx | changed | fails-on-parent (a case fails on the parent) | 0 of 1 |
+| #537 | critique-drive.test.mjs | changed | fails-on-parent (a case fails on the parent) | 0 of 1 |
+| #537 | dice-roll-ritual.test.ts | changed | fails-on-parent (a case fails on the parent) | 0 of 0 |
+| #539 | CombatBoard.footer-dock.test.tsx | changed | fails-on-parent (a case fails on the parent) | 0 of 1 |
+| #541 | forge-vocabulary.S5-talk-C12.test.tsx | changed | fails-on-parent (a case fails on the parent) | 1 of 2: spells the purse out in SHILLINGS, the unit the prices are in |
+| #541 | blacksmith.engine.test.ts | changed | fails-on-parent (a case fails on the parent) | 0 of 0 |
+| #543 | card-program.engine.test.ts | changed | could-not-fail (passes on the parent) | 0 of 0 |
+| #543 | loop-pr.test.mjs | changed | fails-on-parent (a case fails on the parent) | 0 of 1 |
+| #545 | HazardOverlays.test.tsx | changed | fails-on-parent (a case fails on the parent) | 0 of 1 |
+| #549 | CombatEncounterPanel.drag-spans.test.tsx | added | fails-on-parent (a case fails on the parent) | 0 of 5 |
+| #549 | monitoring.test.ts | added | fails-on-parent (a case fails on the parent) | 0 of 8 |
+| #553 | EncounterModalOverlay.test.tsx | changed | fails-on-parent (a case fails on the parent) | 1 of 3: leaving it out changes nothing |
+| #553 | map-under-combat-modes.engine.test.tsx | added | fails-on-parent (a case fails on the parent) | 2 of 3: prelude: the map stays mounted behind the modal; aftermath: the map comes back behind the modal |
+| #553 | map-under-combat.engine.test.tsx | added | fails-on-parent (a case fails on the parent) | 1 of 5: no encounter: the map is mounted |
+| #555 | CombatBoard.footer-dock.test.tsx | changed | fails-on-parent (a case fails on the parent) | 0 of 0 |
+| #557 | legibility-sweep.engine.test.ts | changed | fails-on-parent (a case fails on the parent) | 0 of 1 |
+| #559 | CombatBoard.sacfloor.test.tsx | changed | fails-on-parent (a case fails on the parent) | 0 of 1 |
+| #562 | rest-shelter.engine.test.ts | changed | could-not-fail (passes on the parent) | 0 of 0 |
+| #562 | hazard-scar-rest-recovery.engine.test.ts | changed | fails-on-parent (a case fails on the parent) | 0 of 3 |
+
+<!-- eval:parent-replay:end -->
