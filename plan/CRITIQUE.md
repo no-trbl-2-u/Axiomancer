@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-15 at commit 2927472f
-> Pass count: 89
+> Last pass: 2026-10-16 at commit 6b5e2b6d
+> Pass count: 90
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -676,7 +676,31 @@
 > screens' line "The node is spent the moment you stopped here" mixes
 > tenses.
 
+> **[critique pass 90, 2026-10-16, commit 6b5e2b6d] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors. 14 commits
+> after pass 89: the combat route and the overlay-era delete (CR1a,
+> CR1b), the level curve (LV1), the parent-replay eval (EV1b), Sentry
+> perf (PF3) and two plots. No screen in the set changed shape; the
+> drive opens `/combat-encounter` on its own, so CR1b's route is not on
+> screen, and the SELF level-up modal is not in the set. Reconfirmed
+> and not re-filed: pass 89's "you stopped here" tense row (both rest
+> captures), the unfixtured exploration hub bouncing to the title, the
+> mobile hazard strip's "CHOOSE TO PROC…" (pass 68 trade), the legend's
+> SEALED key (pass 86 row). One fresh finding: after LV1 the late-game
+> hub's Sage reads LVL 15 with 680 VITAE, a pool no level-15 pilgrim
+> can reach.
+
 ## Pending
+
+### [LOW] exploration hub / tooling — the level-15 Sage fixture shows 680 VITAE, twice what a level-15 pilgrim can now reach
+- pass: 90 (commit 6b5e2b6d)
+- viewport: both (375x812 and 1280x800)
+- category: comprehension
+- observation: the late-game hub (fixture `sage-bw-door-gate`) heads the screen "Sage · LVL 15 · PILGRIM", VITAE 680/680. Since LV1 a level gives 1 stat point (`STAT_POINTS_PER_LEVEL = 1`), so a level-15 pilgrim holds 15 + 14 = 29 points; every point in BODY gives at most 50 + 19x12 + 5x6 + 5x6 = 338 VITAE. The Sage preset carries 75 points (heart 20, body 30, mind 25). The other level presets miss the curve too: `kid-l15` 38 points (reachable 29), `kid-l30` 78 (44), `kid-l50` 126 (64), and `wanderer` at L8 holds 13, fewer than the 15 a fresh L1 starts with. Every late-game critique pass, and any sim or e2e that boots these presets (`PRESET=sage`), reads numbers no player sees.
+- evidence: `.critique-artifacts/{mobile,desktop}/11-late-game-hub.png` and `.txt` ("LVL 15 · PILGRIM", "680/680"); `axiomancer-mechanics/src/Character/presets.ts:83-198`; `calculateMaxHealth` in `src/Utils/index.ts:143`; `STAT_POINTS_PER_LEVEL` in `src/Game/game-mechanics.constants.ts:49`.
+- suggested fix: set each level preset's `baseStats` to a reachable spread, start stats plus (level - 1) x `STAT_POINTS_PER_LEVEL`, and add a guard test that no preset's stat total exceeds what its level can bank. Dev presets only, no player rule changes; label `review:rules-change` anyway, since sims and e2e read these numbers.
+- source: critique:drive (unattended)
 
 
 ### [LOW] rest / cache — "The node is spent the moment you stopped here" mixes present and past tense
