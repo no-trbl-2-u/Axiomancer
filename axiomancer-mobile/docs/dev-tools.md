@@ -128,6 +128,7 @@ Open sections stay open across visits to `/dev` until the app restarts.
 | Leaf | What it does | Test ids |
 |---|---|---|
 | `DebugHazardButton` | Start a hazard (BRAVE IT) | `debug-hazard-button` |
+| `DebugHazardPuzzlesButton` | Open the HAZARD PUZZLES board (`/devpuzzle`): three fixed demo puzzles, a route pick, the board under its clock, and the outcome panel (`?id=<demo>&route=safe\|risk` deep-links a demo; `&confirm=1` confirms at once, `&paused=1` holds the clock) | `debug-hazard-puzzles-button` |
 | `DebugRestButton` | Start the night watch at a camp or an inn | `debug-rest-button`, `debug-rest-inn-button` |
 | `DebugBlacksmithButton` | Open the Anvil with the witness variant | `debug-blacksmith-button` |
 | `DebugRewardTriggers` | RELIQUARY MODEST / RICH (loot-cache tiers), ANVIL ×500 (fixed budget), UNLOCK JOURNAL (every foe codex entry), KNOW ALL CARDS, and one chip per authored hazard id (`state/dev/rewards.ts`) | `debug-cache-button`, `debug-cache-rich-button`, `debug-anvil-budget-button`, `debug-journal-unlock-button`, `debug-learn-all-cards-button`, `debug-hazard-id-<id>` |

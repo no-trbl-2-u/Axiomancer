@@ -57,3 +57,7 @@ export {
     hazardPuzzleDeclaresUnlocks,
     hazardPuzzleUnlockSubsets,
 } from './hazard-puzzle.unlocks';
+
+export { HAZARD_PUZZLE_LIBRARY, getHazardPuzzleLayout } from './hazard-puzzle.library';
+export { HAZARD_PUZZLE_CLOCK_SECONDS } from './hazard-puzzle.tuning';
+export { HAZARD_PUZZLE_REGIONS } from './hazard-puzzle.validate';

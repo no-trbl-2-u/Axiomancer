@@ -647,6 +647,12 @@
 - proposed scope: one `/iterate` tick. Add a pre-commit or `guard.mjs` check that refuses a staged file whose LF/CRLF style differs from its `HEAD` version, with a hook test. A `.gitattributes` `eol` rule is the other route, but it renormalizes the 9 CRLF mechanics sources and needs its own diff. Then mark the lesson `guarded by`.
 - conflicts: none; no content.
 
+### [ ] [score 3.0] Mobile scripts spawn `npx` through a shell on Windows (lesson `e2e-export-windows`, seen 2×)
+- proposed: 2026-10-16, retro of ship B3e (#592)
+- source signals: lesson `e2e-export-windows` (ship CR1a, ship B3e). `smoke-screens.mjs`, `combat-round-e2e.mjs`, `combat-drag-perf.mjs`, `critique-drive.mjs`, `encounter-routing-e2e.mjs` and others call `spawnSync('npx', …)` with no shell, so on Windows the export exits 3 before any screen loads.
+- proposed scope: one `/iterate` tick. A shared `scripts/lib/spawn-npx.mjs` that passes `shell: process.platform === 'win32'`, used by every script that spawns `npx`, with a unit test on the options. Then mark the lesson `guarded by`.
+- conflicts: none; no content.
+
 ### [ ] [score 3.5] Repo scripts borrow keyring `gh` auth when a worktree has no `.env` (lesson `worktree-no-env`, seen 2×)
 - proposed: 2026-10-14, retro iterate (AUDIT [infra] pr-resolve); narrowed 2026-10-14 (D94)
 - source signals:

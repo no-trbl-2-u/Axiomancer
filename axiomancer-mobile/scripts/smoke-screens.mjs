@@ -57,6 +57,11 @@ export const ROUTES = [
     { name: 'dialogue', path: '/exploration', fixture: 'apprentice-staged-dialogue', waitForPath: '/dialogue' },
     { name: 'village', path: '/exploration', fixture: 'wanderer-staged-village', waitForPath: '/village' },
     { name: 'cutscene', path: '/exploration', fixture: 'wanderer-staged-cutscene', waitForPath: '/cutscene' },
+    // Dev-menu HAZARD PUZZLES board (a dev route, so it needs the forced
+    // dev-tools context a fixture route gets): the hard demo's board, and
+    // its outcome panel after an immediate confirm.
+    { name: 'devpuzzle-board', path: '/devpuzzle?id=demo-undercroft-hard&route=risk&paused=1', fixture: 'fresh-start' },
+    { name: 'devpuzzle-outcome', path: '/devpuzzle?id=demo-undercroft-hard&route=risk&confirm=1', fixture: 'fresh-start' },
 ]
 
 // 0.5% of pixels may differ before a route is flagged. Bumps catch

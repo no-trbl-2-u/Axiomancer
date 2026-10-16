@@ -4,19 +4,64 @@
  * solver budget, and its winning line replays to a cleared resolve.
  * A10: every subset of its stat unlocks keeps it solvable with at least as
  * many winning outcomes as no unlock.
- *
- * Runs on the fixture library until the demo puzzles ship in
- * `HAZARD_PUZZLE_LIBRARY`; then it runs on that library.
+ * A13: the three demos, one per band on the risk route, the safe route in
+ * the same band or easier, and at least one demo that cannot be cleared
+ * without a reserve DRAW card.
  */
 
 import { describe, expect, it } from 'vitest';
 
+import { getHazardCardDef, getHazardDef } from '../../hazard.content';
 import { auditHazardPuzzleLayout, auditHazardPuzzleUnlocks } from '../hazard-puzzle.band';
-import type { HazardPuzzleLayout } from '../hazard-puzzle.types';
+import { getHazardPuzzleLayout, HAZARD_PUZZLE_LIBRARY } from '../hazard-puzzle.library';
+import { solveHazardPuzzle } from '../hazard-puzzle.solver';
+import type { HazardPuzzleBand, HazardPuzzleLayout } from '../hazard-puzzle.types';
 import { validateHazardPuzzleLayout } from '../hazard-puzzle.validate';
-import { FIXTURE_LIBRARY } from './hazard-puzzle.layouts.mock';
 
-const LIBRARY: readonly HazardPuzzleLayout[] = FIXTURE_LIBRARY;
+const LIBRARY: readonly HazardPuzzleLayout[] = HAZARD_PUZZLE_LIBRARY;
+
+const BAND_RANK: Record<HazardPuzzleBand, number> = { easy: 0, medium: 1, hard: 2 };
+
+/** True when neither route can be cleared once the reserve is emptied. */
+function needsReserveDraw(layout: HazardPuzzleLayout): boolean {
+    const noReserve = { ...layout, reserve: [] };
+    return (['safe', 'risk'] as const).every((route) => solveHazardPuzzle(noReserve, route).winningOutcomes === 0);
+}
+
+describe('the demo puzzles (A13)', () => {
+    it('are three, one per band on the risk route, easy to hard', () => {
+        expect(LIBRARY.map((l) => l.bands.risk)).toEqual(['easy', 'medium', 'hard']);
+    });
+
+    it('put the safe route in the same band as the risk route or an easier one', () => {
+        for (const l of LIBRARY) expect(BAND_RANK[l.bands.safe], l.id).toBeLessThanOrEqual(BAND_RANK[l.bands.risk]);
+    });
+
+    it('use only existing hazard cards, none of them RE-CAST', () => {
+        for (const l of LIBRARY) {
+            const ids = [...l.hand, ...l.reserve, ...l.unlocks.flatMap((u) => (u.kind === 'extraCard' ? [u.cardId] : []))];
+            for (const id of ids) expect(getHazardCardDef(id).effect, `${l.id} ${id}`).not.toBe('recast');
+        }
+    });
+
+    it('reuse a live hazard title and sit in an Act 1 region', () => {
+        for (const l of LIBRARY) {
+            expect(l.title).toBe(getHazardDef(l.hazardId).title);
+            expect(l.act).toBe(1);
+        }
+    });
+
+    it('include at least one demo whose every solution needs a reserve DRAW card', () => {
+        const needing = LIBRARY.filter(needsReserveDraw).map((l) => l.id);
+        expect(needing).toContain('demo-undercroft-hard');
+        expect(needing).toContain('demo-ashfall-medium');
+    });
+
+    it('look up by id, and an unknown id throws', () => {
+        expect(getHazardPuzzleLayout('demo-cliff-easy').hazardId).toBe('cracked-cliff');
+        expect(() => getHazardPuzzleLayout('nope')).toThrow(/Unknown hazard puzzle/);
+    });
+});
 
 describe('hazard puzzle library: solvable and in band (A7)', () => {
     it('has layouts to check', () => {

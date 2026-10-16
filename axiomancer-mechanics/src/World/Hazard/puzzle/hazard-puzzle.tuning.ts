@@ -9,6 +9,7 @@
 import type { CacheLootTier } from '../../../Items/cache-reward';
 import { HAZARD_TUNING } from '../hazard.tuning';
 import type { HazardRouteKey } from '../hazard.types';
+import type { HazardPuzzleBand } from './hazard-puzzle.types';
 
 export const HAZARD_PUZZLE_TUNING = {
     bands: {
@@ -72,4 +73,14 @@ export const HAZARD_PUZZLE_FAILURE: Readonly<{
     maxVitaeLoss: Object.freeze({ safe: 6, risk: 12 }),
     scarBelow: 0.5,
     scar: HAZARD_TUNING.rewards.maxhpScar,
+});
+
+/**
+ * Seconds on the clock, by the band of the route being played. Placeholders
+ * until timed first-time solves set them (median x 1.5, rounded to 5 s).
+ */
+export const HAZARD_PUZZLE_CLOCK_SECONDS: Readonly<Record<HazardPuzzleBand, number>> = Object.freeze({
+    easy: 90,
+    medium: 75,
+    hard: 60,
 });
