@@ -47,6 +47,11 @@ export type GameAction =
     | { type: 'USE_ITEM';       payload: { itemId: string } }
     | { type: 'EQUIP_ITEM';     payload: { item: Equipment; opts?: { replaceIndex?: number } } }
     | { type: 'UNEQUIP_ITEM';   payload: { slot: EquipmentSlot; index?: number } }
+    /**
+     * Adds XP outside combat (a hazard puzzle's outcome). Like combat XP it
+     * only fills the bar; `LEVEL_UP` then promotes the player.
+     */
+    | { type: 'GRANT_XP';       payload: { amount: number } }
     | { type: 'LEVEL_UP';       payload?: undefined }
     | { type: 'ALLOCATE_STAT_POINT'; payload: { stat: 'heart' | 'body' | 'mind' } }
     | { type: 'LEARN_CARD';    payload: { cardId: string } }

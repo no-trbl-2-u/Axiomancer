@@ -53,6 +53,7 @@
 
 - **court-validates-laws** · an A/B court that swapped cards ratified a seat that broke the 5/5/5 colour law (Phase D8, 10ec4fe8) → validate the structural laws inside the harness before measuring · seen 1× · last 2026-07-18 · open
 - **iff-rule-needs-sweep** · D91 says a FREE pill iff a FREE line, but BT2a pinned it with one card per kind and a test pinned `programFreeCell('DEAL 3.')` to null, so A Plain Blow and six Blood Price faces shipped with no pill (critique 85) → pin an "iff" rule with a sweep over every lane card, not single examples · seen 1× · last 2026-10-14 · guarded by the lane sweep in combat-card-vm.test.ts
+- **mechanics-tests-no-at** · vitest ran a new suite green, but `type-check:tests` failed on `Array.prototype.at` (its lib is below es2022) and on `.quantity` read off the `Item` union (ship B3c) → in mechanics tests index with `[length - 1]` and narrow `Item` with `'quantity' in i`; run the full `npm run verify`, not just vitest, before the first push · seen 1× · last 2026-10-16 · open
 
 <!-- @domain:review -->
 
