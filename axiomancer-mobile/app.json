@@ -91,7 +91,13 @@
         "@sentry/react-native",
         {
           "organization": "sombersoft",
-          "project": "axiomancer-mobile"
+          "project": "axiomancer-mobile",
+          "experimental_android": {
+            "enableAndroidGradlePlugin": true,
+            "uploadNativeSymbols": true,
+            "includeNativeSources": true,
+            "autoUploadProguardMapping": true
+          }
         }
       ]
     ],

@@ -48,7 +48,8 @@
     "art:qa": "node scripts/art/qa.mjs",
     "art:test": "node --test scripts/art.test.mjs scripts/shrink-art.test.mjs",
     "critique-drive:test": "node --test scripts/critique-drive.test.mjs",
-    "assets:acquire": "node scripts/acquire-art.mjs"
+    "assets:acquire": "node scripts/acquire-art.mjs",
+    "eas-build-on-success": "node scripts/sentry-release.mjs"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

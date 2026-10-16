@@ -61,6 +61,7 @@ const DebugQuestState = lazyNamed(() => import('@/components/DebugQuestState'), 
 // ── RUN & DIAGNOSTICS ──
 const DebugRunControls = lazyNamed(() => import('@/components/DebugRunControls'), 'DebugRunControls');
 const DebugLogViewer = lazyNamed(() => import('@/components/DebugLogViewer'), 'DebugLogViewer');
+const DebugCrashTest = lazyNamed(() => import('@/components/DebugCrashTest'), 'DebugCrashTest');
 
 function LoadingFallback() {
     const AXM = usePalette();
@@ -139,9 +140,10 @@ export function DevToolsSections() {
                     <DebugQuestState />
                 </DevSection>
 
-                <DevSection label="RUN & DIAGNOSTICS" hint="save · reset · galleries · log" testID="dev-section-run">
+                <DevSection label="RUN & DIAGNOSTICS" hint="save · reset · galleries · log · crash test" testID="dev-section-run">
                     <DebugRunControls />
                     <DebugLogViewer />
+                    <DebugCrashTest />
                 </DevSection>
             </Suspense>
         </View>

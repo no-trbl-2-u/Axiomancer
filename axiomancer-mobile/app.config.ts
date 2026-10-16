@@ -1,6 +1,8 @@
 import type { ExpoConfig } from 'expo/config';
 
 import appJson from './app.json';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { sentryReleaseFor, buildCommit } = require('./lib/sentryRelease.js') as typeof import('./lib/sentryRelease.js');
 
 // EAS sets `EAS_BUILD_PROFILE` to the active profile name during
 // build. `BUILD_PROFILE` is an explicit override for web deploys
@@ -27,6 +29,10 @@ const SENTRY_DSN = process.env.EXPO_PUBLIC_SENTRY_DSN
 
 const expo = appJson.expo as ExpoConfig;
 
+// One Sentry release per build commit (`lib/sentryRelease.js` says why).
+// Null off the builder, where the SDK keeps its own default.
+const SENTRY_RELEASE = sentryReleaseFor(expo.version, buildCommit());
+
 export default (): ExpoConfig => ({
   ...expo,
   extra: {
@@ -38,5 +44,6 @@ export default (): ExpoConfig => ({
     ...(devToolsEnabled !== undefined ? { devToolsEnabled } : {}),
     ...(buildProfile ? { buildProfile } : {}),
     ...(SENTRY_DSN ? { sentryDsn: SENTRY_DSN } : {}),
+    ...(SENTRY_RELEASE ? { sentryRelease: SENTRY_RELEASE } : {}),
   },
 });

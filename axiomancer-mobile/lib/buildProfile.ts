@@ -1,6 +1,6 @@
 import Constants from '@/lib/platform/constants';
 
-type Extra = { devToolsEnabled?: boolean; buildProfile?: string | null; sentryDsn?: string | null };
+type Extra = { devToolsEnabled?: boolean; buildProfile?: string | null; sentryDsn?: string | null; sentryRelease?: string | null };
 
 // `extra.devToolsEnabled` is set by `app.config.ts` from
 // `EAS_BUILD_PROFILE` (or `BUILD_PROFILE` for non-EAS web deploys):
@@ -44,4 +44,12 @@ export function getSentryDsn(): string | null {
   const extra = Constants.expoConfig?.extra as Extra | undefined;
   const dsn = extra?.sentryDsn;
   return typeof dsn === 'string' && dsn.length > 0 ? dsn : null;
+}
+
+// This build's Sentry release (`lib/sentryRelease.js`), baked by
+// `app.config.ts` on the EAS builder. Null elsewhere: the SDK default stands.
+export function getSentryRelease(): string | null {
+  const extra = Constants.expoConfig?.extra as Extra | undefined;
+  const release = extra?.sentryRelease;
+  return typeof release === 'string' && release.length > 0 ? release : null;
 }
