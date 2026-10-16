@@ -99,8 +99,11 @@ open after one session of poking).
 | Leaf | What it does | Test ids |
 |---|---|---|
 | `DebugXpGrant` | +100 XP, +1000 XP, or force a LEVELUP through the engine dispatch (`state/dev/rewards.ts`) | `debug-xp-grant-button`, `debug-xp-grant-large-button`, `debug-xp-levelup-button` |
-| `DebugCurrencyControl` | +50S, +500S, BROKE (wallet to zero) | `debug-currency-{small-grant,large-grant,broke}` |
 | `DebugEffectApply` | One chip per buff/debuff in `effectsLibrary` (engine `applyEffect`); CLEAR | `debug-effect-<id>`, `debug-effect-clear` |
+
+The wallet moved out of this section to RUN & DIAGNOSTICS on 2026-10-16:
+granting shillings is a harness chore like SAVE or RESET, not a way of
+shaping who the player is.
 
 ### DECKS & ITEMS — `dev-section-decks`
 
@@ -128,7 +131,6 @@ open after one session of poking).
 |---|---|---|
 | `DebugHazardButton` | Start a hazard (BRAVE IT) | `debug-hazard-button` |
 | `DebugRestButton` | Start the night watch at a camp or an inn | `debug-rest-button`, `debug-rest-inn-button` |
-| `DebugBlacksmithButton` | Open the Anvil with the witness variant | `debug-blacksmith-button` |
 | `DebugRewardTriggers` | RELIQUARY MODEST / RICH (loot-cache tiers), ANVIL ×500 (fixed budget), UNLOCK JOURNAL (every foe codex entry), and one chip per authored hazard id (`state/dev/rewards.ts`) | `debug-cache-button`, `debug-cache-rich-button`, `debug-anvil-budget-button`, `debug-journal-unlock-button`, `debug-hazard-id-<id>` |
 
 ### STORY — `dev-section-story`
@@ -146,6 +148,7 @@ open after one session of poking).
 
 | Leaf | What it does | Test ids |
 |---|---|---|
+| `DebugCurrencyControl` | +50S, +500S, BROKE (wallet to zero). Lived under PLAYER until 2026-10-16 | `debug-currency-{small-grant,large-grant,broke}` |
 | `DebugRunControls` | SAVE, RESET RUN (keep character), NEW RUN; gallery links to `/devart`, `/devart/rooms`, `/devaftermath?panel=defeat|parley` | `debug-run-{save,reset,new}`, `debug-gallery-{enemy-art,rooms,defeat,parley}` |
 | `DebugLogViewer` | AXM Log ring buffer with level / domain filters and the previous-session tail | `debug-log-viewer`, … |
 
@@ -165,6 +168,8 @@ open after one session of poking).
 | `DebugPresetPicker`, `DebugPlayerTierPresets` | Owner call 2026-10-16. Both built players off the real stat curve (CRITIQUE.md: sage carries 75 stat points where a L15 pilgrim reaches 29; `kid-l50` 126 vs 64). The preset *data* stays — `STATE_FIXTURES` and `state/actions.ts` build from it — so a fixture boot (`?fixture=sage-bw-door-gate`) reaches the same player without a button. `e2e:combat-round:boss` / `:levelup` were repointed at fixtures first. |
 | `DebugHazardDeckRandomize` | Owner call 2026-10-16. `HAZARD_DECK_PRESETS` and `actions.randomizeHazardDeck()` stay; only the dev-menu leaf is gone. |
 | KNOW ALL CARDS (in `DebugRewardTriggers`) | Owner call 2026-10-16. `learnAllCards` (`state/dev/rewards.ts`) stays and is now unreferenced by any surface. |
+| `DebugBlacksmithButton` | Owner call 2026-10-16. ANVIL ×500 in `DebugRewardTriggers` strictly dominated it: `BLACKSMITH_WITNESS_VARIANTS` *is* `[HEART_RICH_PAYLOAD_VARIANT]`, the single variant this button offered, and ANVIL adds a 500-shilling budget. The only reach lost is the Anvil on the player's real wallet, which the `wanderer-bw-blacksmith` fixture gives (180 shillings). It carried no test and no harness drove it. |
+| `DebugGetAllRelics` | Owner call 2026-10-16. `DebugItemPicker` chips every id in `relicLibrary` — the same library `grantAllRelics` walks — so the only unique reach was every relic in one tap. The action stays on the store surface; its behaviour (once each, nothing displaced, a free trinket position worn for real) moved from the deleted component test to `state/e2e/dev-presets.engine.test.ts`. |
 | HIDE MANA / HIDE STANCE toggles | The HUD presenter never read them. |
 | `DebugHudOverrides`, the `devOverrides` store slice, `state/presenters/combat-hud.engine.ts` | HIDE EFFECTS fed a presenter no screen rendered, so the toggle was a no-op (TRIM THE FAT T3, 2026-09-25). |
 | `DebugCombatDeck`, `applyCombatDeckPreset` / `randomizeCombatDeck` actions | Superseded by the Deck tab (TRIM THE FAT T3, 2026-09-25). |
@@ -178,9 +183,12 @@ DebugTriggerEncounter|DebugWorld` → encounters; `DebugHazard*` → hazard;
 `CombatGate` → combat). Browser scripts depend on these ids staying
 stable: `self-dev-tools-link`, `debug-trigger-encounter-*`
 (`scripts/live-fight-entry.mjs` enters every scripted fight through it),
-`debug-hazard-button`, `debug-currency-large-grant`,
-`debug-blacksmith-button`, `debug-rest-button`, `debug-cache-button`,
-`debug-xp-grant-button`.
+`debug-hazard-button`, `debug-currency-large-grant`, `debug-rest-button`,
+`debug-cache-button`, `debug-xp-grant-button`.
+
+`debug-currency-*` answers to `dev-section-run`, not `dev-section-player`,
+since 2026-10-16: a harness reaching it through `openDevSection`
+(`scripts/dev-section.mjs`) passes `run` as the section key.
 
 The preset ids (`debug-preset-*`, `debug-player-tier-*`) are gone with
 their leaves (2026-10-16). A harness that needs a built-out player boots

@@ -1,16 +1,20 @@
 /**
  * Grouped dev-tools surface — the body of the `/dev` route.
  *
- * Holds a live STATE inspector, XP / wallet / effect controls, the CARDS
- * section (lane test decks and the reward-pool lanes), world travel
- * to any map / node with its authored event, the labyrinth acts, an
- * any-foe enemy picker, every reward channel, real NPC trees, an item
- * picker, and run controls.
+ * Holds a live STATE inspector, XP / effect controls, the CARDS section
+ * (lane test decks and the reward-pool lanes), world travel to any map /
+ * node with its authored event, the labyrinth acts, an any-foe enemy
+ * picker, every reward channel, real NPC trees, an item picker, and run
+ * controls.
  *
  * Sections read top-down in the order a tester thinks: see state →
  * shape the player → shape the deck → stand somewhere → fight / play a
  * minigame → collect rewards → drive the story → tweak the UI → manage
  * the run and read the log. `testID`s: `dev-section-<key>`.
+ *
+ * The wallet (`DebugCurrencyControl`) sits in RUN & DIAGNOSTICS, not
+ * PLAYER: granting shillings is a harness chore like SAVE or RESET, not
+ * a way of shaping who the player is (owner call 2026-10-16).
  *
  * Every section collapses: closed by default, its header toggles it, and
  * nothing is remembered — every entry to `/dev` opens on nine closed
@@ -36,10 +40,8 @@ const lazyNamed = <T extends React.ComponentType>(load: () => Promise<Record<str
 const DebugStateInspector = lazyNamed(() => import('@/components/DebugStateInspector'), 'DebugStateInspector');
 // ── PLAYER ──
 const DebugXpGrant = lazyNamed(() => import('@/components/DebugXpGrant'), 'DebugXpGrant');
-const DebugCurrencyControl = lazyNamed(() => import('@/components/DebugCurrencyControl'), 'DebugCurrencyControl');
 const DebugEffectApply = lazyNamed(() => import('@/components/DebugEffectApply'), 'DebugEffectApply');
 // ── DECKS & ITEMS ──
-const DebugGetAllRelics = lazyNamed(() => import('@/components/DebugGetAllRelics'), 'DebugGetAllRelics');
 const DebugItemPicker = lazyNamed(() => import('@/components/DebugItemPicker'), 'DebugItemPicker');
 // ── CARDS ──
 const DebugLaneDeck = lazyNamed(() => import('@/components/DebugLaneDeck'), 'DebugLaneDeck');
@@ -53,12 +55,12 @@ const DebugSkipEvent = lazyNamed(() => import('@/components/DebugSkipEvent'), 'D
 // ── MINIGAMES & REWARDS ──
 const DebugHazardButton = lazyNamed(() => import('@/components/DebugHazardButton'), 'DebugHazardButton');
 const DebugRestButton = lazyNamed(() => import('@/components/DebugRestButton'), 'DebugRestButton');
-const DebugBlacksmithButton = lazyNamed(() => import('@/components/DebugBlacksmithButton'), 'DebugBlacksmithButton');
 const DebugRewardTriggers = lazyNamed(() => import('@/components/DebugRewardTriggers'), 'DebugRewardTriggers');
 // ── STORY ──
 const DebugDialogueJump = lazyNamed(() => import('@/components/DebugDialogueJump'), 'DebugDialogueJump');
 // ── UI ──
 // ── RUN & DIAGNOSTICS ──
+const DebugCurrencyControl = lazyNamed(() => import('@/components/DebugCurrencyControl'), 'DebugCurrencyControl');
 const DebugRunControls = lazyNamed(() => import('@/components/DebugRunControls'), 'DebugRunControls');
 const DebugLogViewer = lazyNamed(() => import('@/components/DebugLogViewer'), 'DebugLogViewer');
 const DebugCrashTest = lazyNamed(() => import('@/components/DebugCrashTest'), 'DebugCrashTest');
@@ -117,14 +119,12 @@ export function DevToolsSections() {
                 <DebugStateInspector />
             </DevSection>
 
-            <DevSection label="PLAYER" hint="xp · wallet · effects" testID="dev-section-player">
+            <DevSection label="PLAYER" hint="xp · effects" testID="dev-section-player">
                 <DebugXpGrant />
-                <DebugCurrencyControl />
                 <DebugEffectApply />
             </DevSection>
 
             <DevSection label="DECKS & ITEMS" hint="satchel" testID="dev-section-decks">
-                <DebugGetAllRelics />
                 <DebugItemPicker />
             </DevSection>
 
@@ -146,7 +146,6 @@ export function DevToolsSections() {
             <DevSection label="MINIGAMES & REWARDS" hint="hazard · rest · anvil · reliquary · journal" testID="dev-section-rewards">
                 <DebugHazardButton />
                 <DebugRestButton />
-                <DebugBlacksmithButton />
                 <DebugRewardTriggers />
             </DevSection>
 
@@ -154,7 +153,8 @@ export function DevToolsSections() {
                 <DebugDialogueJump />
             </DevSection>
 
-            <DevSection label="RUN & DIAGNOSTICS" hint="save · reset · galleries · log · crash test" testID="dev-section-run">
+            <DevSection label="RUN & DIAGNOSTICS" hint="wallet · save · reset · galleries · log · crash test" testID="dev-section-run">
+                <DebugCurrencyControl />
                 <DebugRunControls />
                 <DebugLogViewer />
                 <DebugCrashTest />
