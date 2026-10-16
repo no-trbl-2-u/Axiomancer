@@ -34,9 +34,10 @@ const ev = { rates: missRates.rows, ledger, replay: read('parent-replay.json'), 
 const head = git(['rev-parse', 'HEAD'])
 const stamp = { commit: head.slice(0, 8), date: git(['show', '-s', '--format=%cI', head]) }
 
-/** First-parent landings on HEAD for the last 60 days, newest first, with each PR merge's number and title. */
+/** First-parent landings on HEAD for the 60 days before the stamp (not the clock, so a rerun at one commit reads the same), newest first, with each PR merge's number and title. */
 function landings() {
-  const raw = git(['log', '--first-parent', head, '--since=60 days ago', '--format=%H%x1f%cI%x1f%s%x1f%b%x1e'])
+  const since = new Date(Date.parse(stamp.date) - 60 * 86400000).toISOString()
+  const raw = git(['log', '--first-parent', head, `--since=${since}`,'--format=%H%x1f%cI%x1f%s%x1f%b%x1e'])
   return raw.split('\x1e').map((s) => s.trim()).filter(Boolean).map((rec) => {
     const [sha, date, subject, body] = rec.split('\x1f')
     const pr = subject.match(/^Merge pull request #(\d+)/)

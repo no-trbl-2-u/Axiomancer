@@ -28,7 +28,7 @@ const rates = [
   { judge: "The builder's own `[x]`", misses: ['#534 A1', '#521 A4 (S3)'], of: 4 },
 ]
 const seeded = { seeds: [seed('D1', 534, ['verify-mobile.yml'], 'missed'), seed('D4', 543, [], 'missed', ['scripts/pr-resolve.mjs'])] }
-const replay = { ticks: [{ named: [] }, { named: [{}] }], prs: [{ files: [{ verdict: 'could-not-fail', couldNotFailCases: ['a'] }, { verdict: 'fails-on-parent', couldNotFailCases: [] }] }] }
+const replay = { ticks: [{ pr: 534, id: 'A1', named: [] }, { pr: 521, id: 'A4', named: [{ couldNotFail: true }] }],prs: [{ files: [{ verdict: 'could-not-fail', couldNotFailCases: ['a'] }, { verdict: 'fails-on-parent', couldNotFailCases: [] }] }] }
 const ev = { rates, ledger, replay, seeded, mutation: null }
 
 test('rankFixes: misses per size point, smaller first on a tie, and "adds" never counts a miss twice', () => {
@@ -37,7 +37,9 @@ test('rankFixes: misses per size point, smaller first on a tie, and "adds" never
   const by = Object.fromEntries(ranked.map((f) => [f.id, f]))
   assert.deepEqual(by.F2.prevents, ['D4 (#543)', '#526 (S4)'])
   assert.deepEqual(by.F3.prevents, ['D4 (#543)'])
-  assert.deepEqual(by.F5.prevents, ['#534 A1'])
+  // F5 credits only the tick whose named test the replay proved could not fail, never a tick naming no test.
+  assert.deepEqual(by.F5.prevents, ['#521 A4 (S3)'])
+  assert.deepEqual(rankFixes({ ...ev, replay: null }).find((f) => f.id === 'F5').prevents, [])
   assert.equal(by.F4.score, 1)
   // F2 (S, 2) outranks F4 (M, 2 misses, score 1), and F1 (S, 1) ties F4 on score but is smaller.
   assert.deepEqual(ranked.slice(0, 3).map((f) => f.id), ['F2', 'F1', 'F3'])

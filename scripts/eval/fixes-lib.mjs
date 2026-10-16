@@ -67,7 +67,12 @@ export const FIXES = Object.freeze([
   {
     id: 'F5', gate: 'verify', size: 'M',
     fix: 'a fail-on-parent check for new tests',
-    prevents: ({ rates }) => missesOf(rates, "The builder's own `[x]`").filter((m) => !/\((S3|S5)\)$/.test(m)),
+    // Only a builder miss whose ticked line rests on named tests the replay proved could not fail.
+    prevents: ({ rates, replay }) => missesOf(rates, "The builder's own `[x]`").filter((m) => {
+      const [, pr, id] = m.match(/^#(\d+) (\S+)/) ?? []
+      const tick = replay?.ticks.find((t) => t.pr === Number(pr) && t.id === id)
+      return Boolean(tick?.named.length) && tick.named.every((n) => n.couldNotFail)
+    }),
     why: 'it refuses a test that passes before the change; the replay found no tick that rests only on such a test, so it prevents no measured miss yet',
     exposure: ({ replay }) => {
       if (!replay) return 'no parent replay'
