@@ -1,13 +1,13 @@
 {
   "stamp": {
-    "commit": "15a2fa76",
-    "date": "2026-10-16T07:25:59Z"
+    "commit": "0c18f2f7",
+    "date": "2026-10-16T07:28:26Z"
   },
   "inputs": {
     "ledger": "86eea99d",
     "parent replay": "5085b096",
     "planted defects": "b0ac22f8",
-    "mutation": "b0ac22f8"
+    "mutation": "15a2fa76"
   },
   "rows": [
     {
@@ -32,7 +32,7 @@
       ],
       "of": 4,
       "rate": 100,
-      "note": "Tests as they stood at each fix's parent. Each fix's own tests catch its defect: 4 of 4. Mutation: mechanics: combat resolution: over budget (1380s): 694 of 820 tested, 121 survived; mobile: combat presenters: over budget (1380s): 564 of 2276 tested, 6 survived."
+      "note": "Tests as they stood at each fix's parent. Each fix's own tests catch its defect: 4 of 4. Mutation: mechanics: combat resolution: 76.3% (194 of 842 mutants survive or are uncovered); mobile: combat presenters: over budget (1380s): 564 of 2276 tested, 6 survived."
     },
     {
       "judge": "The antagonist",

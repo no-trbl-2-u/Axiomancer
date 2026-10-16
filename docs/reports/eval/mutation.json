@@ -1,7 +1,7 @@
 {
   "stamp": {
-    "commit": "b0ac22f8",
-    "date": "2026-10-16T02:49:04Z"
+    "commit": "15a2fa76",
+    "date": "2026-10-16T07:25:59Z"
   },
   "targets": [
     {
@@ -15,16 +15,1443 @@
         "src/Combat/stat-scaling.ts",
         "src/Combat/combat.dice.ts"
       ],
-      "seconds": 1380,
-      "outcome": "over budget (1380s): 694 of 820 tested, 121 survived",
-      "partial": {
-        "tested": 694,
-        "total": 820,
-        "survived": 121,
-        "timedOut": 4
-      },
-      "files": [],
-      "survivors": []
+      "seconds": 738,
+      "outcome": "ok",
+      "partial": null,
+      "files": [
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "tally": {
+            "total": 109,
+            "killed": 79,
+            "timeout": 0,
+            "survived": 25,
+            "noCoverage": 5,
+            "invalid": 0,
+            "score": 72.5
+          }
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "tally": {
+            "total": 133,
+            "killed": 102,
+            "timeout": 0,
+            "survived": 13,
+            "noCoverage": 17,
+            "invalid": 1,
+            "score": 77.3
+          }
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "tally": {
+            "total": 370,
+            "killed": 293,
+            "timeout": 3,
+            "survived": 71,
+            "noCoverage": 2,
+            "invalid": 1,
+            "score": 80.2
+          }
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/health.ts",
+          "tally": {
+            "total": 27,
+            "killed": 19,
+            "timeout": 0,
+            "survived": 2,
+            "noCoverage": 6,
+            "invalid": 0,
+            "score": 70.4
+          }
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/resist.ts",
+          "tally": {
+            "total": 17,
+            "killed": 12,
+            "timeout": 0,
+            "survived": 5,
+            "noCoverage": 0,
+            "invalid": 0,
+            "score": 70.6
+          }
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "tally": {
+            "total": 186,
+            "killed": 118,
+            "timeout": 0,
+            "survived": 45,
+            "noCoverage": 3,
+            "invalid": 20,
+            "score": 71.1
+          }
+        }
+      ],
+      "survivors": [
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 22,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 22,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 22,
+          "mutator": "EqualityOperator",
+          "replacement": "color !== 'body'",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 22,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 22,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 22,
+          "mutator": "EqualityOperator",
+          "replacement": "color !== 'mind'",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 22,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 36,
+          "mutator": "ArrayDeclaration",
+          "replacement": "[\"Stryker was here\"]",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 40,
+          "mutator": "CallExpression",
+          "replacement": ";",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 58,
+          "mutator": "MethodExpression",
+          "replacement": "colors",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 59,
+          "mutator": "BooleanLiteral",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 71,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 71,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 72,
+          "mutator": "BooleanLiteral",
+          "replacement": "false",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 72,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 72,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 80,
+          "mutator": "BlockStatement",
+          "replacement": "{}",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 81,
+          "mutator": "MethodExpression",
+          "replacement": "dice",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 81,
+          "mutator": "ArrowFunction",
+          "replacement": "() => undefined",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 86,
+          "mutator": "EqualityOperator",
+          "replacement": "d.state !== 'available'",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 86,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 86,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 106,
+          "mutator": "LogicalOperator",
+          "replacement": "d.state === 'spent' || d.color === color",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 106,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 106,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 107,
+          "mutator": "LogicalOperator",
+          "replacement": "d.state === 'spent' || d.color === 'wild'",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 107,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 107,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 108,
+          "mutator": "MethodExpression",
+          "replacement": "dice",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/combat.dice.ts",
+          "line": 116,
+          "mutator": "BlockStatement",
+          "replacement": "{}",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 31,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 32,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 32,
+          "mutator": "EqualityOperator",
+          "replacement": "result.amplificationValue <= INTERACTION_AMPLIFICATION.MIN_MEANINGFUL_AMPLIFICATION",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 35,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 35,
+          "mutator": "EqualityOperator",
+          "replacement": "clamped >= current",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 123,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 123,
+          "mutator": "EqualityOperator",
+          "replacement": "flat >= 0",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 146,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 149,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 149,
+          "mutator": "EqualityOperator",
+          "replacement": "raw <= INTERACTION_AMPLIFICATION.MIN_MEANINGFUL_AMPLIFICATION",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 157,
+          "mutator": "BlockStatement",
+          "replacement": "{}",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 157,
+          "mutator": "MethodExpression",
+          "replacement": "out",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 158,
+          "mutator": "LogicalOperator",
+          "replacement": "EFFECT_INTERACTIONS.find(i => i.id === a.interactionId)?.priority && 0",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 158,
+          "mutator": "OptionalChaining",
+          "replacement": "EFFECT_INTERACTIONS.find(i => i.id === a.interactionId).priority",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 158,
+          "mutator": "ArrowFunction",
+          "replacement": "() => undefined",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 158,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 158,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 158,
+          "mutator": "EqualityOperator",
+          "replacement": "i.id !== a.interactionId",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 159,
+          "mutator": "LogicalOperator",
+          "replacement": "EFFECT_INTERACTIONS.find(i => i.id === b.interactionId)?.priority && 0",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 159,
+          "mutator": "OptionalChaining",
+          "replacement": "EFFECT_INTERACTIONS.find(i => i.id === b.interactionId).priority",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 159,
+          "mutator": "ArrowFunction",
+          "replacement": "() => undefined",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 159,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 159,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 159,
+          "mutator": "EqualityOperator",
+          "replacement": "i.id !== b.interactionId",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 160,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 160,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 160,
+          "mutator": "EqualityOperator",
+          "replacement": "pa === pb",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 160,
+          "mutator": "ArithmeticOperator",
+          "replacement": "pb + pa",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 215,
+          "mutator": "ArithmeticOperator",
+          "replacement": "Math.floor(dpr * intensity * multiplier) - markBonus",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effect-modifiers.ts",
+          "line": 215,
+          "mutator": "ArithmeticOperator",
+          "replacement": "dpr * intensity / multiplier",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 60,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 126,
+          "mutator": "EqualityOperator",
+          "replacement": "tickIntensity < 0",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 130,
+          "mutator": "ObjectLiteral",
+          "replacement": "{}",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 149,
+          "mutator": "MethodExpression",
+          "replacement": "bearer.effects.map(ae => { const def = lookupEffect(ae.effectId); const dot = def?.payload.damageOverTime; if (!def || !dot) return null; const eventClock = dotEventTrigger(dot); return { ae, dot, dotModifiers: def.payload.dotModifiers, intensity: ae.intensity ?? 1, multiplier: dotAmp.get(ae.effectId) ?? 1, rounds: Math.max(1, ae.remainingDuration), ticksPerRound: eventClock ? EXPECTED_TRIGGERS_PER_ROUND[eventClock] : 1, decays: def.payload.dotModifiers?.decaysPerTick === true, ticksTaken: 0 }; })",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 152,
+          "mutator": "OptionalChaining",
+          "replacement": "def.payload",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 153,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 153,
+          "mutator": "LogicalOperator",
+          "replacement": "!def && !dot",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 161,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 161,
+          "mutator": "BooleanLiteral",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 165,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 166,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 168,
+          "mutator": "MethodExpression",
+          "replacement": "Math.min(...dotEffects.map(e => e.rounds))",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 170,
+          "mutator": "EqualityOperator",
+          "replacement": "k <= maxRounds",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 172,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 172,
+          "mutator": "EqualityOperator",
+          "replacement": "k > e.rounds",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 175,
+          "mutator": "ArithmeticOperator",
+          "replacement": "currentRound - k",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 175,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 175,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 175,
+          "mutator": "EqualityOperator",
+          "replacement": "currentRound !== undefined",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 177,
+          "mutator": "UpdateOperator",
+          "replacement": "e.ticksTaken--",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 179,
+          "mutator": "ArithmeticOperator",
+          "replacement": "e.intensity + e.ticksTaken",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 180,
+          "mutator": "EqualityOperator",
+          "replacement": "tickIntensity < 0",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 193,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 193,
+          "mutator": "OptionalChaining",
+          "replacement": "lookupEffect(ae.effectId).type",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 234,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 234,
+          "mutator": "EqualityOperator",
+          "replacement": "mods?.decaysPerTick !== true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 234,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 234,
+          "mutator": "BooleanLiteral",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 234,
+          "mutator": "OptionalChaining",
+          "replacement": "mods.decaysPerTick",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 264,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 264,
+          "mutator": "EqualityOperator",
+          "replacement": "projectedDamage < 0",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 264,
+          "mutator": "ArrayDeclaration",
+          "replacement": "[\"Stryker was here\"]",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 276,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 277,
+          "mutator": "OptionalChaining",
+          "replacement": "p.dotModifiers",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 278,
+          "mutator": "ObjectLiteral",
+          "replacement": "{}",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 278,
+          "mutator": "ArithmeticOperator",
+          "replacement": "ae.intensity + 1",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 278,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 285,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 286,
+          "mutator": "MethodExpression",
+          "replacement": "decayed.every((ae, i) => ae !== next.effects[i])",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 286,
+          "mutator": "ArrowFunction",
+          "replacement": "() => undefined",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 286,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 286,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 286,
+          "mutator": "EqualityOperator",
+          "replacement": "ae === next.effects[i]",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 360,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 362,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 362,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 362,
+          "mutator": "LogicalOperator",
+          "replacement": "gate !== false || gate !== 0",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 362,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 362,
+          "mutator": "EqualityOperator",
+          "replacement": "gate === false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 362,
+          "mutator": "BooleanLiteral",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 362,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 362,
+          "mutator": "EqualityOperator",
+          "replacement": "gate === 0",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 367,
+          "mutator": "OptionalChaining",
+          "replacement": "def.payload",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 370,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 370,
+          "mutator": "LogicalOperator",
+          "replacement": "gate === false && gate === 0",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 370,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 370,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 371,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 371,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 372,
+          "mutator": "MethodExpression",
+          "replacement": "Math.max(ae.intensity ?? 1, gate)",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 376,
+          "mutator": "ArithmeticOperator",
+          "replacement": "dpr * clocked / multiplier",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 380,
+          "mutator": "ArrayDeclaration",
+          "replacement": "[\"Stryker was here\"]",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 388,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 388,
+          "mutator": "EqualityOperator",
+          "replacement": "amount >= 0",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 396,
+          "mutator": "OptionalChaining",
+          "replacement": "lookupEffect(ae.effectId).payload",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 397,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 397,
+          "mutator": "LogicalOperator",
+          "replacement": "p?.damageOverTime?.trigger === trigger || onClock(ae)",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 397,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 397,
+          "mutator": "OptionalChaining",
+          "replacement": "p.damageOverTime",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 399,
+          "mutator": "OptionalChaining",
+          "replacement": "p.dotModifiers",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 407,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 408,
+          "mutator": "MethodExpression",
+          "replacement": "decayed.every((ae, i) => ae !== next.effects[i])",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/effects.ts",
+          "line": 408,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/health.ts",
+          "line": 28,
+          "mutator": "BlockStatement",
+          "replacement": "{}",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/health.ts",
+          "line": 29,
+          "mutator": "ObjectLiteral",
+          "replacement": "{}",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/health.ts",
+          "line": 31,
+          "mutator": "MethodExpression",
+          "replacement": "Math.min(0, combatant.maxHealth - amount)",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/health.ts",
+          "line": 31,
+          "mutator": "ArithmeticOperator",
+          "replacement": "combatant.maxHealth + amount",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/health.ts",
+          "line": 32,
+          "mutator": "MethodExpression",
+          "replacement": "Math.min(0, combatant.health - amount)",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/health.ts",
+          "line": 32,
+          "mutator": "ArithmeticOperator",
+          "replacement": "combatant.health + amount",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/health.ts",
+          "line": 42,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/health.ts",
+          "line": 42,
+          "mutator": "EqualityOperator",
+          "replacement": "combatant.health >= 0",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/resist.ts",
+          "line": 35,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/resist.ts",
+          "line": 36,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/resist.ts",
+          "line": 39,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/resist.ts",
+          "line": 39,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/resist.ts",
+          "line": 39,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 50,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 59,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 59,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 112,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 115,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 116,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 125,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 126,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 126,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 126,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 126,
+          "mutator": "EqualityOperator",
+          "replacement": "def.type !== 'debuff'",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 126,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 126,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 143,
+          "mutator": "ObjectLiteral",
+          "replacement": "{}",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 144,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 145,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 145,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 145,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 145,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 146,
+          "mutator": "BlockStatement",
+          "replacement": "{}",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 146,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 148,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 148,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 148,
+          "mutator": "BlockStatement",
+          "replacement": "{}",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 151,
+          "mutator": "LogicalOperator",
+          "replacement": "r.applyEffect.intensity && 1",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 151,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 151,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 151,
+          "mutator": "EqualityOperator",
+          "replacement": "r.applyEffect.to !== 'self'",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 151,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 159,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 174,
+          "mutator": "ObjectLiteral",
+          "replacement": "{}",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 174,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 174,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 184,
+          "mutator": "BlockStatement",
+          "replacement": "{}",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 184,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 187,
+          "mutator": "LogicalOperator",
+          "replacement": "p.intensity && 1",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 187,
+          "mutator": "ConditionalExpression",
+          "replacement": "true",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 187,
+          "mutator": "ConditionalExpression",
+          "replacement": "false",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 187,
+          "mutator": "EqualityOperator",
+          "replacement": "p.appliedTo !== 'self'",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 187,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 213,
+          "mutator": "ConditionalExpression",
+          "replacement": "case 'heal':",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 214,
+          "mutator": "ConditionalExpression",
+          "replacement": "case 'leech':",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 214,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 214,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 214,
+          "mutator": "StringLiteral",
+          "replacement": "\"\"",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 219,
+          "mutator": "ConditionalExpression",
+          "replacement": "default:",
+          "status": "NoCoverage"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 230,
+          "mutator": "ObjectLiteral",
+          "replacement": "{}",
+          "status": "Survived"
+        },
+        {
+          "path": "axiomancer-mechanics/src/Combat/stat-scaling.ts",
+          "line": 234,
+          "mutator": "ObjectLiteral",
+          "replacement": "{}",
+          "status": "Survived"
+        }
+      ]
     },
     {
       "name": "mobile: combat presenters",

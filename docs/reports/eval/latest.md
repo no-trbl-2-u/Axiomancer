@@ -193,23 +193,72 @@ CI path filters: 0 of 4 caught; verify, tests as they stood: 0 of 4 caught; veri
 
 ## Mutation scores (EV1c, A5)
 
-Stamp: commit `b0ac22f8` (2026-10-16T02:49:04Z). Regenerate with `npm run eval:mutation`; the data, with every survivor, is `docs/reports/eval/mutation.json`.
+Stamp: commit `15a2fa76` (2026-10-16T07:25:59Z). Regenerate with `npm run eval:mutation`; the data, with every survivor, is `docs/reports/eval/mutation.json`.
 
 StrykerJS mutates the named files and runs the workspace's own tests against each mutant, in a detached worktree. The score is killed plus timed-out mutants over every mutant that compiled, uncovered ones included. A survivor is a change to the code that no test noticed. Never part of `verify`.
 
 | Target | Files | Mutants | Killed | Timed out | Survived | No coverage | Score | Run |
 |---|---|---|---|---|---|---|---|---|
-| mechanics: combat resolution | 0 | 820 | - | 4 | 121 | - | n/a | over budget (1380s): 694 of 820 tested, 121 survived, 1380s |
+| mechanics: combat resolution | 6 | 842 | 623 | 3 | 161 | 33 | 76.3% | ok, 738s |
 | mobile: combat presenters | 0 | 2276 | - | 2 | 6 | - | n/a | over budget (1380s): 564 of 2276 tested, 6 survived, 1380s |
 
 ### Per file
 
 | File | Mutants | Survived | No coverage | Score |
 |---|---|---|---|---|
+| axiomancer-mechanics/src/Combat/combat.dice.ts | 109 | 25 | 5 | 72.5% |
+| axiomancer-mechanics/src/Combat/effect-modifiers.ts | 133 | 13 | 17 | 77.3% |
+| axiomancer-mechanics/src/Combat/effects.ts | 370 | 71 | 2 | 80.2% |
+| axiomancer-mechanics/src/Combat/health.ts | 27 | 2 | 6 | 70.4% |
+| axiomancer-mechanics/src/Combat/resist.ts | 17 | 5 | 0 | 70.6% |
+| axiomancer-mechanics/src/Combat/stat-scaling.ts | 186 | 45 | 3 | 71.1% |
 
 ### Survivors: mechanics: combat resolution
 
-No report (over budget (1380s): 694 of 820 tested, 121 survived).
+| File:line | Mutator | Replacement | Status |
+|---|---|---|---|
+| combat.dice.ts:22 | ConditionalExpression | `true` | Survived |
+| combat.dice.ts:22 | ConditionalExpression | `false` | Survived |
+| combat.dice.ts:22 | EqualityOperator | `color !== 'body'` | Survived |
+| combat.dice.ts:22 | StringLiteral | `""` | Survived |
+| combat.dice.ts:22 | ConditionalExpression | `false` | Survived |
+| combat.dice.ts:22 | EqualityOperator | `color !== 'mind'` | Survived |
+| combat.dice.ts:22 | StringLiteral | `""` | Survived |
+| combat.dice.ts:36 | ArrayDeclaration | `["Stryker was here"]` | Survived |
+| combat.dice.ts:40 | CallExpression | `;` | Survived |
+| combat.dice.ts:58 | MethodExpression | `colors` | Survived |
+| combat.dice.ts:59 | BooleanLiteral | `true` | Survived |
+| combat.dice.ts:71 | ConditionalExpression | `false` | Survived |
+| combat.dice.ts:71 | StringLiteral | `""` | Survived |
+| combat.dice.ts:72 | BooleanLiteral | `false` | NoCoverage |
+| combat.dice.ts:72 | ConditionalExpression | `false` | Survived |
+| combat.dice.ts:72 | StringLiteral | `""` | Survived |
+| combat.dice.ts:80 | BlockStatement | `{}` | NoCoverage |
+| combat.dice.ts:81 | MethodExpression | `dice` | NoCoverage |
+| combat.dice.ts:81 | ArrowFunction | `() => undefined` | NoCoverage |
+| combat.dice.ts:86 | EqualityOperator | `d.state !== 'available'` | Survived |
+| combat.dice.ts:86 | ConditionalExpression | `true` | Survived |
+| combat.dice.ts:86 | StringLiteral | `""` | Survived |
+| combat.dice.ts:106 | LogicalOperator | `d.state === 'spent' \|\| d.color === color` | Survived |
+| combat.dice.ts:106 | ConditionalExpression | `true` | Survived |
+| combat.dice.ts:106 | ConditionalExpression | `true` | Survived |
+| combat.dice.ts:107 | LogicalOperator | `d.state === 'spent' \|\| d.color === 'wild'` | Survived |
+| combat.dice.ts:107 | ConditionalExpression | `true` | Survived |
+| combat.dice.ts:107 | ConditionalExpression | `true` | Survived |
+| combat.dice.ts:108 | MethodExpression | `dice` | Survived |
+| combat.dice.ts:116 | BlockStatement | `{}` | NoCoverage |
+| effect-modifiers.ts:31 | ConditionalExpression | `false` | Survived |
+| effect-modifiers.ts:32 | ConditionalExpression | `false` | Survived |
+| effect-modifiers.ts:32 | EqualityOperator | `result.amplificationValue <= INTERACTION_AMPLIFICATION.MIN_MEANINGF...` | Survived |
+| effect-modifiers.ts:35 | ConditionalExpression | `true` | Survived |
+| effect-modifiers.ts:35 | EqualityOperator | `clamped >= current` | Survived |
+| effect-modifiers.ts:123 | ConditionalExpression | `true` | Survived |
+| effect-modifiers.ts:123 | EqualityOperator | `flat >= 0` | Survived |
+| effect-modifiers.ts:146 | ConditionalExpression | `false` | Survived |
+| effect-modifiers.ts:149 | ConditionalExpression | `false` | Survived |
+| effect-modifiers.ts:149 | EqualityOperator | `raw <= INTERACTION_AMPLIFICATION.MIN_MEANINGFUL_AMPLIFICATION` | Survived |
+
+154 more in `mutation.json`.
 
 ### Survivors: mobile: combat presenters
 
@@ -221,12 +270,12 @@ No report (over budget (1380s): 564 of 2276 tested, 6 survived).
 
 ## Miss rate per judge (EV1c, A7)
 
-Stamp: commit `15a2fa76` (2026-10-16T07:25:59Z). Regenerate with `node scripts/eval/miss-rates.mjs`; inputs: ledger at `86eea99d`, parent replay at `5085b096`, planted defects at `b0ac22f8`, mutation at `b0ac22f8`.
+Stamp: commit `0c18f2f7` (2026-10-16T07:28:26Z). Regenerate with `node scripts/eval/miss-rates.mjs`; inputs: ledger at `86eea99d`, parent replay at `5085b096`, planted defects at `b0ac22f8`, mutation at `15a2fa76`.
 
 | Judge | Missed | Of | Rate | Rows it comes from | How it is counted |
 |---|---|---|---|---|---|
 | CI and its path filters | 4 | 4 | 100% | D1 (#534), D2 (#523), D3 (#529), D4 (#543) | 1 of 4 planted defects trigger no `verify-*` workflow (D4). Path coverage: 9 of 26 ledger PRs changed code no filter covers (#505, #507, #509, #520, #523, #526, #535, #543, #549). |
-| `verify` | 4 | 4 | 100% | D1 (#534), D2 (#523), D3 (#529), D4 (#543) | Tests as they stood at each fix's parent. Each fix's own tests catch its defect: 4 of 4. Mutation: mechanics: combat resolution: over budget (1380s): 694 of 820 tested, 121 survived; mobile: combat presenters: over budget (1380s): 564 of 2276 tested, 6 survived. |
+| `verify` | 4 | 4 | 100% | D1 (#534), D2 (#523), D3 (#529), D4 (#543) | Tests as they stood at each fix's parent. Each fix's own tests catch its defect: 4 of 4. Mutation: mechanics: combat resolution: 76.3% (194 of 842 mutants survive or are uncovered); mobile: combat presenters: over budget (1380s): 564 of 2276 tested, 6 survived. |
 | The antagonist | 4 | 5 | 80% | #520 (S3), #521 (S3), #523 (S3, S5), #526 (S4) | Denominator: PRs carrying a seeded escape that the antagonist reviewed before merge. It reviewed 6 of 26 ledger PRs; 1 drew a "not a pass". |
 | `/critique` | not measured | - | - | - | it plays the deployed web build after merge and no ledger row records what a pass saw against what had escaped, so it has no denominator. Context: 5 follow-up fix(es) in the ledger cite a critique pass. |
 | The merge gate | 3 | 26 | 11.5% | #509, #529, #541 | A miss is a merge before every check on the final head finished, or over an antagonist "not a pass" (S1). |
