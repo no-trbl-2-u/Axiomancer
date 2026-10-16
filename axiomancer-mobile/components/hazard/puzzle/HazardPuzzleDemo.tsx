@@ -6,7 +6,7 @@
  * outcome reaches the store (`claimHazardPuzzle`).
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Text, View } from 'react-native';
 
 import {
@@ -84,16 +84,22 @@ export function HazardPuzzleDemo({ initialId, initialRoute, autoConfirm, clockPa
     const [picked, setPicked] = useState<HazardPuzzleLayout | null>(() => findLayout(initialId));
     const [play, setPlay] = useState<Play | null>(null);
     const [outcome, setOutcome] = useState<HazardPuzzleOutcomeVM | null>(null);
+    // Never reused for the life of the screen: the clock remembers which key
+    // it already expired for, so a key restarting at 1 after DONE would leave
+    // the next board's clock stuck at 0:00 without confirming.
+    const startCount = useRef(0);
 
     const start = useCallback(
         (layout: HazardPuzzleLayout, route: HazardRouteKey) => {
             const unlocks = activeHazardPuzzleUnlocks(layout, baseStats);
-            setPlay((prev) => ({
+            startCount.current += 1;
+            const startKey = startCount.current;
+            setPlay({
                 layout,
                 unlocks,
                 session: createHazardPuzzleSession(layout, route, unlocks),
-                startKey: (prev?.startKey ?? 0) + 1,
-            }));
+                startKey,
+            });
             setOutcome(null);
         },
         [baseStats],

@@ -97,6 +97,24 @@ describe('HazardPuzzleDemo', () => {
         expect(store.getState().player.experience).toBe(after.experience);
     });
 
+    it('after a timed-out board and DONE, the next board still times out', () => {
+        const { screen, store } = openHardRisk();
+        act(() => {
+            jest.advanceTimersByTime(60 * HAZARD_PUZZLE_TICK_MS);
+        });
+        expect(screen.getByTestId('hazard-puzzle-outcome-headline').props.children).toBe('TIME RAN OUT');
+        fireEvent.press(screen.getByTestId('hazard-puzzle-done'));
+        fireEvent.press(screen.getByTestId('hazard-puzzle-pick-demo-undercroft-hard'));
+        fireEvent.press(screen.getByTestId('hazard-puzzle-route-risk'));
+        expect(screen.getByTestId('hazard-puzzle-clock').props.children).toBe('1:00');
+        const xp = store.getState().player.experience;
+        act(() => {
+            jest.advanceTimersByTime(60 * HAZARD_PUZZLE_TICK_MS);
+        });
+        expect(screen.getByTestId('hazard-puzzle-outcome-headline').props.children).toBe('TIME RAN OUT');
+        expect(store.getState().player.experience).toBeGreaterThan(xp);
+    });
+
     it('a manual confirm resolves at once, without waiting for the clock', () => {
         const { screen } = openHardRisk();
         fireEvent.press(screen.getByTestId('hazard-puzzle-confirm'));
