@@ -109,7 +109,6 @@ open after one session of poking).
 | Leaf | What it does | Test ids |
 |---|---|---|
 | `DebugHazardDeckRandomize` | Hazard deck presets and a random deck | `debug-hazard-deck-preset-<id>`, `debug-hazard-deck-randomize` |
-| `DebugPopulateAllItems` | One of every relic + consumable into the satchel | `debug-populate-all-items` |
 | `DebugItemPicker` | One chip per relic (red) and consumable → `actions.addItemById` | `debug-item-<id>` |
 
 ### WORLD — `dev-section-world`
@@ -140,7 +139,6 @@ open after one session of poking).
 | Leaf | Helper | What it does | Test ids |
 |---|---|---|---|
 | `DebugDialogueJump` | `state/dev/story-catalog.ts` → `listNpcs` | One chip per staged NPC with a tree (all maps); opens `/dialogue` with the real tree | `debug-dialogue-<map>-<npc-slug>` |
-| `DebugQuestState` | `listQuests` | One chip per authored quest with live status; START / ADVANCE / COMPLETE the selected one through the engine reducers | `debug-quest-<name>`, `debug-quest-{start,advance,complete}` |
 
 ### UI — `dev-section-ui`
 
@@ -165,6 +163,8 @@ open after one session of poking).
 | `DebugAporiaButton`, `DebugMapResetButton` | Folded into `DebugWorldTravel`. |
 | `DebugCombatEncounterButton`, `DebugCombatTutorialButton`, `DebugCombatSandbox` | The pre-v1 `/combat-encounter` sandbox (mock foe, demo deck, nothing persisted); deleted in phase CR1a when the route became the live fight. A fight is entered through the quick triggers or the enemy picker. |
 | `DebugAddItemById` | Free-text input replaced by `DebugItemPicker` chips. |
+| `DebugPopulateAllItems` | POPULATE overlapped `DebugItemPicker` (any one item) + `DebugGetAllRelics` (every relic); the only unique reach was "every consumable at once". |
+| `DebugQuestState` | No `MapDefinition` authors a quest, so `listQuests()` was empty and the leaf rendered nothing. Restore it with the quest content, not before. |
 | HIDE MANA / HIDE STANCE toggles | The HUD presenter never read them. |
 | `DebugHudOverrides`, the `devOverrides` store slice, `state/presenters/combat-hud.engine.ts` | HIDE EFFECTS fed a presenter no screen rendered, so the toggle was a no-op (TRIM THE FAT T3, 2026-09-25). |
 | `DebugCombatDeck`, `applyCombatDeckPreset` / `randomizeCombatDeck` actions | Superseded by the Deck tab (TRIM THE FAT T3, 2026-09-25). |

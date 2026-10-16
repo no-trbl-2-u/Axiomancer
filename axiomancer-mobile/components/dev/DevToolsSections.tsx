@@ -42,7 +42,6 @@ const DebugCurrencyControl = lazyNamed(() => import('@/components/DebugCurrencyC
 const DebugEffectApply = lazyNamed(() => import('@/components/DebugEffectApply'), 'DebugEffectApply');
 // ── DECKS & ITEMS ──
 const DebugHazardDeckRandomize = lazyNamed(() => import('@/components/DebugHazardDeckRandomize'), 'DebugHazardDeckRandomize');
-const DebugPopulateAllItems = lazyNamed(() => import('@/components/DebugPopulateAllItems'), 'DebugPopulateAllItems');
 const DebugGetAllRelics = lazyNamed(() => import('@/components/DebugGetAllRelics'), 'DebugGetAllRelics');
 const DebugItemPicker = lazyNamed(() => import('@/components/DebugItemPicker'), 'DebugItemPicker');
 // ── CARDS ──
@@ -61,7 +60,6 @@ const DebugBlacksmithButton = lazyNamed(() => import('@/components/DebugBlacksmi
 const DebugRewardTriggers = lazyNamed(() => import('@/components/DebugRewardTriggers'), 'DebugRewardTriggers');
 // ── STORY ──
 const DebugDialogueJump = lazyNamed(() => import('@/components/DebugDialogueJump'), 'DebugDialogueJump');
-const DebugQuestState = lazyNamed(() => import('@/components/DebugQuestState'), 'DebugQuestState');
 // ── UI ──
 // ── RUN & DIAGNOSTICS ──
 const DebugRunControls = lazyNamed(() => import('@/components/DebugRunControls'), 'DebugRunControls');
@@ -132,7 +130,6 @@ export function DevToolsSections() {
 
             <DevSection label="DECKS & ITEMS" hint="hazard deck · satchel" testID="dev-section-decks">
                 <DebugHazardDeckRandomize />
-                <DebugPopulateAllItems />
                 <DebugGetAllRelics />
                 <DebugItemPicker />
             </DevSection>
@@ -159,9 +156,8 @@ export function DevToolsSections() {
                 <DebugRewardTriggers />
             </DevSection>
 
-            <DevSection label="STORY" hint="real NPC trees · real quests" testID="dev-section-story">
+            <DevSection label="STORY" hint="real NPC trees" testID="dev-section-story">
                 <DebugDialogueJump />
-                <DebugQuestState />
             </DevSection>
 
             <DevSection label="RUN & DIAGNOSTICS" hint="save · reset · galleries · log · crash test" testID="dev-section-run">
