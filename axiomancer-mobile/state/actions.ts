@@ -81,7 +81,8 @@ import {
     type HazardDeckPresetId,
     type HazardDeckPresetResult,
 } from './hazard/store-actions';
-import type { HazardRouteKey } from '@mechanics';
+import { claimHazardPuzzleAction, type ClaimHazardPuzzleResult } from './hazard/puzzle-store-actions';
+import type { HazardPuzzleLayout, HazardRouteKey } from '@mechanics';
 import type { LootCacheChoiceOfferId, RestChoiceOfferId } from '@mechanics';
 import {
     beginRestAction,
@@ -432,6 +433,12 @@ export interface AppActions {
     /** Clear the session without rewards or penalties (dev / escape hatch). */
     abandonHazard: () => void;
     /**
+     * Dev hazard puzzle demo: turn a resolve (its p on `route`) into the
+     * puzzle outcome and apply it to the player (XP, items, purse, VITAE,
+     * scar). The puzzle session itself is never stored.
+     */
+    claimHazardPuzzle: (layout: HazardPuzzleLayout, route: HazardRouteKey, p: number, seed?: number) => ClaimHazardPuzzleResult;
+    /**
      * Dev tool — replace the acquired-card flags with a random pull
      * from every defined hazard card (starter + reward pool). Returns
      * the granted card ids.
@@ -733,6 +740,7 @@ export function createAppActions(store: AppStore): AppActions {
         acknowledgeHazardOutcome: () => acknowledgeHazardOutcomeAction(store),
         claimHazardRewards: (cardId) => claimHazardRewardsAction(store, cardId),
         abandonHazard: () => abandonHazardAction(store),
+        claimHazardPuzzle: (layout, route, p, seed) => claimHazardPuzzleAction(store, layout, route, p, seed),
         randomizeHazardDeck: () => randomizeHazardDeckAction(store),
         applyHazardDeckPreset: (presetId) => applyHazardDeckPresetAction(store, presetId),
         // ── The Labyrinth (THE APORIA) ──
