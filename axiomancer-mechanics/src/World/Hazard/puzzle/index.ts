@@ -32,3 +32,11 @@ export {
     playHazardPuzzleMoves,
     confirmHazardPuzzle,
 } from './hazard-puzzle.session';
+
+export { HAZARD_PUZZLE_TUNING, HAZARD_PUZZLE_BANDS, HAZARD_PUZZLE_SOLVER_BUDGET } from './hazard-puzzle.tuning';
+
+export type { HazardPuzzleSolution, HazardPuzzleSolveOptions } from './hazard-puzzle.solver';
+export { solveHazardPuzzle, solveHazardPuzzleSession, hazardPuzzleSurplus } from './hazard-puzzle.solver';
+
+export type { HazardPuzzleRouteAudit } from './hazard-puzzle.band';
+export { hazardPuzzleBandOf, auditHazardPuzzleRoute, auditHazardPuzzleLayout } from './hazard-puzzle.band';

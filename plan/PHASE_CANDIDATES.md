@@ -641,6 +641,12 @@
 - estimated phases: 1
 - conflicts: none with the spec. Touches the title screen's press gating (small), not its look. If `/oversight` judges the drive half a single `/iterate` tick, the CRITIQUE MED row can be drained that way and this candidate rejected. Creates no content.
 
+### [ ] [score 3.5] Refuse a line-ending flip in a commit (lesson `sed-flattens-crlf`, seen 2×)
+- proposed: 2026-10-16, retro of ship B3b (#584)
+- source signals: lesson `sed-flattens-crlf` (ship SF1, ship B3b). A shell or Python edit on Windows rewrote a file's line endings, so a one-line change showed as hundreds of changed lines. On #584 that was 411 lines in `src/index.ts`, which would have turned B3c's barrel edit into a whole-file conflict. Review caught it; no gate did.
+- proposed scope: one `/iterate` tick. Add a pre-commit or `guard.mjs` check that refuses a staged file whose LF/CRLF style differs from its `HEAD` version, with a hook test. A `.gitattributes` `eol` rule is the other route, but it renormalizes the 9 CRLF mechanics sources and needs its own diff. Then mark the lesson `guarded by`.
+- conflicts: none; no content.
+
 ### [ ] [score 3.5] Repo scripts borrow keyring `gh` auth when a worktree has no `.env` (lesson `worktree-no-env`, seen 2×)
 - proposed: 2026-10-14, retro iterate (AUDIT [infra] pr-resolve); narrowed 2026-10-14 (D94)
 - source signals:
