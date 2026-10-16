@@ -9,8 +9,10 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { render, screen } from '@testing-library/react-native';
 
-import { MapOverlays } from '../MapOverlays';
-import { MAP_LEGEND_LEFT } from '@/state/presenters/exploration.engine';
+import { Platform } from 'react-native';
+
+import { MapOverlays, detectMapPointer } from '../MapOverlays';
+import { MAP_GESTURE_LINE, MAP_LEGEND_LEFT } from '@/state/presenters/exploration.engine';
 
 describe('MapOverlays', () => {
     const legend = { left: 'visited', right: 'sealed' };
@@ -24,7 +26,49 @@ describe('MapOverlays', () => {
         render(<MapOverlays legend={legend} />);
         // The chart pans and zooms behind a much smaller
         // window, so the always-on furniture has to say so.
-        expect(screen.getByText('drag · pinch')).toBeTruthy();
+        expect(screen.getByText(MAP_GESTURE_LINE.touch)).toBeTruthy();
+        expect(MAP_GESTURE_LINE.touch).toBe('drag · pinch');
+    });
+
+    it('tells a mouse to scroll, since a mouse cannot pinch (critique pass 91)', () => {
+        render(<MapOverlays legend={legend} pointer="mouse" />);
+        expect(screen.getByTestId('map-gesture-line').props.children).toBe('drag · scroll to zoom');
+        expect(screen.queryByText(/pinch/)).toBeNull();
+    });
+
+    describe('detectMapPointer', () => {
+        const os = Platform.OS;
+        const mm = (globalThis as { window?: { matchMedia?: unknown } }).window?.matchMedia;
+        const setOS = (v: string) => Object.defineProperty(Platform, 'OS', { value: v, configurable: true });
+        const setFine = (fine: boolean) => {
+            (globalThis as unknown as { window: { matchMedia: unknown } }).window.matchMedia = (q: string) =>
+                ({ matches: fine && q === '(pointer: fine)' });
+        };
+        afterEach(() => {
+            setOS(os);
+            const w = (globalThis as { window?: { matchMedia?: unknown } }).window;
+            if (w) w.matchMedia = mm;
+        });
+
+        it('is touch on native, whatever the media query says', () => {
+            setOS('android');
+            setFine(true);
+            expect(detectMapPointer()).toBe('touch');
+        });
+
+        it('is mouse on web with a fine pointer, touch with a coarse one', () => {
+            setOS('web');
+            setFine(true);
+            expect(detectMapPointer()).toBe('mouse');
+            setFine(false);
+            expect(detectMapPointer()).toBe('touch');
+        });
+
+        it('falls back to touch on web without matchMedia', () => {
+            setOS('web');
+            (globalThis as unknown as { window: { matchMedia?: unknown } }).window.matchMedia = undefined;
+            expect(detectMapPointer()).toBe('touch');
+        });
     });
 
     it('carries no compass and no NODE GRAPH label (T, 2026-10-02)', () => {
@@ -124,6 +168,6 @@ describe('MapOverlays', () => {
     it('renders empty legend strings without crashing', () => {
         const { root } = render(<MapOverlays legend={{ left: '', right: '' }} />);
         expect(root).toBeTruthy();
-        expect(screen.getByText('drag · pinch')).toBeTruthy();
+        expect(screen.getByText(MAP_GESTURE_LINE.touch)).toBeTruthy();
     });
 });
