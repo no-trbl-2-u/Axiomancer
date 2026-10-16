@@ -4,7 +4,9 @@
 // template's `Closes #` trailer, in the shape close-trailers reads; the union
 // merge pr-resolve uses on append-only files; the telemetry step that must
 // never push a PR branch's commits to main; and the rule that only T fires
-// /plot and /messy, and that /plot lands its phases by a `plot` PR (D93).
+// /plot and /messy, and that /plot lands its phases by a `plot` PR (D93); and
+// the `verify-gate` job in pr-review.yml (phase RV1a): same-repo
+// `pull_request` only, the only writer of `risk:*`, no merge wiring.
 //
 //   node --test scripts/loop-pr.test.mjs
 
@@ -106,6 +108,58 @@ test('no workflow merges, auto-merges or force-pushes', () => {
     assert.doesNotMatch(text, /git push[^\n]*(--force|\s-f\b)/, f)
   }
   assert.doesNotMatch(code(read('scripts/pr-resolve.mjs')), /'--force'|'-f'|'rebase'/)
+})
+
+// --- pr-review.yml: the always-reporting gate (phase RV1a, A1, A2a) ----------
+
+const review = read(`${WF}/pr-review.yml`)
+const job = (text, id) => {
+  const rest = text.split(new RegExp(`\\n {2}${id}:\\n`))[1]
+  return rest ? rest.split(/\n {2}[a-z][\w-]*:\n/)[0] : null
+}
+
+test('pr-review runs on pull_request into main, never pull_request_target', () => {
+  assert.doesNotMatch(code(review), /pull_request_target/)
+  assert.match(review, /^on:\n {2}pull_request:\n {4}branches: \[main\]\n {4}types: \[opened, synchronize, reopened, ready_for_review, labeled\]$/m)
+  for (const f of fs.readdirSync(path.join(ROOT, WF)).filter((f) => f.endsWith('.yml'))) {
+    assert.doesNotMatch(code(read(`${WF}/${f}`)), /pull_request_target/, f)
+  }
+})
+
+test('verify-gate runs on every same-repo PR, not only loop:pr and plot', () => {
+  const gate = job(review, 'verify-gate')
+  assert.ok(gate, 'verify-gate job present')
+  assert.match(gate, /^ {4}if: github\.event\.pull_request\.head\.repo\.full_name == github\.repository$/m)
+  assert.doesNotMatch(gate, /loop:pr|'plot'|labels\.\*\.name/, 'no label filter on the gate')
+  assert.match(gate, /\n {4}concurrency:\n {6}group: pr-review-gate-\$\{\{ github\.event\.pull_request\.number \}\}\n {6}cancel-in-progress: true/)
+  assert.match(gate, /node scripts\/pr-gate\.mjs classify/)
+  assert.match(gate, /if: steps\.classify\.outputs\.uncovered == 'true'\n {8}run: npm test/)
+  assert.match(gate, /node scripts\/pr-gate\.mjs wait --pr "\$PR" --head "\$HEAD_SHA"/)
+})
+
+test('verify-gate labels with the workflow token, so its label starts no run', () => {
+  assert.match(job(review, 'verify-gate'), /GH_TOKEN: \$\{\{ github\.token \}\}/)
+})
+
+test('verify-gate is the only workflow step that writes a risk:* label', () => {
+  const writers = []
+  for (const f of fs.readdirSync(path.join(ROOT, WF)).filter((f) => f.endsWith('.yml'))) {
+    const text = code(read(`${WF}/${f}`))
+    if (/pr-risk\.mjs[^\n]*--apply|--add-label[^\n]*risk:|gh label create[^\n]*risk:/.test(text)) writers.push(f)
+  }
+  assert.deepEqual(writers, ['pr-review.yml'])
+  assert.match(job(review, 'verify-gate'), /node scripts\/pr-risk\.mjs --pr "\$PR" --apply/)
+})
+
+// Stage 2 (risk:low auto-merge) is T's call and not wired in RV1. When it is,
+// `gh pr merge --auto` may only sit in a step gated on risk:low; until then
+// this holds vacuously and the merge test above forbids `gh pr merge` at all.
+test('a gh pr merge --auto in pr-review is reachable only from a risk:low step', () => {
+  const steps = review.split(/\n\s+- name: /).slice(1)
+  for (const s of steps.filter((s) => /gh pr merge/.test(code(s)))) {
+    assert.match(code(s), /gh pr merge --auto\b/, 'never a plain merge')
+    assert.match(s, /\n\s+if: [^\n]*risk:low/, 'gated on risk:low')
+  }
 })
 
 // --- the telemetry step never pushes across branches -------------------------
