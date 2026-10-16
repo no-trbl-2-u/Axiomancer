@@ -1,0 +1,118 @@
+{
+  "frozenAt": "a712832a",
+  "ledgerStamp": "86eea99d",
+  "set": [
+    {
+      "kind": "pr",
+      "ref": "#520",
+      "head": "4b1ee463869c6669abc19c591042eb50bb7b46a2",
+      "expected": "block",
+      "why": "S3: block: a ticked acceptance line whose test could not fail"
+    },
+    {
+      "kind": "pr",
+      "ref": "#521",
+      "head": "d4812993fc841c74debf7e5e5c8614cddd8f852a",
+      "expected": "block",
+      "why": "S3: block: a ticked acceptance line whose test could not fail"
+    },
+    {
+      "kind": "pr",
+      "ref": "#523",
+      "head": "5d5fac9b3272958f8240bf3a628811a2155f945a",
+      "expected": "block",
+      "why": "S3: block: a ticked acceptance line whose test could not fail; S5: block: a ticked acceptance line whose `verify:visual` shot was not taken"
+    },
+    {
+      "kind": "pr",
+      "ref": "#526",
+      "head": "efc7f371c2ef7cc774c1c3a8cfeaf3f525838938",
+      "expected": "block",
+      "why": "S4: block: no `verify-*` workflow ran on code it changed"
+    },
+    {
+      "kind": "pr",
+      "ref": "#529",
+      "head": "9d44ca5e130f1b3e396bbf8b0383c8e7729f1366",
+      "expected": "block",
+      "why": "S1: block: merged before `verify-mobile` finished on its final head, over a \"not a pass\""
+    },
+    {
+      "kind": "commit",
+      "ref": "c95114a2",
+      "head": "c95114a2",
+      "expected": "block",
+      "why": "S2: a `pr-resolve` merge that cut `plan/CRITIQUE.md` rows apart"
+    },
+    {
+      "kind": "commit",
+      "ref": "49829988",
+      "head": "49829988",
+      "expected": "block",
+      "why": "S2: a `pr-resolve` merge that cut `plan/CRITIQUE.md` rows apart"
+    },
+    {
+      "kind": "pr",
+      "ref": "#514",
+      "head": "18f0165394e9e9ddf475a95302a17f3717f1ca68",
+      "expected": "pass",
+      "why": "known-good: no follow-up in 7 days, every path covered, every check done before the merge"
+    },
+    {
+      "kind": "pr",
+      "ref": "#528",
+      "head": "af2c11e52844203cdfdd1dad3bdc94a47fd6a1d0",
+      "expected": "pass",
+      "why": "known-good: no follow-up in 7 days, every path covered, every check done before the merge"
+    },
+    {
+      "kind": "pr",
+      "ref": "#537",
+      "head": "7e216a558f216aad1a7965da11ccfab18ad02802",
+      "expected": "pass",
+      "why": "known-good: no follow-up in 7 days, every path covered, every check done before the merge"
+    },
+    {
+      "kind": "pr",
+      "ref": "#545",
+      "head": "f548516f8f91a228ac8ef95f55eacdb52f7aea17",
+      "expected": "pass",
+      "why": "known-good: no follow-up in 7 days, every path covered, every check done before the merge"
+    },
+    {
+      "kind": "pr",
+      "ref": "#553",
+      "head": "988640ae0c3726b488cb414e34089feb15b2a098",
+      "expected": "pass",
+      "why": "known-good: no follow-up in 7 days, every path covered, every check done before the merge"
+    },
+    {
+      "kind": "pr",
+      "ref": "#555",
+      "head": "cf090553246f403adb48f9143800ce0174865d8b",
+      "expected": "pass",
+      "why": "known-good: no follow-up in 7 days, every path covered, every check done before the merge"
+    },
+    {
+      "kind": "pr",
+      "ref": "#557",
+      "head": "1729a428e4d711589d200673d0a9dfdc0ab944c8",
+      "expected": "pass",
+      "why": "known-good: no follow-up in 7 days, every path covered, every check done before the merge"
+    },
+    {
+      "kind": "pr",
+      "ref": "#559",
+      "head": "0ac5ededcf5a7a7f94f320aabf9b7f7aa4cf0f5a",
+      "expected": "pass",
+      "why": "known-good: no follow-up in 7 days, every path covered, every check done before the merge"
+    },
+    {
+      "kind": "pr",
+      "ref": "#562",
+      "head": "4ed594e96714106ab06add080869225982d8f1b2",
+      "expected": "pass",
+      "why": "known-good: no follow-up in 7 days, every path covered, every check done before the merge"
+    }
+  ]
+}

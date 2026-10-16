@@ -284,3 +284,101 @@ Stamp: commit `0c18f2f7` (2026-10-16T07:28:26Z). Regenerate with `node scripts/e
 Android has no gate at all (S6), so it has no rate (brief Decisions).
 
 <!-- eval:miss-rates:end -->
+
+<!-- eval:fixes:start -->
+
+## Ranked fixes and how to tell they worked (EV1d, A8-A10)
+
+Stamp: commit `a712832a` (2026-10-16T12:21:07Z). Regenerate with `node scripts/eval/fixes.mjs`; inputs: miss rates at `0c18f2f7`, ledger at `86eea99d`, parent replay at `5085b096`, planted defects at `b0ac22f8`, mutation at `15a2fa76`. The data is `docs/reports/eval/fixes.json`; the frozen set is `docs/reports/eval/frozen-set.json`.
+
+### Ranked fix list (A8)
+
+Score: the A7 misses a fix would have prevented, per size point (S 1, M 2, L 3). "Adds" counts the misses no fix ranked above it already covers. "Found" marks a fix the evidence suggested beyond the brief's list. No fix is built here.
+
+| Rank | Fix | Gate | Size | Prevents | Score | Adds | Why | Exposure beyond the misses |
+|---|---|---|---|---|---|---|---|---|
+| 1 | F1 branch protection with required status checks, replacing comment matching | The merge gate | S | 3: #509, #529, #541 | 3 | 3 | every merge-gate miss is a merge before a check on the final head finished; a required check refuses that merge | 3 of 26 ledger PRs merged before a check finished (S1) |
+| 2 | F2 a path-coverage audit so no diff merges unverified | CI and its path filters | S | 2: D4 (#543), #526 (S4) | 2 | 2 | a planted defect no `verify-*` workflow triggers on, and #526, which merged with only Cloudflare Pages run, both fail a check that every changed path has a gate | 9 of 26 ledger PRs changed code no filter covers |
+| 3 | F4 an acceptance-ID-to-test map | The builder's own `[x]` | M | 3: #521 A4 (S3), #523 A6 (S3), #523 verify:visual (S5) | 1.5 | 3 | each builder miss is a ticked line with no test or shot behind it; a map that refuses a tick naming no test catches all three | 49 of 65 ticked lines name no test |
+| 4 | F3 a structural lint for the plan queue files | The plan queue files | S | 1: D4 (#543) | 1 | 0 | the `pr-resolve` defect shows as split queue rows on `main`; a lint on the queue files fails that push even though no test covers the merge script | S2: merge c95114a2, merge 49829988, repair 23f06828, repair 662aa10b |
+| 5 | F6 builder/judge separation | The builder's own `[x]` | L | 3: #521 A4 (S3), #523 A6 (S3), #523 verify:visual (S5) | 1 | 0 | a judge that is not the builder re-runs each acceptance line; it catches what F4 catches only if it runs the checks, since the antagonist, already separate, passed 4 of 5 escapes | the antagonist missed 4 of 5 |
+| 6 | F9 a per-pass critique record (commit range played, findings filed) so `/critique` gets a denominator (found) | `/critique` | S | 0 | 0 | 0 | it catches nothing itself; it turns the one "not measured" judge into a measured one | 5 follow-up fix(es) in the ledger cite a critique pass. |
+| 7 | F5 a fail-on-parent check for new tests | verify | M | 0 | 0 | 0 | it refuses a test that passes before the change; the replay found no tick that rests only on such a test, so it prevents no measured miss yet | 4 of 58 replayed test files could not fail; 11 new cases pass on the parent |
+| 8 | F7 an Android smoke test on the preview APK | Android | L | 0 | 0 | 0 | no gate exists, so no miss is on record to prevent (S6) | S6: no `verify-*` workflow runs on Android |
+| 9 | F8 diff-scoped mutation testing on a PR's changed lines (found) | verify | L | 0 | 0 | 0 | the tests as they stood caught none of the planted defects, and survivors sit in the combat code; whether mutants on the diff would have flagged them is not measured | mechanics: combat resolution: 194 of 842 mutants survive or are uncovered |
+
+### Success evidence (A9)
+
+**Frozen past-PR set.** Frozen at commit `a712832a` and never regenerated: a gate fix works when, replayed on each head below, it blocks every "block" row and passes every "pass" row. 7 escapes, 9 known-good.
+
+| Ref | Head | Expected | Why |
+|---|---|---|---|
+| #520 | 4b1ee463 | block | S3: block: a ticked acceptance line whose test could not fail |
+| #521 | d4812993 | block | S3: block: a ticked acceptance line whose test could not fail |
+| #523 | 5d5fac9b | block | S3: block: a ticked acceptance line whose test could not fail; S5: block: a ticked acceptance line whose `verify:visual` shot was not taken |
+| #526 | efc7f371 | block | S4: block: no `verify-*` workflow ran on code it changed |
+| #529 | 9d44ca5e | block | S1: block: merged before `verify-mobile` finished on its final head, over a "not a pass" |
+| c95114a2 | c95114a2 | block | S2: a `pr-resolve` merge that cut `plan/CRITIQUE.md` rows apart |
+| 49829988 | 49829988 | block | S2: a `pr-resolve` merge that cut `plan/CRITIQUE.md` rows apart |
+| #514 | 18f01653 | pass | known-good: no follow-up in 7 days, every path covered, every check done before the merge |
+| #528 | af2c11e5 | pass | known-good: no follow-up in 7 days, every path covered, every check done before the merge |
+| #537 | 7e216a55 | pass | known-good: no follow-up in 7 days, every path covered, every check done before the merge |
+| #545 | f548516f | pass | known-good: no follow-up in 7 days, every path covered, every check done before the merge |
+| #553 | 988640ae | pass | known-good: no follow-up in 7 days, every path covered, every check done before the merge |
+| #555 | cf090553 | pass | known-good: no follow-up in 7 days, every path covered, every check done before the merge |
+| #557 | 1729a428 | pass | known-good: no follow-up in 7 days, every path covered, every check done before the merge |
+| #559 | 0ac5eded | pass | known-good: no follow-up in 7 days, every path covered, every check done before the merge |
+| #562 | 4ed594e9 | pass | known-good: no follow-up in 7 days, every path covered, every check done before the merge |
+
+**Seeded-defect catch-rate target.** On the next 4 real bugs fixed on `main` after this stamp, replayed by `node scripts/eval/seeded-replay.mjs`: every planted defect triggers at least one `verify-*` workflow (target 100%, now 75% of 4), and CI or the tests as they stood at the defect's parent catch at least 50% (now 0%). The fix's own tests are not counted; they are written after the bug is known.
+
+**Change-failure baseline.** Of the last 20 PR merges on `main` that changed code (merges that touch only `plan/`, `telemetry/`, `docs/reports/` or `devlog/entries/` are left out), 0 drew a fix or revert touching the same files within 7 days: 0%, an upper bound, since a shared file names a candidate, not a cause. Reverts alone, the floor: 0 (0%). 20 of the 20 merges are under 7 days old at the stamp, so their window is still open; rerun on or after 2026-10-23, when the newest window closes, for the final baseline. Compare the next 20 code merges by the same method, read from `git log --first-parent` alone.
+
+| PR | Merge | Merged | Follow-ups (7d) | Window |
+|---|---|---|---|---|
+| #581 feat: hazard puzzle layout and one-round session — phase B3a | 4f29f34e | 2026-10-16T08:20 | none | open |
+| #579 eval: planted defects, mutation scores and the miss-rate table — phase EV1c | a3df0db6 | 2026-10-16T08:19 | none | open |
+| #577 Sentry: screen load times, JS stalls and tap transactions on preview | 356547ff | 2026-10-16T08:19 | none | open |
+| #576 eval: do the tests fail on the parent — phase EV1b | 6b5e2b6d | 2026-10-15T21:34 | none | open |
+| #575 Sentry: per-build releases, native symbols, crash test buttons | e1ceefbd | 2026-10-15T21:33 | none | open |
+| #573 refactor(mobile): delete the encounter-overlay era, labyrinth combat e2e — phase CR1b | eec2e423 | 2026-10-15T21:33 | none | open |
+| #571 feat(mechanics): level curve to 20 by the end of Act 1 — phase LV1 | 2f2a6c69 | 2026-10-15T17:29 | none | open |
+| #569 feat(mobile): live combat on its own route — phase CR1a | 71fc062e | 2026-10-15T16:55 | none | open |
+| #565 eval: the escape ledger — phase EV1a | 4893340f | 2026-10-15T15:25 | none | open |
+| #563 plot: B3 — the hazard as a fixed puzzle | f9cfb37c | 2026-10-15T14:34 | none | open |
+| #549 perf(mobile): Sentry performance on preview builds, combat drag spans — phase PF3 | 48aa808f | 2026-10-15T14:23 | none | open |
+| #562 fix: a hazard scar mends at any rest, not only at an inn (AUDIT Scarred never clears) | 44719db2 | 2026-10-15T11:05 | none | open |
+| #559 a11y: announce the SACRIFICE floor line on each refusal (CRITIQUE antagonist PR #523) | 691ec550 | 2026-10-15T10:59 | none | open |
+| #557 fix(combat): HUD clock line in full at 11px (CRITIQUE pass 88) | d82f5365 | 2026-10-15T10:33 | none | open |
+| #555 fix(combat): END keeps the dock's right edge on a wide window (CRITIQUE pass 87) | b5b395ad | 2026-10-15T01:55 | none | open |
+| #553 perf(mobile): no exploration map under live combat — phase PF4 | 1df5499e | 2026-10-14T20:19 | none | open |
+| #551 loop: size labels on plot and loop:pr PRs | 5a5b73e6 | 2026-10-14T15:16 | none | open |
+| #547 loop: T's own moves go to plan/NEEDS_T.md, never lessons (D94) | 7877633c | 2026-10-14T15:09 | none | open |
+| #546 loop: /plot splits a task into one-tick phases and lands by a plot PR (D93) | cef98c11 | 2026-10-14T13:35 | none | open |
+| #545 fix: hazard cast and stamp springs name mass and energyThreshold (AUDIT hazard springs mass 4) | ba23efa7 | 2026-10-14T12:08 | none | open |
+
+## For `/messy`
+
+One theme per gate, raw, for T to paste into `/messy`. EV1 builds none of it.
+
+```text
+CI and its path filters: missed 4 of 4 (D1 (#534), D2 (#523), D3 (#529), D4 (#543)). Candidate fixes: a path-coverage audit so no diff merges unverified (S, prevents 2, ranked 2 of 9).
+
+verify: missed 4 of 4 (D1 (#534), D2 (#523), D3 (#529), D4 (#543)). Candidate fixes: a fail-on-parent check for new tests (M, prevents 0, ranked 7 of 9); diff-scoped mutation testing on a PR's changed lines (L, prevents 0, ranked 9 of 9).
+
+The antagonist: missed 4 of 5 (#520 (S3), #521 (S3), #523 (S3, S5), #526 (S4)). No candidate fix aims at this gate.
+
+/critique: not measured: it plays the deployed web build after merge and no ledger row records what a pass saw against what had escaped, so it has no denominator. Context: 5 follow-up fix(es) in the ledger cite a critique pass. Candidate fixes: a per-pass critique record (commit range played, findings filed) so `/critique` gets a denominator (S, prevents 0, ranked 6 of 9).
+
+The merge gate: missed 3 of 26 (#509, #529, #541). Candidate fixes: branch protection with required status checks, replacing comment matching (S, prevents 3, ranked 1 of 9).
+
+The builder's own [x]: missed 3 of 65 (#521 A4 (S3), #523 A6 (S3), #523 verify:visual (S5)). Candidate fixes: an acceptance-ID-to-test map (M, prevents 3, ranked 3 of 9); builder/judge separation (L, prevents 3, ranked 5 of 9).
+
+The plan queue files: not one of the A7 judges. Candidate fixes: a structural lint for the plan queue files (S, prevents 1, ranked 4 of 9).
+
+Android: not one of the A7 judges. Candidate fixes: an Android smoke test on the preview APK (L, prevents 0, ranked 8 of 9).
+
+Evidence for every line: docs/reports/eval/latest.md (EV1a-EV1d) and its JSON beside it.
+```
+
+<!-- eval:fixes:end -->

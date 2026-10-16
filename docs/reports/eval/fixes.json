@@ -1,0 +1,354 @@
+{
+  "stamp": {
+    "commit": "a712832a",
+    "date": "2026-10-16T12:21:07Z"
+  },
+  "inputs": {
+    "miss rates": "0c18f2f7",
+    "ledger": "86eea99d",
+    "parent replay": "5085b096",
+    "planted defects": "b0ac22f8",
+    "mutation": "15a2fa76"
+  },
+  "ranked": [
+    {
+      "id": "F1",
+      "gate": "The merge gate",
+      "size": "S",
+      "fix": "branch protection with required status checks, replacing comment matching",
+      "found": false,
+      "prevents": [
+        "#509",
+        "#529",
+        "#541"
+      ],
+      "score": 3,
+      "why": "every merge-gate miss is a merge before a check on the final head finished; a required check refuses that merge",
+      "exposure": "3 of 26 ledger PRs merged before a check finished (S1)",
+      "adds": 3
+    },
+    {
+      "id": "F2",
+      "gate": "CI and its path filters",
+      "size": "S",
+      "fix": "a path-coverage audit so no diff merges unverified",
+      "found": false,
+      "prevents": [
+        "D4 (#543)",
+        "#526 (S4)"
+      ],
+      "score": 2,
+      "why": "a planted defect no `verify-*` workflow triggers on, and #526, which merged with only Cloudflare Pages run, both fail a check that every changed path has a gate",
+      "exposure": "9 of 26 ledger PRs changed code no filter covers",
+      "adds": 2
+    },
+    {
+      "id": "F4",
+      "gate": "The builder's own `[x]`",
+      "size": "M",
+      "fix": "an acceptance-ID-to-test map",
+      "found": false,
+      "prevents": [
+        "#521 A4 (S3)",
+        "#523 A6 (S3)",
+        "#523 verify:visual (S5)"
+      ],
+      "score": 1.5,
+      "why": "each builder miss is a ticked line with no test or shot behind it; a map that refuses a tick naming no test catches all three",
+      "exposure": "49 of 65 ticked lines name no test",
+      "adds": 3
+    },
+    {
+      "id": "F3",
+      "gate": "The plan queue files",
+      "size": "S",
+      "fix": "a structural lint for the plan queue files",
+      "found": false,
+      "prevents": [
+        "D4 (#543)"
+      ],
+      "score": 1,
+      "why": "the `pr-resolve` defect shows as split queue rows on `main`; a lint on the queue files fails that push even though no test covers the merge script",
+      "exposure": "S2: merge c95114a2, merge 49829988, repair 23f06828, repair 662aa10b",
+      "adds": 0
+    },
+    {
+      "id": "F6",
+      "gate": "The builder's own `[x]`",
+      "size": "L",
+      "fix": "builder/judge separation",
+      "found": false,
+      "prevents": [
+        "#521 A4 (S3)",
+        "#523 A6 (S3)",
+        "#523 verify:visual (S5)"
+      ],
+      "score": 1,
+      "why": "a judge that is not the builder re-runs each acceptance line; it catches what F4 catches only if it runs the checks, since the antagonist, already separate, passed 4 of 5 escapes",
+      "exposure": "the antagonist missed 4 of 5",
+      "adds": 0
+    },
+    {
+      "id": "F9",
+      "gate": "`/critique`",
+      "size": "S",
+      "fix": "a per-pass critique record (commit range played, findings filed) so `/critique` gets a denominator",
+      "found": true,
+      "prevents": [],
+      "score": 0,
+      "why": "it catches nothing itself; it turns the one \"not measured\" judge into a measured one",
+      "exposure": "5 follow-up fix(es) in the ledger cite a critique pass.",
+      "adds": 0
+    },
+    {
+      "id": "F5",
+      "gate": "verify",
+      "size": "M",
+      "fix": "a fail-on-parent check for new tests",
+      "found": false,
+      "prevents": [],
+      "score": 0,
+      "why": "it refuses a test that passes before the change; the replay found no tick that rests only on such a test, so it prevents no measured miss yet",
+      "exposure": "4 of 58 replayed test files could not fail; 11 new cases pass on the parent",
+      "adds": 0
+    },
+    {
+      "id": "F7",
+      "gate": "Android",
+      "size": "L",
+      "fix": "an Android smoke test on the preview APK",
+      "found": false,
+      "prevents": [],
+      "score": 0,
+      "why": "no gate exists, so no miss is on record to prevent (S6)",
+      "exposure": "S6: no `verify-*` workflow runs on Android",
+      "adds": 0
+    },
+    {
+      "id": "F8",
+      "gate": "verify",
+      "size": "L",
+      "fix": "diff-scoped mutation testing on a PR's changed lines",
+      "found": true,
+      "prevents": [],
+      "score": 0,
+      "why": "the tests as they stood caught none of the planted defects, and survivors sit in the combat code; whether mutants on the diff would have flagged them is not measured",
+      "exposure": "mechanics: combat resolution: 194 of 842 mutants survive or are uncovered",
+      "adds": 0
+    }
+  ],
+  "target": {
+    "now": {
+      "triggered": 75,
+      "caught": 0,
+      "of": 4
+    },
+    "target": {
+      "triggered": 100,
+      "caught": 50,
+      "seeds": 4
+    }
+  },
+  "baseline": {
+    "merges": [
+      {
+        "pr": 581,
+        "sha": "4f29f34e",
+        "date": "2026-10-16T08:20:16-04:00",
+        "subject": "feat: hazard puzzle layout and one-round session — phase B3a",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      },
+      {
+        "pr": 579,
+        "sha": "a3df0db6",
+        "date": "2026-10-16T08:19:56-04:00",
+        "subject": "eval: planted defects, mutation scores and the miss-rate table — phase EV1c",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      },
+      {
+        "pr": 577,
+        "sha": "356547ff",
+        "date": "2026-10-16T08:19:27-04:00",
+        "subject": "Sentry: screen load times, JS stalls and tap transactions on preview",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      },
+      {
+        "pr": 576,
+        "sha": "6b5e2b6d",
+        "date": "2026-10-15T21:34:04-04:00",
+        "subject": "eval: do the tests fail on the parent — phase EV1b",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      },
+      {
+        "pr": 575,
+        "sha": "e1ceefbd",
+        "date": "2026-10-15T21:33:50-04:00",
+        "subject": "Sentry: per-build releases, native symbols, crash test buttons",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      },
+      {
+        "pr": 573,
+        "sha": "eec2e423",
+        "date": "2026-10-15T21:33:31-04:00",
+        "subject": "refactor(mobile): delete the encounter-overlay era, labyrinth combat e2e — phase CR1b",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      },
+      {
+        "pr": 571,
+        "sha": "2f2a6c69",
+        "date": "2026-10-15T17:29:22-04:00",
+        "subject": "feat(mechanics): level curve to 20 by the end of Act 1 — phase LV1",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      },
+      {
+        "pr": 569,
+        "sha": "71fc062e",
+        "date": "2026-10-15T16:55:25-04:00",
+        "subject": "feat(mobile): live combat on its own route — phase CR1a",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      },
+      {
+        "pr": 565,
+        "sha": "4893340f",
+        "date": "2026-10-15T15:25:34-04:00",
+        "subject": "eval: the escape ledger — phase EV1a",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      },
+      {
+        "pr": 563,
+        "sha": "f9cfb37c",
+        "date": "2026-10-15T14:34:09-04:00",
+        "subject": "plot: B3 — the hazard as a fixed puzzle",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      },
+      {
+        "pr": 549,
+        "sha": "48aa808f",
+        "date": "2026-10-15T14:23:06-04:00",
+        "subject": "perf(mobile): Sentry performance on preview builds, combat drag spans — phase PF3",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      },
+      {
+        "pr": 562,
+        "sha": "44719db2",
+        "date": "2026-10-15T11:05:35-04:00",
+        "subject": "fix: a hazard scar mends at any rest, not only at an inn (AUDIT Scarred never clears)",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      },
+      {
+        "pr": 559,
+        "sha": "691ec550",
+        "date": "2026-10-15T10:59:38-04:00",
+        "subject": "a11y: announce the SACRIFICE floor line on each refusal (CRITIQUE antagonist PR #523)",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      },
+      {
+        "pr": 557,
+        "sha": "d82f5365",
+        "date": "2026-10-15T10:33:22-04:00",
+        "subject": "fix(combat): HUD clock line in full at 11px (CRITIQUE pass 88)",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      },
+      {
+        "pr": 555,
+        "sha": "b5b395ad",
+        "date": "2026-10-15T01:55:08-04:00",
+        "subject": "fix(combat): END keeps the dock's right edge on a wide window (CRITIQUE pass 87)",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      },
+      {
+        "pr": 553,
+        "sha": "1df5499e",
+        "date": "2026-10-14T20:19:13-04:00",
+        "subject": "perf(mobile): no exploration map under live combat — phase PF4",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      },
+      {
+        "pr": 551,
+        "sha": "5a5b73e6",
+        "date": "2026-10-14T15:16:18-04:00",
+        "subject": "loop: size labels on plot and loop:pr PRs",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      },
+      {
+        "pr": 547,
+        "sha": "7877633c",
+        "date": "2026-10-14T15:09:35-04:00",
+        "subject": "loop: T's own moves go to plan/NEEDS_T.md, never lessons (D94)",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      },
+      {
+        "pr": 546,
+        "sha": "cef98c11",
+        "date": "2026-10-14T13:35:53-04:00",
+        "subject": "loop: /plot splits a task into one-tick phases and lands by a plot PR (D93)",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      },
+      {
+        "pr": 545,
+        "sha": "ba23efa7",
+        "date": "2026-10-14T12:08:01-04:00",
+        "subject": "fix: hazard cast and stamp springs name mass and energyThreshold (AUDIT hazard springs mass 4)",
+        "followUps": [],
+        "reverted": false,
+        "windowOpen": true
+      }
+    ],
+    "failed": 0,
+    "reverted": 0,
+    "open": 20,
+    "finalOn": "2026-10-23",
+    "of": 20,
+    "rate": 0,
+    "revertRate": 0
+  },
+  "messy": [
+    "CI and its path filters: missed 4 of 4 (D1 (#534), D2 (#523), D3 (#529), D4 (#543)). Candidate fixes: a path-coverage audit so no diff merges unverified (S, prevents 2, ranked 2 of 9).",
+    "verify: missed 4 of 4 (D1 (#534), D2 (#523), D3 (#529), D4 (#543)). Candidate fixes: a fail-on-parent check for new tests (M, prevents 0, ranked 7 of 9); diff-scoped mutation testing on a PR's changed lines (L, prevents 0, ranked 9 of 9).",
+    "The antagonist: missed 4 of 5 (#520 (S3), #521 (S3), #523 (S3, S5), #526 (S4)). No candidate fix aims at this gate.",
+    "/critique: not measured: it plays the deployed web build after merge and no ledger row records what a pass saw against what had escaped, so it has no denominator. Context: 5 follow-up fix(es) in the ledger cite a critique pass. Candidate fixes: a per-pass critique record (commit range played, findings filed) so `/critique` gets a denominator (S, prevents 0, ranked 6 of 9).",
+    "The merge gate: missed 3 of 26 (#509, #529, #541). Candidate fixes: branch protection with required status checks, replacing comment matching (S, prevents 3, ranked 1 of 9).",
+    "The builder's own [x]: missed 3 of 65 (#521 A4 (S3), #523 A6 (S3), #523 verify:visual (S5)). Candidate fixes: an acceptance-ID-to-test map (M, prevents 3, ranked 3 of 9); builder/judge separation (L, prevents 3, ranked 5 of 9).",
+    "The plan queue files: not one of the A7 judges. Candidate fixes: a structural lint for the plan queue files (S, prevents 1, ranked 4 of 9).",
+    "Android: not one of the A7 judges. Candidate fixes: an Android smoke test on the preview APK (L, prevents 0, ranked 8 of 9)."
+  ],
+  "frozenAt": "a712832a"
+}
