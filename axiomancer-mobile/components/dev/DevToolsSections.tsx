@@ -13,8 +13,9 @@
  * the run and read the log. `testID`s: `dev-section-<key>`.
  *
  * Every section collapses: closed by default, its header toggles it, and
- * which sections are open survives leaving and re-entering `/dev` for the
- * life of the app. A closed section does not mount its leaves.
+ * nothing is remembered — every entry to `/dev` opens on nine closed
+ * headers, however the last visit was left. A closed section does not
+ * mount its leaves.
  *
  * Every leaf is `React.lazy` so production bundles never import the
  * Debug* modules; the container also self-gates on `isDevToolsEnabled`.
@@ -76,20 +77,18 @@ function LoadingFallback() {
     );
 }
 
-/** Which sections are open, by testID — module scope so it outlives the route. */
-const openSections = new Set<string>();
-
-/** One titled, dashed-border group of leaves; its header opens and closes it. */
+/**
+ * One titled, dashed-border group of leaves; its header opens and closes it.
+ *
+ * `open` is plain route-local state: leaving `/dev` unmounts it, so the next
+ * visit starts closed. Nothing is hoisted to module scope on purpose — an
+ * open set that outlived the route meant one session of poking left every
+ * header open for the life of the app, which is the whole of the clutter.
+ */
 function DevSection({ label, hint, testID, children }: { label: string; hint: string; testID: string; children: React.ReactNode }) {
     const styles = useStyles();
-    const [open, setOpen] = React.useState(() => openSections.has(testID));
-    const toggle = () => {
-        setOpen((was) => {
-            if (was) openSections.delete(testID);
-            else openSections.add(testID);
-            return !was;
-        });
-    };
+    const [open, setOpen] = React.useState(false);
+    const toggle = () => setOpen((was) => !was);
     return (
         <View style={styles.section} testID={testID}>
             <Pressable

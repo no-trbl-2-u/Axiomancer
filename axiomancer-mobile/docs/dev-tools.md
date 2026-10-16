@@ -81,7 +81,10 @@ the player → shape the deck → stand somewhere → fight / play a minigame �
 collect rewards → drive the story → tweak the UI → manage the run and
 read the log.** Section container ids are `dev-section-<key>`; each
 section starts closed and its header (`dev-section-<key>-toggle`) opens it.
-Open sections stay open across visits to `/dev` until the app restarts.
+Open state is route-local: leaving `/dev` closes every section, so each
+visit starts on the nine headers alone (changed 2026-10-16 — the open set
+used to outlive the route for the life of the app, which left every header
+open after one session of poking).
 
 ## Sections and controls
 
