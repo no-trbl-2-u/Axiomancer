@@ -12,12 +12,16 @@
  * minigame → collect rewards → drive the story → tweak the UI → manage
  * the run and read the log. `testID`s: `dev-section-<key>`.
  *
+ * Every section collapses: closed by default, its header toggles it, and
+ * which sections are open survives leaving and re-entering `/dev` for the
+ * life of the app. A closed section does not mount its leaves.
+ *
  * Every leaf is `React.lazy` so production bundles never import the
  * Debug* modules; the container also self-gates on `isDevToolsEnabled`.
  */
 
 import React, { Suspense, lazy } from 'react';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { isDevToolsEnabled } from '@/lib/buildProfile';
 import { FONTS } from '@/theme/axm';
@@ -72,16 +76,38 @@ function LoadingFallback() {
     );
 }
 
-/** One titled, dashed-border group of leaves. */
+/** Which sections are open, by testID — module scope so it outlives the route. */
+const openSections = new Set<string>();
+
+/** One titled, dashed-border group of leaves; its header opens and closes it. */
 function DevSection({ label, hint, testID, children }: { label: string; hint: string; testID: string; children: React.ReactNode }) {
     const styles = useStyles();
+    const [open, setOpen] = React.useState(() => openSections.has(testID));
+    const toggle = () => {
+        setOpen((was) => {
+            if (was) openSections.delete(testID);
+            else openSections.add(testID);
+            return !was;
+        });
+    };
     return (
         <View style={styles.section} testID={testID}>
-            <View style={styles.sectionHeader}>
-                <Text style={styles.sectionLabel}>{label}</Text>
+            <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ expanded: open }}
+                onPress={toggle}
+                style={[styles.sectionHeader, open && styles.sectionHeaderOpen]}
+                testID={`${testID}-toggle`}
+            >
+                <Text style={styles.sectionLabel}>{open ? '▾' : '▸'} {label}</Text>
                 <Text style={styles.sectionHint}>{hint}</Text>
-            </View>
-            <View style={styles.sectionBody}>{children}</View>
+            </Pressable>
+            {open && (
+                <View style={styles.sectionBody}>
+                    {/* Per section, so opening one does not blank the menu while it loads. */}
+                    <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
+                </View>
+            )}
         </View>
     );
 }
@@ -93,59 +119,57 @@ export function DevToolsSections() {
 
     return (
         <View style={styles.root} testID="dev-tools-sections">
-            <Suspense fallback={<LoadingFallback />}>
-                <DevSection label="STATE" hint="see everything" testID="dev-section-state">
-                    <DebugStateInspector />
-                </DevSection>
+            <DevSection label="STATE" hint="see everything" testID="dev-section-state">
+                <DebugStateInspector />
+            </DevSection>
 
-                <DevSection label="PLAYER" hint="archetype · level · wallet · effects" testID="dev-section-player">
-                    <DebugPresetPicker />
-                    <DebugPlayerTierPresets />
-                    <DebugXpGrant />
-                    <DebugCurrencyControl />
-                    <DebugEffectApply />
-                </DevSection>
+            <DevSection label="PLAYER" hint="archetype · level · wallet · effects" testID="dev-section-player">
+                <DebugPresetPicker />
+                <DebugPlayerTierPresets />
+                <DebugXpGrant />
+                <DebugCurrencyControl />
+                <DebugEffectApply />
+            </DevSection>
 
-                <DevSection label="DECKS & ITEMS" hint="hazard deck · satchel" testID="dev-section-decks">
-                    <DebugHazardDeckRandomize />
-                    <DebugPopulateAllItems />
-                    <DebugGetAllRelics />
-                    <DebugItemPicker />
-                </DevSection>
+            <DevSection label="DECKS & ITEMS" hint="hazard deck · satchel" testID="dev-section-decks">
+                <DebugHazardDeckRandomize />
+                <DebugPopulateAllItems />
+                <DebugGetAllRelics />
+                <DebugItemPicker />
+            </DevSection>
 
-                <DevSection label="CARDS" hint="lane deck · reward pool" testID="dev-section-cards">
-                    <DebugLaneDeck />
-                    <DebugRewardPool />
-                </DevSection>
+            <DevSection label="CARDS" hint="lane deck · reward pool" testID="dev-section-cards">
+                <DebugLaneDeck />
+                <DebugRewardPool />
+            </DevSection>
 
-                <DevSection label="WORLD" hint="any map · any node · the labyrinth" testID="dev-section-world">
-                    <DebugWorldTravel />
-                </DevSection>
+            <DevSection label="WORLD" hint="any map · any node · the labyrinth" testID="dev-section-world">
+                <DebugWorldTravel />
+            </DevSection>
 
-                <DevSection label="ENCOUNTERS" hint="quick triggers · any foe · skip" testID="dev-section-encounters">
-                    <DebugTriggerEncounter />
-                    <DebugEnemyPicker />
-                    <DebugSkipEvent />
-                </DevSection>
+            <DevSection label="ENCOUNTERS" hint="quick triggers · any foe · skip" testID="dev-section-encounters">
+                <DebugTriggerEncounter />
+                <DebugEnemyPicker />
+                <DebugSkipEvent />
+            </DevSection>
 
-                <DevSection label="MINIGAMES & REWARDS" hint="hazard · rest · anvil · reliquary · journal · cards" testID="dev-section-rewards">
-                    <DebugHazardButton />
-                    <DebugRestButton />
-                    <DebugBlacksmithButton />
-                    <DebugRewardTriggers />
-                </DevSection>
+            <DevSection label="MINIGAMES & REWARDS" hint="hazard · rest · anvil · reliquary · journal · cards" testID="dev-section-rewards">
+                <DebugHazardButton />
+                <DebugRestButton />
+                <DebugBlacksmithButton />
+                <DebugRewardTriggers />
+            </DevSection>
 
-                <DevSection label="STORY" hint="real NPC trees · real quests" testID="dev-section-story">
-                    <DebugDialogueJump />
-                    <DebugQuestState />
-                </DevSection>
+            <DevSection label="STORY" hint="real NPC trees · real quests" testID="dev-section-story">
+                <DebugDialogueJump />
+                <DebugQuestState />
+            </DevSection>
 
-                <DevSection label="RUN & DIAGNOSTICS" hint="save · reset · galleries · log · crash test" testID="dev-section-run">
-                    <DebugRunControls />
-                    <DebugLogViewer />
-                    <DebugCrashTest />
-                </DevSection>
-            </Suspense>
+            <DevSection label="RUN & DIAGNOSTICS" hint="save · reset · galleries · log · crash test" testID="dev-section-run">
+                <DebugRunControls />
+                <DebugLogViewer />
+                <DebugCrashTest />
+            </DevSection>
         </View>
     );
 }
@@ -157,7 +181,6 @@ const useStyles = makeStyles((AXM) => ({
         borderColor: AXM.ash,
         borderStyle: 'dashed',
         backgroundColor: AXM.panelBg,
-        paddingBottom: 6,
     },
     sectionHeader: {
         flexDirection: 'row',
@@ -165,12 +188,14 @@ const useStyles = makeStyles((AXM) => ({
         justifyContent: 'space-between',
         paddingVertical: 8,
         paddingHorizontal: 10,
+        gap: 8,
+    },
+    sectionHeaderOpen: {
         borderBottomWidth: 1,
         borderBottomColor: AXM.ash,
         borderStyle: 'dashed',
-        gap: 8,
     },
     sectionLabel: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 2, color: AXM.sulfur },
     sectionHint: { fontFamily: FONTS.mono, fontSize: 9, color: AXM.bone, flexShrink: 1, textAlign: 'right' },
-    sectionBody: { paddingTop: 4 },
+    sectionBody: { paddingTop: 4, paddingBottom: 6 },
 }));
