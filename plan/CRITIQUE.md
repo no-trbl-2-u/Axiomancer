@@ -706,15 +706,6 @@
 
 ## Pending
 
-### [LOW] exploration / map — on desktop the gesture line still says "drag · pinch", but a mouse zooms with the wheel since #590
-- pass: 91 (commit ef1d1dd3)
-- viewport: desktop (1280x800); mobile is correct
-- category: comprehension
-- observation: the late-game hub's chart heads its top-left corner "drag · pinch" at both viewports. #590 gave web a wheel zoom anchored at the cursor (a mouse has no pinch), so on desktop the line names a gesture the player cannot make and leaves out the one that works. The string is also hardcoded in the component, against the package rule that player-facing copy lives outside components.
-- evidence: `.critique-artifacts/desktop/11-late-game-hub.png` and `.txt` ("drag · pinch"); `axiomancer-mobile/components/exploration/MapOverlays.tsx:35`; the wheel handler in `MapCanvas.tsx` (`Platform.OS !== 'web'` guard); `MapOverlays.test.tsx:27,127` pin the string.
-- suggested fix: move the line to a copy file and pick it by platform: "drag · pinch" on native, "drag · scroll to zoom" on web; update the two test pins. Copy only, no rule change.
-- source: critique:drive (unattended)
-
 ### [LOW] exploration hub / tooling — the level-15 Sage fixture shows 680 VITAE, twice what a level-15 pilgrim can now reach
 - pass: 90 (commit 6b5e2b6d)
 - viewport: both (375x812 and 1280x800)
@@ -1062,6 +1053,16 @@
 - source: loop
 
 ## Done
+
+### [x] [LOW] exploration / map — on desktop the gesture line still says "drag · pinch", but a mouse zooms with the wheel since #590 — RESOLVED 2026-10-16 (branch loop/iterate-map-gesture-line, 41a733aa: `MAP_GESTURE_LINE` in the exploration presenter; MapOverlays reads "drag · scroll to zoom" for a fine pointer on web, "drag · pinch" otherwise; pinned in MapOverlays.test.tsx)
+- pass: 91 (commit ef1d1dd3)
+- viewport: desktop (1280x800); mobile is correct
+- category: comprehension
+- observation: the late-game hub's chart heads its top-left corner "drag · pinch" at both viewports. #590 gave web a wheel zoom anchored at the cursor (a mouse has no pinch), so on desktop the line names a gesture the player cannot make and leaves out the one that works. The string is also hardcoded in the component, against the package rule that player-facing copy lives outside components.
+- evidence: `.critique-artifacts/desktop/11-late-game-hub.png` and `.txt` ("drag · pinch"); `axiomancer-mobile/components/exploration/MapOverlays.tsx:35`; the wheel handler in `MapCanvas.tsx` (`Platform.OS !== 'web'` guard); `MapOverlays.test.tsx:27,127` pin the string.
+- suggested fix: move the line to a copy file and pick it by platform: "drag · pinch" on native, "drag · scroll to zoom" on web; update the two test pins. Copy only, no rule change.
+- source: critique:drive (unattended)
+- issue: #597
 
 ### [x] [LOW] combat / a11y — the SACRIFICE-floor callout changes the ring's label but announces nothing — RESOLVED 2026-10-15 (branch loop/iterate-sacfloor-announce, 6974aa46: `flagShortfall` announces `PROGRAM_COPY.floorA11y` once per refusal; the label change stays for focus; pinned in CombatBoard.sacfloor.test.tsx)
 - pass: antagonist on PR #523 (SF1, commit 04e5ebb6)
