@@ -1,0 +1,59 @@
+/**
+ * Hazard puzzle — layout validation.
+ *
+ * A layout is playable only when every card exists, none is a RE-CAST
+ * card (a puzzle never rolls, so re-casting has nothing to do), the act is
+ * Act 1, and both goals are positive whole numbers. RE-CAST cards stay in
+ * `HAZARD_DECK` for the live minigame; they are only kept out of puzzles.
+ */
+
+import { getHazardCardDef } from '../hazard.content';
+import type { HazardCardDef } from '../hazard.types';
+import type { HazardPuzzleLayout, HazardPuzzleValidation } from './hazard-puzzle.types';
+
+/** The only act a hazard puzzle may belong to until T lifts the scope. */
+export const HAZARD_PUZZLE_ACT = 1;
+
+function findCard(cardId: string): HazardCardDef | null {
+    try {
+        return getHazardCardDef(cardId);
+    } catch {
+        return null;
+    }
+}
+
+function isPositiveInt(n: number): boolean {
+    return Number.isInteger(n) && n > 0;
+}
+
+function checkCard(cardId: string, where: string, reasons: string[]): void {
+    const def = findCard(cardId);
+    if (!def) {
+        reasons.push(`${where}: unknown hazard card "${cardId}"`);
+        return;
+    }
+    if (def.effect === 'recast') {
+        reasons.push(`${where}: "${cardId}" is a RE-CAST card; puzzles never re-cast dice`);
+    }
+}
+
+export function validateHazardPuzzleLayout(layout: HazardPuzzleLayout): HazardPuzzleValidation {
+    const reasons: string[] = [];
+    if (layout.act !== HAZARD_PUZZLE_ACT) {
+        reasons.push(`act ${layout.act}: hazard puzzles are scoped to Act ${HAZARD_PUZZLE_ACT}`);
+    }
+    if (layout.hand.length === 0) reasons.push('hand: a puzzle needs at least one card');
+    layout.hand.forEach((id, i) => checkCard(id, `hand[${i}]`, reasons));
+    layout.reserve.forEach((id, i) => checkCard(id, `reserve[${i}]`, reasons));
+    layout.unlocks.forEach((u, i) => {
+        if (u.kind === 'extraCard') checkCard(u.cardId, `unlocks[${i}]`, reasons);
+    });
+    if (!isPositiveInt(layout.goals.safe)) {
+        reasons.push(`goals.safe: ${layout.goals.safe} is not a positive whole number`);
+    }
+    const [gf, ge] = layout.goals.risk;
+    if (!isPositiveInt(gf) || !isPositiveInt(ge)) {
+        reasons.push(`goals.risk: [${gf}, ${ge}] needs two positive whole numbers`);
+    }
+    return { ok: reasons.length === 0, reasons };
+}

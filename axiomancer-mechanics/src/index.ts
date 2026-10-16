@@ -270,6 +270,20 @@ export type {
     HazardMark, HazardOutcomeTier, HazardPhase, HazardSessionState,
 } from './World/Hazard';
 
+// Hazard puzzle: the fixed, one-round hazard (dev-menu only for now).
+export {
+    HAZARD_PUZZLE_ACT, validateHazardPuzzleLayout, createHazardPuzzleSession,
+    stageHazardPuzzleCard, unstageHazardPuzzleCard, powerHazardPuzzleCard,
+    applyHazardPuzzleCard, discardHazardPuzzleCard, playHazardPuzzleMove,
+    playHazardPuzzleMoves, confirmHazardPuzzle,
+} from './World/Hazard';
+export type {
+    HazardPuzzleBand, HazardPuzzleGoal, HazardPuzzleGoals, HazardPuzzleLayout,
+    HazardPuzzleMove, HazardPuzzlePhase, HazardPuzzleResult, HazardPuzzleSession,
+    HazardPuzzleStat, HazardPuzzleUnlock, HazardPuzzleUnlockGrant,
+    HazardPuzzleValidation,
+} from './World/Hazard';
+
 // Blacksmith encounter ("The Anvil" — die-gear upgrades: HONE / TEMPER /
 // gear swap).
 export {

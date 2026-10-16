@@ -77,3 +77,6 @@ export {
     acknowledgeHazardOutcome,
     claimHazardRewards,
 } from './hazard.engine';
+
+// ── Fixed one-round puzzle ──────────────────────────────────────────────────
+export * from './puzzle';
