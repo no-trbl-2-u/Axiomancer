@@ -33,8 +33,17 @@ export {
     confirmHazardPuzzle,
 } from './hazard-puzzle.session';
 
-export { HAZARD_PUZZLE_FAILURE, HAZARD_PUZZLE_REWARDS } from './hazard-puzzle.tuning';
+export {
+    HAZARD_PUZZLE_FAILURE, HAZARD_PUZZLE_REWARDS, HAZARD_PUZZLE_TUNING,
+    HAZARD_PUZZLE_BANDS, HAZARD_PUZZLE_SOLVER_BUDGET,
+} from './hazard-puzzle.tuning';
 
 export type { HazardPuzzleOutcome, HazardPuzzleOutcomeContext } from './hazard-puzzle.outcome';
 export { hazardPuzzleOutcome } from './hazard-puzzle.outcome';
 export { hazardRegionMaterials } from './hazard-puzzle.region';
+
+export type { HazardPuzzleSolution, HazardPuzzleSolveOptions } from './hazard-puzzle.solver';
+export { solveHazardPuzzle, solveHazardPuzzleSession, hazardPuzzleSurplus } from './hazard-puzzle.solver';
+
+export type { HazardPuzzleRouteAudit } from './hazard-puzzle.band';
+export { hazardPuzzleBandOf, auditHazardPuzzleRoute, auditHazardPuzzleLayout } from './hazard-puzzle.band';

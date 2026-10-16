@@ -292,6 +292,16 @@ export type { HazardPuzzleOutcome, HazardPuzzleOutcomeContext } from './World/Ha
 export { claimHazardPuzzleOutcome, HAZARD_SCAR_FLAG_PREFIX } from './Game';
 export type { HazardPuzzleClaim } from './Game';
 
+// Hazard puzzle solver and band check.
+export {
+    HAZARD_PUZZLE_TUNING, HAZARD_PUZZLE_BANDS, HAZARD_PUZZLE_SOLVER_BUDGET,
+    solveHazardPuzzle, solveHazardPuzzleSession, hazardPuzzleSurplus,
+    hazardPuzzleBandOf, auditHazardPuzzleRoute, auditHazardPuzzleLayout,
+} from './World/Hazard';
+export type {
+    HazardPuzzleSolution, HazardPuzzleSolveOptions, HazardPuzzleRouteAudit,
+} from './World/Hazard';
+
 // Blacksmith encounter ("The Anvil" — die-gear upgrades: HONE / TEMPER /
 // gear swap).
 export {
