@@ -47,3 +47,13 @@ export { solveHazardPuzzle, solveHazardPuzzleSession, hazardPuzzleSurplus } from
 
 export type { HazardPuzzleRouteAudit } from './hazard-puzzle.band';
 export { hazardPuzzleBandOf, auditHazardPuzzleRoute, auditHazardPuzzleLayout } from './hazard-puzzle.band';
+
+export type { HazardPuzzleUnlockAudit } from './hazard-puzzle.band';
+export { auditHazardPuzzleUnlocks } from './hazard-puzzle.band';
+export {
+    HAZARD_PUZZLE_UNLOCK_DIE,
+    activeHazardPuzzleUnlocks,
+    applyHazardPuzzleUnlocks,
+    hazardPuzzleDeclaresUnlocks,
+    hazardPuzzleUnlockSubsets,
+} from './hazard-puzzle.unlocks';

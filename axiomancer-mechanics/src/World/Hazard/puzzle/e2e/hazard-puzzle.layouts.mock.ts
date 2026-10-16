@@ -3,7 +3,7 @@
  * ship in the puzzle library.
  */
 
-import type { HazardPuzzleLayout } from '../hazard-puzzle.types';
+import type { HazardPuzzleLayout, HazardPuzzleUnlock } from '../hazard-puzzle.types';
 
 function layout(over: Partial<HazardPuzzleLayout> & Pick<HazardPuzzleLayout, 'id'>): HazardPuzzleLayout {
     return {
@@ -48,10 +48,23 @@ export const MIXED_LAYOUT = layout({
  * The fixture library the library test runs on until the demo puzzles
  * ship. One hand and one set of dice at three goals, so the goal alone
  * sets the band. Counts are the solver's, recorded when the goals were
- * set: easy 222 safe / 91 risk, medium 13 / 19, hard 2 / 4.
+ * set: easy 222 safe / 91 risk, medium 13 / 19, hard 2 / 4. Each declares
+ * stat unlocks so the library test's subset check has something to check;
+ * `fixture-blank` adds a blank die and a `blankReroll` (9 / 9, medium).
  */
 const BAND_HAND = ['leap', 'leap', 'windread', 'haul', 'runner'];
 const BAND_DICE: HazardPuzzleLayout['dice'] = ['red', 'red', 'blue', 'blue'];
+const BODY_DIE: HazardPuzzleUnlock = { stat: 'body', min: 3, kind: 'extraDie' };
+const HEART_DIE: HazardPuzzleUnlock = { stat: 'heart', min: 3, kind: 'extraDie' };
+const MIND_CARD: HazardPuzzleUnlock = { stat: 'mind', min: 3, kind: 'extraCard', cardId: 'scram' };
+
+/**
+ * A blank die and READ THE WIND, whose convert turns a blank die gold.
+ * Turning the blank gold up front keeps every line open (9 -> 20 safe);
+ * turning it red would close some (9 -> 7), which the subset check refuses.
+ */
+export const BLANK_HAND = ['windread', 'grip', 'scram', 'haul'];
+export const BLANK_DICE: HazardPuzzleLayout['dice'] = ['hex', 'red', 'blue'];
 
 export const FIXTURE_LIBRARY: readonly HazardPuzzleLayout[] = [
     layout({
@@ -60,6 +73,7 @@ export const FIXTURE_LIBRARY: readonly HazardPuzzleLayout[] = [
         dice: BAND_DICE,
         goals: { safe: 14, risk: [6, 6] },
         bands: { safe: 'easy', risk: 'easy' },
+        unlocks: [BODY_DIE, MIND_CARD],
     }),
     layout({
         id: 'fixture-medium',
@@ -67,6 +81,7 @@ export const FIXTURE_LIBRARY: readonly HazardPuzzleLayout[] = [
         dice: BAND_DICE,
         goals: { safe: 26, risk: [7, 12] },
         bands: { safe: 'medium', risk: 'medium' },
+        unlocks: [HEART_DIE],
     }),
     layout({
         id: 'fixture-hard',
@@ -74,6 +89,15 @@ export const FIXTURE_LIBRARY: readonly HazardPuzzleLayout[] = [
         dice: BAND_DICE,
         goals: { safe: 30, risk: [8, 20] },
         bands: { safe: 'hard', risk: 'hard' },
+        unlocks: [HEART_DIE, MIND_CARD],
+    }),
+    layout({
+        id: 'fixture-blank',
+        hand: BLANK_HAND,
+        dice: BLANK_DICE,
+        goals: { safe: 20, risk: [12, 6] },
+        bands: { safe: 'medium', risk: 'medium' },
+        unlocks: [{ stat: 'mind', min: 2, kind: 'blankReroll', face: 'gold' }],
     }),
 ];
 
