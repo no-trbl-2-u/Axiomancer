@@ -42,7 +42,7 @@ function load(p: string | null): Monitoring {
     return m;
 }
 
-type InitOptions = { release?: string; tracesSampleRate: number; enableNativeFramesTracking: boolean; enableAppStartTracking: boolean; integrations: unknown[] };
+type InitOptions = { release?: string; tracesSampleRate: number; enableNativeFramesTracking: boolean; enableAppStartTracking: boolean; enableStallTracking: boolean; enableUserInteractionTracing: boolean; integrations: unknown[] };
 const lastInit = (): InitOptions => mockSentry.init.mock.calls.at(-1)![0] as InitOptions;
 
 beforeEach(() => {
@@ -61,6 +61,9 @@ describe('initCrashReporting — trace rate per build profile (A1, A2)', () => {
         expect(m.PREVIEW_TRACES_SAMPLE_RATE).toBeGreaterThan(0);
         expect(opts.enableNativeFramesTracking).toBe(true);
         expect(opts.enableAppStartTracking).toBe(true);
+        expect(opts.enableStallTracking).toBe(true);
+        expect(opts.enableUserInteractionTracing).toBe(true);
+        expect(mockSentry.reactNavigationIntegration).toHaveBeenCalledWith({ enableTimeToInitialDisplay: true });
         expect(opts.integrations).toHaveLength(1);
         expect(m.isPerformanceTracingActive()).toBe(true);
     });
