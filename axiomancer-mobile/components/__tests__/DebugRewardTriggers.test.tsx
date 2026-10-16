@@ -7,13 +7,12 @@
  *     (historic `debug-cache-button` id on MODEST)
  *   - A hazard chip opens a hazard session for that id
  *   - ANVIL opens a blacksmith session
- *   - UNLOCK JOURNAL fills codex.unlockedEntries; KNOW ALL CARDS fills knownCards
+ *   - UNLOCK JOURNAL fills codex.unlockedEntries
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render } from '@testing-library/react-native';
 import React from 'react';
-import { cardLibrary } from '@mechanics';
 
 import { DebugRewardTriggers } from '@/components/DebugRewardTriggers';
 import { listHazards, listJournalEntries } from '@/state/dev/rewards';
@@ -35,7 +34,6 @@ describe('DebugRewardTriggers: DEV gate', () => {
         expect(tree.queryByTestId('debug-cache-rich-button')).not.toBeNull();
         expect(tree.queryByTestId('debug-anvil-budget-button')).not.toBeNull();
         expect(tree.queryByTestId('debug-journal-unlock-button')).not.toBeNull();
-        expect(tree.queryByTestId('debug-learn-all-cards-button')).not.toBeNull();
         for (const h of listHazards()) expect(tree.queryByTestId(`debug-hazard-id-${h.id}`)).not.toBeNull();
     });
 
@@ -75,15 +73,10 @@ describe('DebugRewardTriggers: sessions + grants', () => {
         expect(store.getState().blacksmith.session).not.toBeNull();
     });
 
-    it('UNLOCK JOURNAL and KNOW ALL CARDS grant everything', () => {
+    it('UNLOCK JOURNAL unlocks every codex entry', () => {
         const store = makeStore();
         const tree = render(withProvider(store, <DebugRewardTriggers />));
         fireEvent.press(tree.getByTestId('debug-journal-unlock-button'));
         expect(store.getState().codex.unlockedEntries).toHaveLength(listJournalEntries().length);
-        fireEvent.press(tree.getByTestId('debug-learn-all-cards-button'));
-        // Every card a player can learn: the library but the Curses.
-        for (const c of cardLibrary.filter((card) => card.cardType !== 'curse')) {
-            expect(store.getState().player.knownCards).toContain(c.id);
-        }
     });
 });

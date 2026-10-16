@@ -40,8 +40,12 @@
 // flagged against the 2026-08-19 unreproduced mid-combat crash report (30
 // prior runs only ever drove the standard-foe encounter, spare-mercy, and
 // the fresh 4-card starter deck):
-//   PRESET=sage|wanderer|apprentice|endgame — a non-starter deck (already
-//     supported, see enterLive; wire it explicitly, the default runs never did).
+//   PRESET=sage|l30 — a non-starter deck. Boots the matching committed
+//     state fixture (PRESET_FIXTURES below) through the `?fixture=` deep
+//     link instead of tapping a /dev preset button: the preset leaves were
+//     cut from the dev menu on 2026-10-16, and a fixture reaches the same
+//     engine preset data without one. Any other value lists the ids and
+//     exits.
 //   ENCOUNTER_KIND=boss node scripts/combat-round-e2e.mjs   — arm the lowest
 //     boss foe on the map instead of a standard encounter (`debug-trigger-
 //     encounter-boss`). Bosses seal retreat, so WITHDRAW never renders here.
@@ -455,6 +459,20 @@ async function playRound(page, sink, seed, round) {
     return acted
 }
 
+/**
+ * PRESET value → the committed state fixture that stands up that player
+ * (`axiomancer-mechanics/src/Game/fixtures/state-fixture.registry.ts`).
+ *
+ * Only fixtures WITHOUT `arrive: true` belong here: an arriving fixture
+ * fires its node's event on boot and takes the screen, which would fight
+ * this harness for the route. That rules the staged dialogue / village /
+ * cutscene / rest / cache / anvil / hazard-arrive fixtures out.
+ */
+const PRESET_FIXTURES = {
+    sage: 'sage-bw-door-gate',
+    l30: 'l30-bw-hazard',
+}
+
 // ── one seed, played to a terminal outcome ──────────────────────────────────
 
 /**
@@ -470,24 +488,28 @@ async function enterLive(page, baseUrl, seed) {
     // the same one the roundtrip + hazard harnesses set. Inert in real
     // builds — nothing sets the global there.
     await page.addInitScript(() => { globalThis.__AXM_FORCE_DEV_TOOLS__ = true })
-    await page.goto(`${baseUrl}/character`, { waitUntil: 'networkidle' })
+    // Optional player preset: a fresh e2e save is a level-1 pilgrim who
+    // usually LOSES, so the victory aftermath — the reward draft and its
+    // ACCEPT path — went unexercised on every default run. A fixture boot
+    // stands up the same engine preset the /dev button used to apply, before
+    // the first paint, so the win (and the take-a-card walk below) is
+    // reachable in CI. The run is ephemeral: no save slot is read or written.
+    const preset = (process.env.PRESET ?? '').toLowerCase()
+    const fixture = preset ? PRESET_FIXTURES[preset] : null
+    if (preset && !fixture) {
+        console.error(`combat-round-e2e: PRESET="${preset}" has no committed fixture. `
+            + `Use one of: ${Object.keys(PRESET_FIXTURES).join(', ')}`)
+        process.exit(2)
+    }
+    const entry = fixture ? `/exploration?fixture=${fixture}` : '/character'
+    await page.goto(`${baseUrl}${entry}`, { waitUntil: 'networkidle' })
+    if (fixture) {
+        log(`live: booted the "${fixture}" fixture for PRESET="${preset}"`)
+        await page.goto(`${baseUrl}/character`, { waitUntil: 'networkidle' })
+    }
     await page.getByTestId('self-dev-tools-link').waitFor({ state: 'visible', timeout: 25000 })
     await page.getByTestId('self-dev-tools-link').click()
     await page.waitForURL((url) => url.pathname.endsWith('/dev'), { timeout: 15000 })
-    // Optional player preset (PRESET=endgame|sage|wanderer|apprentice|fresh):
-    // a fresh e2e save is a level-1 pilgrim who usually LOSES, so the victory
-    // aftermath — the reward draft and its ACCEPT path — went unexercised on
-    // every default run. PRESET=endgame (or sage) makes the win, and therefore
-    // the take-a-card walk below, actually reachable in CI.
-    const preset = (process.env.PRESET ?? '').toLowerCase()
-    if (preset) {
-        await openDevSection(page, 'player', `debug-preset-${preset}`)
-        const btn = page.getByTestId(`debug-preset-${preset}`)
-        await btn.waitFor({ state: 'visible', timeout: 15000 })
-        await btn.click()
-        await page.waitForTimeout(800)
-        log(`live: applied player preset "${preset}"`)
-    }
     if (LEVEL_UP) {
         await openDevSection(page, 'player', 'debug-xp-grant-button')
         const grant = page.getByTestId('debug-xp-grant-button')
