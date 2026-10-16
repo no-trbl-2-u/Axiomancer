@@ -18,14 +18,17 @@ const mockSentry = {
     addBreadcrumb: jest.fn(),
     startInactiveSpan: jest.fn((_opts: Record<string, unknown>): unknown => mockSpan),
     reactNavigationIntegration: jest.fn(() => ({ name: 'ReactNavigation', registerNavigationContainer: jest.fn() })),
+    nativeCrash: jest.fn(),
 };
 let mockProfile: string | null = null;
 let mockDsn: string | null = 'https://public@example.ingest.mockSentry.io/1';
+let mockRelease: string | null = null;
 
 jest.mock('@sentry/react-native', () => mockSentry);
 jest.mock('@/lib/buildProfile', () => ({
     getBuildProfile: () => mockProfile,
     getSentryDsn: () => mockDsn,
+    getSentryRelease: () => mockRelease,
     isDevToolsEnabled: () => true,
 }));
 
@@ -39,13 +42,14 @@ function load(p: string | null): Monitoring {
     return m;
 }
 
-type InitOptions = { tracesSampleRate: number; enableNativeFramesTracking: boolean; enableAppStartTracking: boolean; integrations: unknown[] };
+type InitOptions = { release?: string; tracesSampleRate: number; enableNativeFramesTracking: boolean; enableAppStartTracking: boolean; integrations: unknown[] };
 const lastInit = (): InitOptions => mockSentry.init.mock.calls.at(-1)![0] as InitOptions;
 
 beforeEach(() => {
     jest.clearAllMocks();
     mockSentry.startInactiveSpan.mockImplementation(() => mockSpan);
     mockDsn = 'https://public@example.ingest.mockSentry.io/1';
+    mockRelease = null;
 });
 
 describe('initCrashReporting — trace rate per build profile (A1, A2)', () => {
@@ -128,6 +132,48 @@ describe('startDragSpan (A3, A5)', () => {
     });
 });
 
+describe('initCrashReporting — release per build', () => {
+    it('passes the baked release to Sentry', () => {
+        mockRelease = 'com.axiomancer.mobile@1.0.0+5085b09';
+        load('preview').initCrashReporting();
+        expect(lastInit().release).toBe('com.axiomancer.mobile@1.0.0+5085b09');
+    });
+
+    it('leaves the SDK default when no release was baked', () => {
+        load('preview').initCrashReporting();
+        expect('release' in lastInit()).toBe(false);
+    });
+});
+
+describe('triggerTestCrash', () => {
+    it('does nothing without a running client', () => {
+        mockDsn = null;
+        const m = load('preview');
+        m.initCrashReporting();
+        expect(m.triggerTestCrash('native')).toBe(false);
+        expect(mockSentry.nativeCrash).not.toHaveBeenCalled();
+    });
+
+    it('aborts natively through the SDK', () => {
+        const m = load('preview');
+        m.initCrashReporting();
+        expect(m.triggerTestCrash('native')).toBe(true);
+        expect(mockSentry.nativeCrash).toHaveBeenCalledTimes(1);
+    });
+
+    it('throws an uncaught JS error off the call stack', () => {
+        jest.useFakeTimers();
+        try {
+            const m = load('preview');
+            m.initCrashReporting();
+            expect(m.triggerTestCrash('js')).toBe(true);
+            expect(() => jest.runOnlyPendingTimers()).toThrow('AXM test crash (js)');
+        } finally {
+            jest.useRealTimers();
+        }
+    });
+});
+
 describe('monitoring.web (A3)', () => {
     it('mirrors the drag span surface as a no-op', () => {
         // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -135,5 +181,6 @@ describe('monitoring.web (A3)', () => {
         expect(web.isPerformanceTracingActive()).toBe(false);
         expect(() => web.startDragSpan('hand-to-play')('dropped')).not.toThrow();
         expect(() => web.registerNavigationTracing({})).not.toThrow();
+        expect(web.triggerTestCrash('native')).toBe(false);
     });
 });

@@ -66,3 +66,11 @@ export type DragSpanEnd = (outcome: DragSpanOutcome) => void;
 export function startDragSpan(_kind: DragSpanKind): DragSpanEnd {
     return () => undefined;
 }
+
+/** The two crashes the dev screen can force (see `monitoring.ts`). */
+export type TestCrashKind = 'js' | 'native';
+
+/** Web never starts a client, so there is nothing to prove. Always false. */
+export function triggerTestCrash(_kind: TestCrashKind): boolean {
+    return false;
+}

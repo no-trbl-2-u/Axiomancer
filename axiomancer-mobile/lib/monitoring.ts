@@ -30,6 +30,12 @@
  * Production keeps its quota for crashes; web never starts a client at all.
  * `docs/logging.md` → "Performance (Sentry)" says where to read it.
  *
+ * RELEASE PER BUILD. `release` is `com.axiomancer.mobile@<version>+<sha7>`
+ * (`lib/sentryRelease.js`), baked on the EAS builder, so each APK is its own
+ * release and a crash names the commit it shipped from. JS stacks resolve by
+ * the Hermes sourcemap's debug ID, which the build uploads, so symbolication
+ * does not depend on the release name.
+ *
  * The DSN is public by design (it is embedded in every shipped client and
  * only permits event ingest); it lives in `app.config.ts` extra. The AUTH
  * TOKEN is a different thing entirely — a secret, used only at build time to
@@ -43,7 +49,7 @@ import { Platform } from 'react-native';
 
 import { getLogger, type AxmLogEntry } from '@mechanics';
 
-import { getSentryDsn, getBuildProfile } from './buildProfile';
+import { getSentryDsn, getBuildProfile, getSentryRelease } from './buildProfile';
 
 let started = false;
 let tracing = false;
@@ -83,9 +89,13 @@ export function initCrashReporting(): void {
         const profile = getBuildProfile();
         const tracesSampleRate = tracesSampleRateFor(profile);
         const traced = tracesSampleRate > 0;
+        const release = getSentryRelease();
         Sentry.init({
             dsn,
             environment: profile ?? 'unknown',
+            // One release per build commit; absent off the builder, where
+            // the SDK's own default stands.
+            ...(release ? { release } : {}),
             // Crashes only, except on preview: tracing elsewhere would eat
             // the free tier's budget for the one signal production needs.
             tracesSampleRate,
@@ -200,4 +210,26 @@ export function withCrashReporting(Root: ComponentType): ComponentType {
     } catch {
         return Root;
     }
+}
+
+/** The two crashes the dev screen can force, to prove reporting end to end. */
+export type TestCrashKind = 'js' | 'native';
+
+/**
+ * Deliberately crash the app so a real report can be checked in Sentry:
+ * `js` throws an uncaught error off the render path (the global handler
+ * reports it as fatal), `native` aborts the process through the SDK. Dev
+ * screen only (`DebugCrashTest`). Returns false, and does nothing, when no
+ * client is running, so a DSN-less build never kills itself for nothing.
+ */
+export function triggerTestCrash(kind: TestCrashKind): boolean {
+    if (!started) return false;
+    if (kind === 'native') {
+        Sentry.nativeCrash();
+        return true;
+    }
+    setTimeout(() => {
+        throw new Error('AXM test crash (js) from the dev screen');
+    }, 0);
+    return true;
 }

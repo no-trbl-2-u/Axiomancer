@@ -197,6 +197,26 @@ that died**, which localizes a native crash without a symbolicated stack.
 Keep them ordered and keep them cheap; they are the reason this path is
 diagnosable at all.
 
+## Crash reports (Sentry)
+
+Native builds only (`lib/monitoring.ts`). What makes a report usable:
+
+| Need | How it is met |
+| --- | --- |
+| JS frames as TypeScript lines | Every EAS build uploads the Hermes sourcemap as an artifact bundle keyed by debug ID; Sentry matches on the ID, whatever the release is called |
+| Native frames as symbols | `experimental_android` in `app.json` turns on the Sentry Android Gradle plugin, which uploads the unstripped `.so` symbols and sources (and a ProGuard mapping, if minify is ever enabled) |
+| Which build crashed | `release` is `com.axiomancer.mobile@<version>+<sha7>` (`lib/sentryRelease.js`), baked by `app.config.ts` from `EAS_BUILD_GIT_COMMIT_HASH` |
+| Which commit to suspect | The `eas-build-on-success` hook (`scripts/sentry-release.mjs`) creates that release and attaches its commit; the GitHub repo is linked to the `sombersoft` org |
+| What led to it | The AXM log's info+ lines ride as breadcrumbs (`attachCrashBreadcrumbs`) and are synced to the native scope, so a native crash carries them too |
+
+**Prove it end to end.** On a preview APK, open `/dev` → RUN & DIAGNOSTICS →
+DEBUG · CRASH TEST. Each button arms on the first tap and crashes on the
+second. JS CRASH throws an uncaught error; NATIVE CRASH aborts the process
+and reports on the next launch, so reopen the app. Then check the issue in
+Sentry for the source line, native frames, breadcrumbs and the release.
+
+Events are kept 30 days on the free plan; the issue record outlives them.
+
 ## Performance (Sentry)
 
 Preview builds only. `initCrashReporting` sets `tracesSampleRate` to
@@ -224,4 +244,5 @@ slow frames on them.
 Spans start and end in the panel's JS `begin`/`end` callbacks, never in the
 gesture worklets, so the per-frame drag cost is unchanged. Filter the
 `environment` to `preview`. If the span quota runs short, lower
-`PREVIEW_TRACES_SAMPLE_RATE`; that is the one knob.
+`PREVIEW_TRACES_SAMPLE_RATE`; that is the one knob. The free plan allows
+5,000,000 spans and 5,000 errors a month.
