@@ -3,16 +3,21 @@
  *
  * A layout is playable only when every card exists, none is a RE-CAST
  * card (a puzzle never rolls, so re-casting has nothing to do), the act is
- * Act 1, and both goals are positive whole numbers. RE-CAST cards stay in
+ * Act 1, it reuses a live hazard's copy, it sits in an Act 1 region, and both
+ * goals are positive whole numbers. RE-CAST cards stay in
  * `HAZARD_DECK` for the live minigame; they are only kept out of puzzles.
  */
 
-import { getHazardCardDef } from '../hazard.content';
+import type { MapName } from '../../map.library';
+import { getHazardCardDef, HAZARD_LIBRARY } from '../hazard.content';
 import type { HazardCardDef } from '../hazard.types';
 import type { HazardPuzzleLayout, HazardPuzzleValidation } from './hazard-puzzle.types';
 
 /** The only act a hazard puzzle may belong to until T lifts the scope. */
 export const HAZARD_PUZZLE_ACT = 1;
+
+/** The Act 1 regions a puzzle may sit in (`map.library.ts`: Act 1, maps 1-4). */
+export const HAZARD_PUZZLE_REGIONS: readonly MapName[] = ['breakwater', 'charcoal-wood', 'beacon-crags', 'lantern-deep'];
 
 function findCard(cardId: string): HazardCardDef | null {
     try {
@@ -41,6 +46,12 @@ export function validateHazardPuzzleLayout(layout: HazardPuzzleLayout): HazardPu
     const reasons: string[] = [];
     if (layout.act !== HAZARD_PUZZLE_ACT) {
         reasons.push(`act ${layout.act}: hazard puzzles are scoped to Act ${HAZARD_PUZZLE_ACT}`);
+    }
+    if (!HAZARD_LIBRARY.some((h) => h.id === layout.hazardId)) {
+        reasons.push(`hazardId: "${layout.hazardId}" is not a live hazard whose copy the puzzle can reuse`);
+    }
+    if (!HAZARD_PUZZLE_REGIONS.includes(layout.region)) {
+        reasons.push(`region: "${layout.region}" is not an Act ${HAZARD_PUZZLE_ACT} region`);
     }
     if (layout.hand.length === 0) reasons.push('hand: a puzzle needs at least one card');
     layout.hand.forEach((id, i) => checkCard(id, `hand[${i}]`, reasons));
