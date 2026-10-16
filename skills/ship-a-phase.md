@@ -436,7 +436,9 @@ invocation — see §7 Hard Rule 12.
     not a verification step. Do not block phase delivery on
     GitHub issue API hiccups.
 11. **Never end the turn waiting on a backgrounded research
-    sub-agent.** When a `/ship-a-phase` tick needs a sub-agent's
+    sub-agent or shell job** (a mutation run, a long replay: push
+    the branch and open the PR before starting one, lesson
+    `background-then-end-turn`). When a `/ship-a-phase` tick needs a sub-agent's
     findings (e.g. an `Explore` mapping a save-schema migration
     pattern) before code can be written, spawn it in the
     **foreground** (blocking) and synthesize before proceeding —
