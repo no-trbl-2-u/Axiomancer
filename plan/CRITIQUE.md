@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-16 at commit 6b5e2b6d
-> Pass count: 90
+> Last pass: 2026-10-16 at commit ef1d1dd3
+> Pass count: 91
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -691,7 +691,29 @@
 > hub's Sage reads LVL 15 with 680 VITAE, a pool no level-15 pilgrim
 > can reach.
 
+> **[critique pass 91, 2026-10-16, commit ef1d1dd3] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors. 19 commits
+> after pass 90: the hazard puzzle engine (B3a-B3d, no screen yet),
+> EV1c/EV1d, the dev-section collapse and map wheel zoom (#590), and the
+> RV1 plot. Only #590 reaches a screen in the set. Reconfirmed and not
+> re-filed: pass 90's level-15 Sage at 680 VITAE (both hub captures),
+> pass 89's "you stopped here" tense row (both rest captures), the
+> unfixtured exploration hub bouncing to the title, and the mobile hazard
+> strip's "CHOOSE TO PROC..." (pass 68 trade). One fresh finding: the map
+> gesture line still reads "drag · pinch" on desktop, where #590 made
+> the mouse wheel the zoom.
+
 ## Pending
+
+### [LOW] exploration / map — on desktop the gesture line still says "drag · pinch", but a mouse zooms with the wheel since #590
+- pass: 91 (commit ef1d1dd3)
+- viewport: desktop (1280x800); mobile is correct
+- category: comprehension
+- observation: the late-game hub's chart heads its top-left corner "drag · pinch" at both viewports. #590 gave web a wheel zoom anchored at the cursor (a mouse has no pinch), so on desktop the line names a gesture the player cannot make and leaves out the one that works. The string is also hardcoded in the component, against the package rule that player-facing copy lives outside components.
+- evidence: `.critique-artifacts/desktop/11-late-game-hub.png` and `.txt` ("drag · pinch"); `axiomancer-mobile/components/exploration/MapOverlays.tsx:35`; the wheel handler in `MapCanvas.tsx` (`Platform.OS !== 'web'` guard); `MapOverlays.test.tsx:27,127` pin the string.
+- suggested fix: move the line to a copy file and pick it by platform: "drag · pinch" on native, "drag · scroll to zoom" on web; update the two test pins. Copy only, no rule change.
+- source: critique:drive (unattended)
 
 ### [LOW] exploration hub / tooling — the level-15 Sage fixture shows 680 VITAE, twice what a level-15 pilgrim can now reach
 - pass: 90 (commit 6b5e2b6d)

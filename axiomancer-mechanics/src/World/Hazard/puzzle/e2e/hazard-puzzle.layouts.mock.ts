@@ -9,6 +9,8 @@ function layout(over: Partial<HazardPuzzleLayout> & Pick<HazardPuzzleLayout, 'id
     return {
         title: over.id,
         act: 1,
+        hazardId: 'cracked-cliff',
+        region: 'breakwater',
         hand: [],
         reserve: [],
         dice: [],

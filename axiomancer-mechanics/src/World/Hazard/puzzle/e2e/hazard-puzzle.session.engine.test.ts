@@ -199,6 +199,14 @@ describe('validateHazardPuzzleLayout (A4)', () => {
         }
     });
 
+    it('rejects a hazard with no live copy and a region outside Act 1', () => {
+        const v = validateHazardPuzzleLayout({ ...MIXED_LAYOUT, hazardId: 'nope', region: 'aporia-act-1' as never });
+        expect(v.reasons).toEqual([
+            'hazardId: "nope" is not a live hazard whose copy the puzzle can reuse',
+            'region: "aporia-act-1" is not an Act 1 region',
+        ]);
+    });
+
     it('rejects unknown cards, an empty hand and non-positive goals', () => {
         const v = validateHazardPuzzleLayout(
             testLayout({ id: 'junk', hand: [], reserve: ['nope'], goals: { safe: 0, risk: [3, 0] } }),

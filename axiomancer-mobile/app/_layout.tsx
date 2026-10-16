@@ -60,6 +60,7 @@ import LabyrinthScreen from './labyrinth/index';
 import DevArtGallery from './devart/index';
 import DevRoomGallery from './devart/rooms';
 import DevAftermathPanel from './devaftermath/index';
+import DevHazardPuzzles from './devpuzzle/index';
 
 // Vendored locally (OFL-licensed .ttf files, sourced under
 // assets/fonts/LICENSES/). Keys are the exact fontFamily strings
@@ -378,6 +379,11 @@ function RootLayout() {
             <Stack.Screen
               name="devaftermath/index"
               component={DevAftermathPanel}
+              options={{ headerShown: false, presentation: 'fullScreenModal' }}
+            />
+            <Stack.Screen
+              name="devpuzzle/index"
+              component={DevHazardPuzzles}
               options={{ headerShown: false, presentation: 'fullScreenModal' }}
             />
           </Stack>

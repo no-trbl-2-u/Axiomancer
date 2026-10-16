@@ -7,6 +7,7 @@
  * rolls, never shuffles and never advances to a second round.
  */
 
+import type { MapName } from '../../map.library';
 import type { HazardDieKind, HazardRouteKey, HazardSessionState } from '../hazard.types';
 
 /** Difficulty band a layout declares per route (the solver checks it). */
@@ -41,6 +42,13 @@ export interface HazardPuzzleLayout {
     title: string;
     /** Every hazard puzzle is scoped to Act 1; the validator rejects any other act. */
     act: number;
+    /**
+     * The live hazard whose copy (title, scenario, route names) the puzzle
+     * reuses; no new story text is written for a puzzle.
+     */
+    hazardId: string;
+    /** The Act 1 region the puzzle sits in; its gathering list gives the outcome's material. */
+    region: MapName;
     /** Hand card ids, in order. */
     hand: string[];
     /** Predetermined DRAW cards, in the order they are drawn. */

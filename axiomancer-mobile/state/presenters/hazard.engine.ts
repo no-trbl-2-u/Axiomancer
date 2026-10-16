@@ -206,6 +206,26 @@ function keywordsOf(def: HazardCardDef): { id: string; name: string; desc: strin
     return ids.map((k) => ({ id: k, ...HAZARD_KEYWORDS[k] }));
 }
 
+/** A board die as the hazard screens render it (shared with the puzzle board). */
+export function hazardDieVM(d: HazardSessionState['dice'][number]): HazardDieVM {
+    return {
+        id: d.id,
+        kind: d.kind,
+        state: d.state,
+        isHex: d.kind === 'hex',
+        usable: d.kind !== 'hex' && d.state === 'available',
+        temporary: d.temporary === true,
+        accessibilityLabel: `${DIE_WORD[d.kind]} die, ${
+            d.kind === 'hex' ? 'blocked' : d.state
+        }${d.temporary ? ', conjured' : ''}`,
+    };
+}
+
+/** A hand or staged card on a live board (shared with the puzzle board). */
+export function hazardEntryCardVM(entry: HazardHandEntry, session: HazardSessionState): HazardCardVM {
+    return cardVM(entry, session);
+}
+
 function cardVM(entry: HazardHandEntry, session: HazardSessionState): HazardCardVM {
     const def = getHazardCardDef(entry.cardId);
     const dieAvailable =
@@ -400,17 +420,7 @@ export function selectHazardViewModel(state: Pick<AppStoreState, 'hazard'>): Haz
     const proj = hazardProjectedProgress(session);
     const isRisk = session.route === 'risk';
 
-    const dice: HazardDieVM[] = session.dice.map((d) => ({
-        id: d.id,
-        kind: d.kind,
-        state: d.state,
-        isHex: d.kind === 'hex',
-        usable: d.kind !== 'hex' && d.state === 'available',
-        temporary: d.temporary === true,
-        accessibilityLabel: `${DIE_WORD[d.kind]} die, ${
-            d.kind === 'hex' ? 'blocked' : d.state
-        }${d.temporary ? ', conjured' : ''}`,
-    }));
+    const dice: HazardDieVM[] = session.dice.map(hazardDieVM);
 
     let meters: HazardMeterVM[] = [];
     let meterDetail: string | null = null;
