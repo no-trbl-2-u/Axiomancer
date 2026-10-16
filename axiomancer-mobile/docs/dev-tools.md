@@ -79,7 +79,9 @@ and persists nothing). Tests: `state/dev/__tests__/skip-event.test.ts`.
 Sections read top-down in the order a tester thinks: **see state → shape
 the player → shape the deck → stand somewhere → fight / play a minigame →
 collect rewards → drive the story → tweak the UI → manage the run and
-read the log.** Section container ids are `dev-section-<key>`.
+read the log.** Section container ids are `dev-section-<key>`; each
+section starts closed and its header (`dev-section-<key>-toggle`) opens it.
+Open sections stay open across visits to `/dev` until the app restarts.
 
 ## Sections and controls
 

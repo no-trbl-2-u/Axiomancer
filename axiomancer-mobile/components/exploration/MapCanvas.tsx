@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
     useAnimatedStyle,
@@ -483,6 +483,36 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
 
     const composed = Gesture.Simultaneous(pinch, pan);
 
+    // Web: a mouse has no pinch, so the wheel zooms (a trackpad pinch arrives
+    // as ctrl+wheel and lands here too). Anchored at the cursor: with the
+    // canvas's top-left transform origin a screen point is `t + s·c`, so
+    // holding it fixed across s→s' gives t' = p − (s'/s)(p − t).
+    const wrapRef = React.useRef<View>(null);
+    React.useEffect(() => {
+        if (Platform.OS !== 'web') return;
+        const el = wrapRef.current as unknown as HTMLElement | null;
+        if (!el?.addEventListener) return;
+        const onWheel = (e: WheelEvent) => {
+            e.preventDefault();
+            const rect = el.getBoundingClientRect();
+            const px = e.clientX - rect.left;
+            const py = e.clientY - rect.top;
+            const s = scale.value;
+            const next = Math.min(MAX_SCALE, Math.max(minScale, s * Math.exp(-e.deltaY * 0.0015)));
+            const k = next / s;
+            const nx = px - k * (px - tx.value);
+            const ny = py - k * (py - ty.value);
+            scale.value = next;
+            savedScale.value = next;
+            tx.value = nx;
+            ty.value = ny;
+            savedTx.value = nx;
+            savedTy.value = ny;
+        };
+        el.addEventListener('wheel', onWheel, { passive: false });
+        return () => el.removeEventListener('wheel', onWheel);
+    }, [minScale, scale, savedScale, tx, ty, savedTx, savedTy]);
+
     const mapTransform = useAnimatedStyle(() => ({
         transform: [
             { translateX: tx.value },
@@ -496,7 +526,7 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
     }));
 
     return (
-        <View style={styles.graphWrap} onLayout={onWrapLayout} testID="map-canvas-wrapper">
+        <View ref={wrapRef} style={styles.graphWrap} onLayout={onWrapLayout} testID="map-canvas-wrapper">
             <View style={[StyleSheet.absoluteFillObject, styles.graphBackground]} />
 
             <GestureDetector gesture={composed}>
@@ -507,14 +537,20 @@ export function MapCanvas({ nodes, edges, sheet, overlays, children }: MapCanvas
                     {/* The engraving plate — pans and zooms with the chart so the
                         wood feels painted onto the page. An atmosphere plate is
                         dimmed so roads and nodes keep contrast (dim, never blur);
-                        a plate that is the map itself reads near full. */}
+                        a plate that is the map itself reads near full.
+                        Wrapped pointerEvents="none": on web `expo-image` is a
+                        native <img>, and a mouse drag that starts on it fires
+                        the browser's image drag-and-drop, which cancels the
+                        pan's pointer stream — the map would not move. */}
                     {sheet != null && (
-                        <Image
-                            source={sheet.backdrop}
-                            style={[styles.backdropPlate, { opacity: sheet.plateOpacity }]}
-                            contentFit="cover"
-                            testID="map-backdrop"
-                        />
+                        <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+                            <Image
+                                source={sheet.backdrop}
+                                style={[styles.backdropPlate, { opacity: sheet.plateOpacity }]}
+                                contentFit="cover"
+                                testID="map-backdrop"
+                            />
+                        </View>
                     )}
                     {/* The chart sheet: diagonal hatch + contour hills under the
                         roads — only over an atmosphere plate, never over a plate

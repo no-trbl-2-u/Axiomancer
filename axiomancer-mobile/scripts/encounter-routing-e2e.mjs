@@ -37,6 +37,7 @@ import { readFile, stat } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { resolve, dirname, join, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { openDevSection } from './dev-section.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..')
@@ -182,6 +183,7 @@ async function checkButton(page, baseUrl, c) {
     // Open the dev tools (SELF → DEV TOOLS → the /dev Developer screen)
     // and fire the trigger button.
     await openDevTools(page)
+    await openDevSection(page, 'encounters', `debug-trigger-encounter-${c.button}`)
     const btn = page.getByTestId(`debug-trigger-encounter-${c.button}`)
     await btn.waitFor({ state: 'visible', timeout: 15000 })
     await btn.click()
