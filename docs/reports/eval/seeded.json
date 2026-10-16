@@ -1,0 +1,225 @@
+{
+  "stamp": {
+    "commit": "b0ac22f8",
+    "date": "2026-10-16T02:49:04Z"
+  },
+  "seeds": [
+    {
+      "id": "D1",
+      "pr": 534,
+      "fix": "4080f4a0",
+      "bug": "`riderPairs` ignored damage riders, so A Plain Blow drew no FREE pill",
+      "planted": [
+        "axiomancer-mobile/components/combat/glyphShapes.ts",
+        "axiomancer-mobile/state/presenters/card-program.engine.ts",
+        "axiomancer-mobile/state/presenters/combat-encounter.engine.ts",
+        "scripts/build-catalog.mjs"
+      ],
+      "triggered": [
+        "verify-drift.yml",
+        "verify-mobile.yml"
+      ],
+      "gates": {
+        "ci": {
+          "verdict": "missed",
+          "why": "verify-drift.yml, verify-mobile.yml triggers, and its related tests pass"
+        },
+        "before": {
+          "tests": [
+            "axiomancer-mobile/components/combat/__tests__/glyphShapes.test.ts",
+            "axiomancer-mobile/state/presenters/__tests__/card-program.engine.test.ts",
+            "axiomancer-mobile/state/presenters/__tests__/combat-card-vm.test.ts"
+          ],
+          "verdict": "missed",
+          "failing": [],
+          "noisy": []
+        },
+        "after": {
+          "tests": [
+            "axiomancer-mobile/components/combat/__tests__/glyphShapes.test.ts",
+            "axiomancer-mobile/state/presenters/__tests__/card-program.engine.test.ts",
+            "axiomancer-mobile/state/presenters/__tests__/combat-card-vm.test.ts"
+          ],
+          "verdict": "caught",
+          "failing": [
+            "axiomancer-mobile/state/presenters/__tests__/card-program.engine.test.ts",
+            "axiomancer-mobile/state/presenters/__tests__/combat-card-vm.test.ts"
+          ],
+          "noisy": []
+        }
+      }
+    },
+    {
+      "id": "D2",
+      "pr": 523,
+      "fix": "cfadbf7a",
+      "bug": "a loose die drop refused at the SACRIFICE floor showed no VITAE ring callout (#523's own follow-up)",
+      "planted": [
+        "axiomancer-mobile/components/combat/encounter/CombatBoard.tsx"
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "gates": {
+        "ci": {
+          "verdict": "missed",
+          "why": "verify-mobile.yml triggers, and its related tests pass"
+        },
+        "before": {
+          "tests": [
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.S1-board.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.colorlaw.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.drag-renders.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.fresh-eyes-repair.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.handfan.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.juice.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.multistage.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.paid-column.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.playtest-2026-09-04.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.program-cards.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.rail-ledger.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.region-arena.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.sacfloor.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.staged-a11y.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.stale-powered.test.tsx"
+          ],
+          "verdict": "missed",
+          "failing": [],
+          "noisy": [
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.region-arena.test.tsx"
+          ]
+        },
+        "after": {
+          "tests": [
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.S1-board.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.colorlaw.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.drag-renders.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.fresh-eyes-repair.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.handfan.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.juice.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.multistage.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.paid-column.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.playtest-2026-09-04.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.program-cards.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.rail-ledger.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.region-arena.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.sacfloor.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.staged-a11y.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.stale-powered.test.tsx"
+          ],
+          "verdict": "caught",
+          "failing": [
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.sacfloor.test.tsx"
+          ],
+          "noisy": [
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.region-arena.test.tsx"
+          ]
+        }
+      }
+    },
+    {
+      "id": "D3",
+      "pr": 529,
+      "fix": "9d44ca5e",
+      "bug": "the leftmost hand card's FREE pill was clipped at the screen edge (#529's final head)",
+      "planted": [
+        "axiomancer-mobile/components/combat/encounter/CombatBoard.tsx"
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "gates": {
+        "ci": {
+          "verdict": "missed",
+          "why": "verify-mobile.yml triggers, and its related tests pass"
+        },
+        "before": {
+          "tests": [
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.S1-board.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.colorlaw.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.drag-renders.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.footer-dock.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.fresh-eyes-repair.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.handfan.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.juice.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.multistage.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.paid-column.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.playtest-2026-09-04.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.program-cards.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.region-arena.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.sacfloor.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.sig-column.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.staged-a11y.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.stale-powered.test.tsx"
+          ],
+          "verdict": "missed",
+          "failing": [],
+          "noisy": [
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.region-arena.test.tsx"
+          ]
+        },
+        "after": {
+          "tests": [
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.S1-board.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.colorlaw.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.drag-renders.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.footer-dock.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.fresh-eyes-repair.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.handfan.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.juice.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.multistage.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.paid-column.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.playtest-2026-09-04.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.program-cards.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.region-arena.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.sacfloor.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.sig-column.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.staged-a11y.test.tsx",
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.stale-powered.test.tsx"
+          ],
+          "verdict": "caught",
+          "failing": [
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.handfan.test.tsx"
+          ],
+          "noisy": [
+            "axiomancer-mobile/components/combat/encounter/__tests__/CombatBoard.region-arena.test.tsx"
+          ]
+        }
+      }
+    },
+    {
+      "id": "D4",
+      "pr": 543,
+      "fix": "80ea6f44",
+      "bug": "the `pr-resolve` union merge split moved queue rows",
+      "planted": [
+        "scripts/pr-resolve.mjs"
+      ],
+      "triggered": [],
+      "gates": {
+        "ci": {
+          "verdict": "missed",
+          "why": "no `verify-*` workflow triggers on these paths"
+        },
+        "before": {
+          "tests": [
+            "scripts/loop-pr.test.mjs"
+          ],
+          "verdict": "missed",
+          "failing": [],
+          "noisy": []
+        },
+        "after": {
+          "tests": [
+            "scripts/loop-pr.test.mjs"
+          ],
+          "verdict": "caught",
+          "failing": [
+            "scripts/loop-pr.test.mjs"
+          ],
+          "noisy": []
+        }
+      }
+    }
+  ]
+}

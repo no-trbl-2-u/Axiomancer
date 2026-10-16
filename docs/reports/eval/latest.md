@@ -161,3 +161,126 @@ None.
 | #562 | hazard-scar-rest-recovery.engine.test.ts | changed | fails-on-parent (a case fails on the parent) | 0 of 3 |
 
 <!-- eval:parent-replay:end -->
+
+<!-- eval:seeded:start -->
+
+## Planted defects (EV1c, A6)
+
+Stamp: commit `b0ac22f8` (2026-10-16T02:49:04Z). Regenerate with `node scripts/eval/seeded-replay.mjs`; the data is `docs/reports/eval/seeded.json`.
+
+Each real bug of 2026-10-14 is planted again by reverting its fix's source (not its tests) in a detached worktree that is never pushed. Each mechanical gate then meets it:
+
+- **CI path filters**: a `verify-*` workflow triggers on the planted paths.
+- **verify, tests as they stood**: the related tests at the fix's parent, where the bug lived.
+- **verify, with the fix's tests**: the related tests at the fix, with its source reverted.
+
+A related test that also fails at the unplanted fix (the control run) is noise and is dropped from both test gates; the JSON names it.
+
+The related tests are the test files beside a planted file whose names start with its name, plus the files the fix itself changed. The antagonist, `/critique` and the merge gate are agent or session judges and are scored from the ledger, not replayed (brief Decisions).
+
+| Seed | Bug | Fix | Planted paths | CI path filters | verify, tests as they stood | verify, with the fix's tests |
+|---|---|---|---|---|---|---|
+| D1 (#534) | `riderPairs` ignored damage riders, so A Plain Blow drew no FREE pill | 4080f4a0 | axiomancer-mobile/components/combat/glyphShapes.ts, axiomancer-mobile/state/presenters/card-program.engine.ts, axiomancer-mobile/state/presenters/combat-encounter.engine.ts, scripts/build-catalog.mjs | missed (verify-drift.yml, verify-mobile.yml triggers, and its related tests pass) | missed | caught (card-program.engine.test.ts, combat-card-vm.test.ts) |
+| D2 (#523) | a loose die drop refused at the SACRIFICE floor showed no VITAE ring callout (#523's own follow-up) | cfadbf7a | axiomancer-mobile/components/combat/encounter/CombatBoard.tsx | missed (verify-mobile.yml triggers, and its related tests pass) | missed | caught (CombatBoard.sacfloor.test.tsx) |
+| D3 (#529) | the leftmost hand card's FREE pill was clipped at the screen edge (#529's final head) | 9d44ca5e | axiomancer-mobile/components/combat/encounter/CombatBoard.tsx | missed (verify-mobile.yml triggers, and its related tests pass) | missed | caught (CombatBoard.handfan.test.tsx) |
+| D4 (#543) | the `pr-resolve` union merge split moved queue rows | 80ea6f44 | scripts/pr-resolve.mjs | missed (no `verify-*` workflow triggers on these paths) | missed | caught (loop-pr.test.mjs) |
+
+CI path filters: 0 of 4 caught; verify, tests as they stood: 0 of 4 caught; verify, with the fix's tests: 4 of 4 caught.
+
+<!-- eval:seeded:end -->
+
+<!-- eval:mutation:start -->
+
+## Mutation scores (EV1c, A5)
+
+Stamp: commit `15a2fa76` (2026-10-16T07:25:59Z). Regenerate with `npm run eval:mutation`; the data, with every survivor, is `docs/reports/eval/mutation.json`.
+
+StrykerJS mutates the named files and runs the workspace's own tests against each mutant, in a detached worktree. The score is killed plus timed-out mutants over every mutant that compiled, uncovered ones included. A survivor is a change to the code that no test noticed. Never part of `verify`.
+
+| Target | Files | Mutants | Killed | Timed out | Survived | No coverage | Score | Run |
+|---|---|---|---|---|---|---|---|---|
+| mechanics: combat resolution | 6 | 842 | 623 | 3 | 161 | 33 | 76.3% | ok, 738s |
+| mobile: combat presenters | 0 | 2276 | - | 2 | 6 | - | n/a | over budget (1380s): 564 of 2276 tested, 6 survived, 1380s |
+
+### Per file
+
+| File | Mutants | Survived | No coverage | Score |
+|---|---|---|---|---|
+| axiomancer-mechanics/src/Combat/combat.dice.ts | 109 | 25 | 5 | 72.5% |
+| axiomancer-mechanics/src/Combat/effect-modifiers.ts | 133 | 13 | 17 | 77.3% |
+| axiomancer-mechanics/src/Combat/effects.ts | 370 | 71 | 2 | 80.2% |
+| axiomancer-mechanics/src/Combat/health.ts | 27 | 2 | 6 | 70.4% |
+| axiomancer-mechanics/src/Combat/resist.ts | 17 | 5 | 0 | 70.6% |
+| axiomancer-mechanics/src/Combat/stat-scaling.ts | 186 | 45 | 3 | 71.1% |
+
+### Survivors: mechanics: combat resolution
+
+| File:line | Mutator | Replacement | Status |
+|---|---|---|---|
+| combat.dice.ts:22 | ConditionalExpression | `true` | Survived |
+| combat.dice.ts:22 | ConditionalExpression | `false` | Survived |
+| combat.dice.ts:22 | EqualityOperator | `color !== 'body'` | Survived |
+| combat.dice.ts:22 | StringLiteral | `""` | Survived |
+| combat.dice.ts:22 | ConditionalExpression | `false` | Survived |
+| combat.dice.ts:22 | EqualityOperator | `color !== 'mind'` | Survived |
+| combat.dice.ts:22 | StringLiteral | `""` | Survived |
+| combat.dice.ts:36 | ArrayDeclaration | `["Stryker was here"]` | Survived |
+| combat.dice.ts:40 | CallExpression | `;` | Survived |
+| combat.dice.ts:58 | MethodExpression | `colors` | Survived |
+| combat.dice.ts:59 | BooleanLiteral | `true` | Survived |
+| combat.dice.ts:71 | ConditionalExpression | `false` | Survived |
+| combat.dice.ts:71 | StringLiteral | `""` | Survived |
+| combat.dice.ts:72 | BooleanLiteral | `false` | NoCoverage |
+| combat.dice.ts:72 | ConditionalExpression | `false` | Survived |
+| combat.dice.ts:72 | StringLiteral | `""` | Survived |
+| combat.dice.ts:80 | BlockStatement | `{}` | NoCoverage |
+| combat.dice.ts:81 | MethodExpression | `dice` | NoCoverage |
+| combat.dice.ts:81 | ArrowFunction | `() => undefined` | NoCoverage |
+| combat.dice.ts:86 | EqualityOperator | `d.state !== 'available'` | Survived |
+| combat.dice.ts:86 | ConditionalExpression | `true` | Survived |
+| combat.dice.ts:86 | StringLiteral | `""` | Survived |
+| combat.dice.ts:106 | LogicalOperator | `d.state === 'spent' \|\| d.color === color` | Survived |
+| combat.dice.ts:106 | ConditionalExpression | `true` | Survived |
+| combat.dice.ts:106 | ConditionalExpression | `true` | Survived |
+| combat.dice.ts:107 | LogicalOperator | `d.state === 'spent' \|\| d.color === 'wild'` | Survived |
+| combat.dice.ts:107 | ConditionalExpression | `true` | Survived |
+| combat.dice.ts:107 | ConditionalExpression | `true` | Survived |
+| combat.dice.ts:108 | MethodExpression | `dice` | Survived |
+| combat.dice.ts:116 | BlockStatement | `{}` | NoCoverage |
+| effect-modifiers.ts:31 | ConditionalExpression | `false` | Survived |
+| effect-modifiers.ts:32 | ConditionalExpression | `false` | Survived |
+| effect-modifiers.ts:32 | EqualityOperator | `result.amplificationValue <= INTERACTION_AMPLIFICATION.MIN_MEANINGF...` | Survived |
+| effect-modifiers.ts:35 | ConditionalExpression | `true` | Survived |
+| effect-modifiers.ts:35 | EqualityOperator | `clamped >= current` | Survived |
+| effect-modifiers.ts:123 | ConditionalExpression | `true` | Survived |
+| effect-modifiers.ts:123 | EqualityOperator | `flat >= 0` | Survived |
+| effect-modifiers.ts:146 | ConditionalExpression | `false` | Survived |
+| effect-modifiers.ts:149 | ConditionalExpression | `false` | Survived |
+| effect-modifiers.ts:149 | EqualityOperator | `raw <= INTERACTION_AMPLIFICATION.MIN_MEANINGFUL_AMPLIFICATION` | Survived |
+
+154 more in `mutation.json`.
+
+### Survivors: mobile: combat presenters
+
+No report (over budget (1380s): 564 of 2276 tested, 6 survived).
+
+<!-- eval:mutation:end -->
+
+<!-- eval:miss-rates:start -->
+
+## Miss rate per judge (EV1c, A7)
+
+Stamp: commit `0c18f2f7` (2026-10-16T07:28:26Z). Regenerate with `node scripts/eval/miss-rates.mjs`; inputs: ledger at `86eea99d`, parent replay at `5085b096`, planted defects at `b0ac22f8`, mutation at `15a2fa76`.
+
+| Judge | Missed | Of | Rate | Rows it comes from | How it is counted |
+|---|---|---|---|---|---|
+| CI and its path filters | 4 | 4 | 100% | D1 (#534), D2 (#523), D3 (#529), D4 (#543) | 1 of 4 planted defects trigger no `verify-*` workflow (D4). Path coverage: 9 of 26 ledger PRs changed code no filter covers (#505, #507, #509, #520, #523, #526, #535, #543, #549). |
+| `verify` | 4 | 4 | 100% | D1 (#534), D2 (#523), D3 (#529), D4 (#543) | Tests as they stood at each fix's parent. Each fix's own tests catch its defect: 4 of 4. Mutation: mechanics: combat resolution: 76.3% (194 of 842 mutants survive or are uncovered); mobile: combat presenters: over budget (1380s): 564 of 2276 tested, 6 survived. |
+| The antagonist | 4 | 5 | 80% | #520 (S3), #521 (S3), #523 (S3, S5), #526 (S4) | Denominator: PRs carrying a seeded escape that the antagonist reviewed before merge. It reviewed 6 of 26 ledger PRs; 1 drew a "not a pass". |
+| `/critique` | not measured | - | - | - | it plays the deployed web build after merge and no ledger row records what a pass saw against what had escaped, so it has no denominator. Context: 5 follow-up fix(es) in the ledger cite a critique pass. |
+| The merge gate | 3 | 26 | 11.5% | #509, #529, #541 | A miss is a merge before every check on the final head finished, or over an antagonist "not a pass" (S1). |
+| The builder's own `[x]` | 3 | 65 | 4.6% | #521 A4 (S3), #523 A6 (S3), #523 verify:visual (S5) | Misses: ticks the parent replay found unproven (0), the seeded S3 ticks and S5's missing shot. 49 of 65 ticks name no test, so the replay can neither prove nor clear them. |
+
+Android has no gate at all (S6), so it has no rate (brief Decisions).
+
+<!-- eval:miss-rates:end -->
