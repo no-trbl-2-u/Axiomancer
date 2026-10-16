@@ -1,7 +1,7 @@
 /**
- * CombatEncounterPanel — the card-and-dice combat surface, hosted by BOTH
- * the dev route (`app/combat-encounter/index.tsx`) AND in-place inside the
- * live `EncounterModalOverlay` when the player triggers a map encounter.
+ * CombatEncounterPanel — the card-and-dice combat surface, hosted by the
+ * live `/combat-encounter` route (`app/combat-encounter/index.tsx`) for
+ * every map and labyrinth fight.
  *
  * The engine `CombatEncounterState` is pure, so the panel holds it in local
  * React state and dispatches engine transitions; the presenter

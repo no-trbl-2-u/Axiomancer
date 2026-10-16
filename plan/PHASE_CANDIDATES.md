@@ -56,6 +56,11 @@
 - conflicts: the "Bias" and "Last pass" headers at the top of each queue are the conflict magnet; they move to a tiny separate file either way.
 
 
+### [ ] [score 4.0] Guard every root gate against the fresh-router re-push (lesson `gate-router-identity`, seen 2x)
+- Filed by the CR1b retro (2026-10-15). `useRouter()` returns a fresh object every render, so a gate effect keyed on `router` re-runs on any re-render; `EventGate` (stacked its screen twice) and `LabyrinthGate` (re-pushed `/labyrinth` over a labyrinth fight, fixed in #573) both needed a once-per-session latch.
+- The automation: a hermetic test that mounts each `components/*Gate.tsx` with a router mock returning a fresh object per call, opens its session, re-renders with the pathname moved off its route, and asserts exactly one push. `HazardGate`, `RestGate`, `CacheGate`, `ItemRewardGate`, `BlacksmithGate`, `CombatGate`, `EventGate`, `LabyrinthGate`.
+- Size S, area:mobile. Needs a brief: `/plot`.
+
 ### [ ] [score 6.5] The keyword/card revamp phase: pick one of three process plans (attended, D37) — nothing starts until T picks
 - **PICKED 2026-09-30 (D73):** Plan B, amended. The card sessions run as
   owner-led B6 (`plan/revamp/cards.md`); this candidate stays only as the

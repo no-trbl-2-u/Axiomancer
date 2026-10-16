@@ -662,14 +662,13 @@ describe('selectExplorationViewModel: LEAGUES bucket', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Encounter modal seam
+// Encounter seam
 //
 // Tapping an
 // encounter / boss node populates the engine's pending event slice;
-// the exploration screen mounts <EncounterModalOverlay> when that
-// slice carries `kind === 'combat-prelude'`. These tests pin the
-// presenter-level behaviour the overlay depends on; the overlay itself
-// is hermetic (pure props in, dispatches out).
+// <CombatGate> engages it when that slice carries
+// `kind === 'combat-prelude'`. These tests pin the presenter-level
+// behaviour the gate depends on.
 // ---------------------------------------------------------------------------
 
 import {
@@ -679,7 +678,7 @@ import {
     selectHasActiveCombatPrelude,
 } from '@/state/presenters/event.engine';
 
-describe('encounter-modal seam (Tick D)', () => {
+describe('encounter seam (Tick D)', () => {
     function moveToFirstEncounter(): {
         store: ReturnType<typeof createAppStore>;
         actions: ReturnType<typeof createAppActions>;

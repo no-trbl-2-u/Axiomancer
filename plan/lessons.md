@@ -79,6 +79,7 @@
 - **brief-table-vs-prose** · LV1's A2 table and its Decisions prose disagreed on the growth-band edge (table: band by the level a step leaves; prose: by the level it reaches); only computing both showed the table was the consistent one (ship LV1) → when a brief pins numbers, compute them from each reading of its prose before coding; the pinned table wins, the call goes under Decisions · seen 1× · last 2026-10-15 · open
 - **measured-drift-by-design** · `scripts/measured-truth.mjs` filed 23 `[content]` AUDIT drift rows for the easing the LV1 brief itself predicted (ship LV1) → a phase whose brief names the drift keeps the regenerated report and history line but drops those AUDIT rows, naming the brief's follow-up under Decisions · seen 1× · last 2026-10-15 · open
 - **msys-rev-path** · Git Bash rewrites `git show origin/main:<path>` into a Windows path (`origin\main;...`, "ambiguous argument") → set `MSYS_NO_PATHCONV=1` before any `<rev>:<path>` git call on this box · seen 1× · last 2026-10-15 · open
+- **adjacent-row-push** · a plan-only push to main edited the build-plan row next to one an open PR ticks (CR1c skip beside CR1b), and git conflicted on the adjacent lines (march CR1c) → before pushing a row edit to main, check `git merge-tree` against each open PR branch that ticks a neighbouring row, and merge main into that branch in the same tick if it conflicts · seen 1× · last 2026-10-15 · open
 
 <!-- @domain:mobile -->
 
@@ -90,6 +91,7 @@
 - **brief-e2e-script-paths** · the PF4 brief's verify gate named `node scripts/<x>-e2e.mjs` from the root, but the journeys live in `axiomancer-mobile/scripts/` (ship PF4) → run journeys as `npm run e2e:<name> -w axiomancer-mobile` (the package.json names) whatever path a brief gives · seen 1× · last 2026-10-14 · open
 - **spy-on-preset-mock** · `jest.spyOn(AccessibilityInfo, 'announceForAccessibility')` returned react-native's preset `jest.fn`, so `restoreAllMocks` (which the hermeticity audit demands) neither restored nor cleared it, and calls leaked across tests (iterate sacfloor announce) → in a file that spies on a react-native preset mock, tear down with `jest.clearAllMocks(); jest.restoreAllMocks();` · seen 1× · last 2026-10-15 · open
 - **e2e-export-windows** · the Playwright journeys spawn `npx expo export` with `spawnSync` and no shell, which fails on Windows (`npx` is `npx.cmd`) and exits 3 as a boot failure (ship CR1a) → on Windows run `npx expo export --platform web --output-dir .smoke-dist` by hand, then the journey with its `*_REUSE_EXPORT=1` · seen 1× · last 2026-10-15 · open
+- **gate-router-identity** · a root gate whose effect lists `router` in its deps re-runs every render (`useRouter()` is a fresh object), so with no latch it re-pushes its route when another route moves the pathname: `EventGate` stacked its screen twice, `LabyrinthGate` buried a labyrinth fight (ship CR1b) → latch each gate push once per session, and test it with a fresh router object per render · seen 2× · last 2026-10-15 · open
 
 ## Adding a domain
 

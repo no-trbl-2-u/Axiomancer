@@ -113,9 +113,9 @@ export interface PreludeChrome {
     /** Label on the diagonal sash overlaying the illustration top-left. */
     sashLabel: string;
     /**
-     * Chain-bar label rendered top + bottom of the encounter modal
-     * overlay (`SEALED · NO RETREAT`). The diegetic irreversible-
-     * commitment signal — see `components/event/EncounterModalOverlay.tsx`.
+     * The irreversible-commitment label (`SEALED · NO RETREAT`). Drawn
+     * by the encounter overlay's chain bars until phase CR1b retired the
+     * overlay; no screen renders it now.
      */
     sealLabel: string;
     /**
@@ -233,8 +233,8 @@ export function selectHasActiveEvent(state: AppStoreState): boolean {
  * Returns `true` when the engine has an active event AND that event
  * is a **paced** (narrative-choice) one — the kind that renders as a
  * full-screen `/event` route. Combat-adjacent events
- * (`'combat-prelude'`) render in-place via `<EncounterModalOverlay>`
- * over the exploration map and must NOT route to the full-screen
+ * (`'combat-prelude'`) are engaged by `<CombatGate>` and fought on the
+ * `/combat-encounter` route, and must NOT route to the full-screen
  * shell; the `EventGate` reads this selector instead of the broader
  * `selectHasActiveEvent` to keep the two shells from mounting
  * simultaneously.
@@ -269,11 +269,9 @@ export function selectPacedEventRoute(state: AppStoreState): PacedEventRoute | n
 
 /**
  * Returns `true` when the engine has an active **combat-adjacent**
- * event (kind `'combat-prelude'`) — the kind that mounts
- * `<EncounterModalOverlay>` over the map. The tab layout consumes
- * this OR `useCombatMode().inCombat` to flip the WILDS/STRIFE
- * positional slot to STRIFE early — while the encounter modal is
- * up, before the player commits FIGHT.
+ * event (kind `'combat-prelude'`) — the kind `<CombatGate>` engages
+ * onto the `/combat-encounter` route. True only for the instant before
+ * the gate engages it.
  */
 export function selectHasActiveCombatPrelude(state: AppStoreState): boolean {
     if (!selectHasActiveEvent(state)) return false;
@@ -332,7 +330,7 @@ function withChrome(
 // cached → Maximum update depth exceeded"). The empty-state path returns
 // the frozen `EMPTY_VM` singleton, but every active-event path composes a
 // fresh frozen VM, so a direct subscriber (e.g. the exploration screen's
-// `useGameState(selectEventViewModel)`, which mounts `<EncounterModalOverlay>`)
+// `useGameState(selectEventViewModel)`)
 // would re-render forever once an event resolved. We cache the computed VM
 // against the immutable slices it reads — `event`, `combat`, `quests`,
 // `flags` — which Zustand replaces only when they actually change. These

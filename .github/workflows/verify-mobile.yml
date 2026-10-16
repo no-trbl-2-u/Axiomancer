@@ -216,11 +216,17 @@ jobs:
         if: steps.scope.outputs.run_integration == 'true'
         run: npm run e2e:theme --workspace axiomancer-mobile
 
-      - name: Exploration <-> combat-prelude round trip
+      - name: Exploration <-> combat round trip (and mid-fight reload)
         if: steps.scope.outputs.encounters == 'true'
         run: npm run e2e:exploration-roundtrip --workspace axiomancer-mobile
         env:
           ROUNDTRIP_E2E_REUSE_EXPORT: '1'
+
+      - name: Labyrinth <-> combat round trip
+        if: steps.scope.outputs.encounters == 'true'
+        run: npm run e2e:labyrinth-roundtrip --workspace axiomancer-mobile
+        env:
+          LABYRINTH_E2E_REUSE_EXPORT: '1'
 
       # A new game walked node to node on the start map: arrival, cache,
       # gathering, a fight to its end, and the hazard route. World/** and the

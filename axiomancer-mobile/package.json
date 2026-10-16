@@ -26,6 +26,7 @@
     "e2e:encounters": "node scripts/encounter-routing-e2e.mjs",
     "e2e:theme": "node scripts/theme-switch-e2e.mjs",
     "e2e:exploration-roundtrip": "node scripts/exploration-combat-roundtrip-e2e.mjs",
+    "e2e:labyrinth-roundtrip": "node scripts/labyrinth-combat-roundtrip-e2e.mjs",
     "e2e:map-walk": "node scripts/map-walk-e2e.mjs",
     "e2e:combat-round": "node scripts/combat-round-e2e.mjs",
     "e2e:combat-round:boss": "ENCOUNTER_KIND=boss PRESET=sage node scripts/combat-round-e2e.mjs",

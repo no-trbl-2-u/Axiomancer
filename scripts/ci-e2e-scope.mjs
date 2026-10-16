@@ -73,6 +73,9 @@ function classifyMobilePath(path, result) {
         /^axiomancer-mobile\/scripts\/encounter-routing-e2e\.mjs$/,
         // The map walk (new game, node to node) runs with the encounter suite.
         /^axiomancer-mobile\/scripts\/map-walk-e2e\.mjs$/,
+        // The combat round trips (map and labyrinth) ride the encounter suite too.
+        /^axiomancer-mobile\/scripts\/(?:exploration|labyrinth)-combat-roundtrip-e2e\.mjs$/,
+        /^axiomancer-mobile\/components\/LabyrinthGate/,
     ]
 
     let matched = false

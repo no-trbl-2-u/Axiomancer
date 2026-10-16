@@ -9,9 +9,8 @@ import { selectPacedEventRoute, type PacedEventRoute } from '@/state/presenters/
  * engine reports an active **paced** event (narrative-choice kind):
  * `/dialogue` for interactions, `/village` for settlements,
  * `/cutscene` for omens, `/event` for everything else.
- * Combat-adjacent events (combat-prelude) render in-place over the
- * exploration map via `<EncounterModalOverlay>` and stay out of the
- * router.
+ * Combat-adjacent events (combat-prelude) belong to `<CombatGate>`,
+ * which engages them onto `/combat-encounter`.
  * Rendered as a side-effect-only component so the gate runs anywhere
  * inside the navigation tree.
  *

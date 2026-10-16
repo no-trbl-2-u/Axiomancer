@@ -2,7 +2,7 @@
 
 ## 1. What this screen is for
 
-An encounter node resolves to a `combat-prelude` event that renders **in place over the map**, not as a route: `<EncounterModalOverlay>` (`components/event/EncounterModalOverlay.tsx`) auto-engages the prelude, then mounts `<CombatEncounterPanel>` (`components/combat/encounter/CombatEncounterPanel.tsx`) running the hazard-pattern combat (Spec 26b: stage a card, power it with a die the Color Law allows, APPLY, END PHASE). Aftermath panels (`components/event/aftermath/*`) close the seal. Rules live in `@mechanics`; the panel keeps engine state in local React state, so `state.combat` stays `null` for the whole fight (`app/(tabs)/exploration/index.tsx` Phase 200 comments).
+An encounter node resolves to a `combat-prelude` event. `<CombatGate>` (`components/CombatGate.tsx`) engages it at once and pushes the full-screen **`/combat-encounter` route**, which mounts `<CombatEncounterPanel>` (`components/combat/encounter/CombatEncounterPanel.tsx`) running the hazard-pattern combat (Spec 26b: stage a card, power it with a die the Color Law allows, APPLY, END PHASE). The panel's own summary ends the fight and the route leaves. Rules live in `@mechanics`; the panel keeps engine state in local React state, so `state.combat` stays `null` for the whole fight (`app/(tabs)/exploration/index.tsx` Phase 200 comments).
 
 ## 2. Enter it directly
 
@@ -16,7 +16,7 @@ An encounter node resolves to a `combat-prelude` event that renders **in place o
 
 | testID | what it is |
 |---|---|
-| `encounter-modal-overlay` | The seal over the map for the whole prelude → combat → aftermath session |
+| `combat-encounter-live` | The live fight route (`/combat-encounter`) |
 | `combat-reveal` | Pre-fight reveal (foe, phases, your vitae) |
 | `combat-reveal-phase-<i>` | One phase card on the reveal |
 | `combat-enter` | ENTER — starts the fight and rolls the first tray |
@@ -49,11 +49,11 @@ An encounter node resolves to a `combat-prelude` event that renders **in place o
 | `combat-victory-panel` / `combat-victory-panel-carry-on` | Victory seal → CARRY ON returns to the map |
 | `combat-friendship-panel` / `combat-friendship-panel-part-as-friends` | Parley seal |
 | `combat-defeat-panel` / `combat-defeat-panel-begin-again` | Defeat seal |
-| `combat-encounter-empty` | Sandbox could not build an encounter |
+| `combat-encounter-empty` | The route opened with no staged fight (it leaves at once) |
 
 ## 4. A correct play, step by step
 
-1. Wait for `encounter-modal-overlay` then `combat-reveal`, then press `combat-enter`.
+1. Wait for the URL `/combat-encounter` then `combat-reveal`, then press `combat-enter`.
 2. **Drag** a `combat-hand-<uid>` into `combat-play-area` → it becomes `combat-staged-<uid>`. A plain tap only opens `combat-card-detail` — close it with `combat-card-detail-close`.
 3. **Drag** a `combat-die-<id>` whose colour matches the card onto `combat-staged-<uid>`; success shows `combat-staged-die`. A die whose aria-label says `MISS face` powers nothing — pick another. A wrong colour flashes `combat-drop-reject`. Use real pointer moves (down → several moves → up); `scripts/combat-round-e2e.mjs` `dragTo` is the reference.
 4. Press `combat-apply-<uid>`. Repeat 2–4 while dice remain, or discard via `combat-trash`.

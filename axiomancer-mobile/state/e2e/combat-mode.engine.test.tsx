@@ -87,45 +87,6 @@ describe('combat-mode: lastOutcome signal', () => {
     });
 });
 
-describe('combat-mode: inEncounterModal session flag (Phase 63c)', () => {
-    it('starts false on a fresh provider', () => {
-        const { result } = renderHook(() => useCombatMode(), { wrapper });
-        expect(result.current.inEncounterModal).toBe(false);
-    });
-
-    it('openEncounterModal flips it true', () => {
-        const { result } = renderHook(() => useCombatMode(), { wrapper });
-        act(() => result.current.openEncounterModal());
-        expect(result.current.inEncounterModal).toBe(true);
-    });
-
-    it('closeEncounterModal flips it back to false', () => {
-        const { result } = renderHook(() => useCombatMode(), { wrapper });
-        act(() => result.current.openEncounterModal());
-        act(() => result.current.closeEncounterModal());
-        expect(result.current.inEncounterModal).toBe(false);
-    });
-
-    it('inEncounterModal is independent of inCombat (modal stays open across combat lifecycle)', () => {
-        const { result } = renderHook(() => useCombatMode(), { wrapper });
-        act(() => result.current.openEncounterModal());
-        act(() => result.current.enterCombat());
-        // Modal open + combat in progress simultaneously — the modal stays
-        // mounted across the prelude → combat transition.
-        expect(result.current.inEncounterModal).toBe(true);
-        expect(result.current.inCombat).toBe(true);
-
-        act(() => result.current.exitCombatWith('victory'));
-        // Combat ended, modal still open (aftermath inside modal).
-        expect(result.current.inCombat).toBe(false);
-        expect(result.current.inEncounterModal).toBe(true);
-        expect(result.current.lastOutcome).toBe('victory');
-
-        act(() => result.current.closeEncounterModal());
-        expect(result.current.inEncounterModal).toBe(false);
-    });
-});
-
 // ---------------------------------------------------------------------------
 // Aftermath data snapshot + dismissAftermath
 // ---------------------------------------------------------------------------
@@ -164,10 +125,9 @@ describe('combat-mode: aftermathData + dismissAftermath', () => {
         expect(result.current.aftermathData).toBeNull();
     });
 
-    it('dismissAftermath atomically clears outcome + data + modal flag', () => {
+    it('dismissAftermath atomically clears outcome + data', () => {
         const { result } = renderHook(() => useCombatMode(), { wrapper });
         act(() => result.current.enterCombat());
-        act(() => result.current.openEncounterModal());
         act(() =>
             result.current.exitCombatWith('victory', {
                 variant: 'victory',
@@ -178,12 +138,10 @@ describe('combat-mode: aftermathData + dismissAftermath', () => {
         );
         expect(result.current.lastOutcome).toBe('victory');
         expect(result.current.aftermathData).not.toBeNull();
-        expect(result.current.inEncounterModal).toBe(true);
 
         act(() => result.current.dismissAftermath());
         expect(result.current.lastOutcome).toBeNull();
         expect(result.current.aftermathData).toBeNull();
-        expect(result.current.inEncounterModal).toBe(false);
     });
 
     it('enterCombat clears any stale aftermathData (mirrors lastOutcome behavior)', () => {
