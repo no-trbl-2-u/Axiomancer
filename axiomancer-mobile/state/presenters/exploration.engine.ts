@@ -441,6 +441,19 @@ export const MAP_LEGEND_LEFT: string = MAP_LEGEND_KEYS
     .map((k) => `${k.glyph} ${k.label}`)
     .join('   ');
 
+/** How the player moves the chart: a finger (native, phone browsers) or a mouse. */
+export type MapPointer = 'touch' | 'mouse';
+
+/**
+ * The chart's gesture line, by pointer. A mouse has no pinch: on web the
+ * wheel zooms, anchored at the cursor (`<MapCanvas>`), so a desktop player
+ * is told to scroll instead (critique pass 91).
+ */
+export const MAP_GESTURE_LINE: Readonly<Record<MapPointer, string>> = Object.freeze({
+    touch: 'drag · pinch',
+    mouse: 'drag · scroll to zoom',
+});
+
 const DRAWER_COPY = {
     emptyMessage: 'every path beside trodden ground stays open — tap a glowing node to travel.',
     title: '✠ WHITHER, PILGRIM?',
