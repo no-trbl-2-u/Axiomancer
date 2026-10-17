@@ -1,11 +1,11 @@
 {
   "stamp": {
-    "commit": "86eea99d",
-    "date": "2026-10-15T18:47:23Z"
+    "commit": "4043ba25",
+    "date": "2026-10-17T10:40:15Z"
   },
   "window": {
     "from": "2026-10-12",
-    "to": "2026-10-15"
+    "to": "2026-10-17"
   },
   "workflows": [
     {
@@ -152,6 +152,12 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -221,6 +227,12 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -303,6 +315,12 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -361,6 +379,12 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -411,6 +435,12 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -486,6 +516,12 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -590,6 +626,12 @@
         "at": "2026-10-14T02:20:51Z",
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -656,6 +698,12 @@
         "at": "2026-10-14T02:20:52Z",
         "mergedOnNotPass": false,
         "mergeScriptComment": true
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -767,6 +815,12 @@
         "at": "2026-10-14T02:20:53Z",
         "mergedOnNotPass": false,
         "mergeScriptComment": true
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -821,6 +875,12 @@
         "at": "2026-10-14T03:23:22Z",
         "mergedOnNotPass": false,
         "mergeScriptComment": true
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -869,6 +929,12 @@
         "at": "2026-10-14T03:23:23Z",
         "mergedOnNotPass": false,
         "mergeScriptComment": true
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -982,6 +1048,12 @@
         "at": "2026-10-14T03:23:57Z",
         "mergedOnNotPass": true,
         "mergeScriptComment": true
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -1029,6 +1101,12 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -1108,6 +1186,12 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -1169,6 +1253,12 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -1223,6 +1313,12 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -1298,6 +1394,12 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -1348,6 +1450,12 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -1413,6 +1521,12 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -1462,6 +1576,12 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -1521,6 +1641,12 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -1573,6 +1699,12 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -1622,6 +1754,12 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -1672,6 +1810,12 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -1721,6 +1865,12 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     },
     {
@@ -1799,6 +1949,1227 @@
         "at": null,
         "mergedOnNotPass": false,
         "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
+      }
+    },
+    {
+      "number": 565,
+      "title": "eval: the escape ledger — phase EV1a",
+      "mergedAt": "2026-10-15T19:25:34Z",
+      "head": "303a6e2da8d5f29d72329f1c034f968bf1d5f61a",
+      "mergeCommit": "4893340fc0e72f9152e335bed70c1b05b7f0d836",
+      "files": [
+        "docs/reports/eval/latest.md",
+        "docs/reports/eval/ledger.json",
+        "package.json",
+        "plan/lessons.md",
+        "plan/steps/01_build_plan.md",
+        "scripts/eval/escape-ledger.mjs",
+        "scripts/eval/escape-ledger.test.mjs",
+        "scripts/eval/fixtures/landings.json",
+        "scripts/eval/fixtures/pr-526-comments.json",
+        "scripts/eval/fixtures/pr-529-comments.json",
+        "scripts/eval/ledger-lib.mjs",
+        "telemetry/2026-10-15_47547719-c320-479a-8d82-41bd9121d646.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-15T18:51:19Z",
+          "finishedAt": "2026-10-15T18:51:19Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-mobile.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [
+        "package.json",
+        "scripts/eval/escape-ledger.mjs",
+        "scripts/eval/escape-ledger.test.mjs",
+        "scripts/eval/fixtures/landings.json",
+        "scripts/eval/fixtures/pr-526-comments.json",
+        "scripts/eval/fixtures/pr-529-comments.json",
+        "scripts/eval/ledger-lib.mjs"
+      ],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
+      }
+    },
+    {
+      "number": 569,
+      "title": "feat(mobile): live combat on its own route — phase CR1a",
+      "mergedAt": "2026-10-15T20:55:26Z",
+      "head": "8cd17724f6e4a02e8fb13dd3d51d06d74dd84f2d",
+      "mergeCommit": "71fc062eaee2b3c922837cdbcea30d0fbf1a58c3",
+      "files": [
+        ".github/workflows/verify-mechanics.yml",
+        ".github/workflows/verify-mobile.yml",
+        "axiomancer-mobile/.gitignore",
+        "axiomancer-mobile/app/(tabs)/exploration/index.tsx",
+        "axiomancer-mobile/app/_layout.tsx",
+        "axiomancer-mobile/app/combat-encounter/index.tsx",
+        "axiomancer-mobile/app/labyrinth/index.tsx",
+        "axiomancer-mobile/components/CombatGate.tsx",
+        "axiomancer-mobile/components/DebugCombatSandbox.tsx",
+        "axiomancer-mobile/components/DebugTriggerEncounter.tsx",
+        "axiomancer-mobile/components/__tests__/CombatGate.test.tsx",
+        "axiomancer-mobile/components/__tests__/DebugCombatSandbox.test.tsx",
+        "axiomancer-mobile/components/dev/DevToolsSections.tsx",
+        "axiomancer-mobile/docs/E2E_INVENTORY.md",
+        "axiomancer-mobile/docs/combat.md",
+        "axiomancer-mobile/docs/dev-tools.md",
+        "axiomancer-mobile/docs/playtest-guides/README.md",
+        "axiomancer-mobile/docs/playtest-guides/combat.md",
+        "axiomancer-mobile/docs/testing.md",
+        "axiomancer-mobile/package.json",
+        "axiomancer-mobile/screenshots/baseline/combat-encounter.png",
+        "axiomancer-mobile/scripts/__tests__/smoke-screens.test.ts",
+        "axiomancer-mobile/scripts/android-drag-perf.sh",
+        "axiomancer-mobile/scripts/audit-capture.mjs",
+        "axiomancer-mobile/scripts/combat-drag-perf.mjs",
+        "axiomancer-mobile/scripts/combat-encounter-e2e.mjs",
+        "axiomancer-mobile/scripts/combat-round-e2e.mjs",
+        "axiomancer-mobile/scripts/critique-drive.mjs",
+        "axiomancer-mobile/scripts/exploration-combat-roundtrip-e2e.mjs",
+        "axiomancer-mobile/scripts/fresh-eyes-capture.mjs",
+        "axiomancer-mobile/scripts/live-fight-entry.mjs",
+        "axiomancer-mobile/scripts/perf-web.mjs",
+        "axiomancer-mobile/scripts/smoke-screens.mjs",
+        "axiomancer-mobile/state/e2e/app-routes.engine.test.tsx",
+        "axiomancer-mobile/state/e2e/combat-encounter.screen.test.tsx",
+        "axiomancer-mobile/state/e2e/combat-route.screen.test.tsx",
+        "axiomancer-mobile/state/e2e/cross-screen-integration.engine.test.tsx",
+        "axiomancer-mobile/state/e2e/map-under-combat-modes.engine.test.tsx",
+        "axiomancer-mobile/state/e2e/map-under-combat.engine.test.tsx",
+        "axiomancer-mobile/state/e2e/mid-fight-resume.engine.test.tsx",
+        "axiomancer-mobile/state/e2e/route-registration.engine.test.ts",
+        "axiomancer-mobile/state/e2e/start-node-arrival.engine.test.tsx",
+        "axiomancer-mobile/state/presenters/navigation.engine.ts",
+        "plan/lessons.md",
+        "plan/steps/01_build_plan.md",
+        "scripts/ci-e2e-scope.mjs"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-15T20:34:22Z",
+          "finishedAt": "2026-10-15T20:34:22Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mechanics",
+          "path": ".github/workflows/verify-mechanics.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-15T20:34:06Z",
+          "finishedAt": "2026-10-15T20:47:18Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-15T20:34:06Z",
+          "finishedAt": "2026-10-15T20:45:02Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mechanics.yml",
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
+      }
+    },
+    {
+      "number": 571,
+      "title": "feat(mechanics): level curve to 20 by the end of Act 1 — phase LV1",
+      "mergedAt": "2026-10-15T21:29:22Z",
+      "head": "c638aa7f355a92a8e61f1b965c5fa192b7c40888",
+      "mergeCommit": "2f2a6c69537731571cc412672fb95e5c2913dee2",
+      "files": [
+        "axiomancer-mechanics/src/Character/e2e/character.engine.test.ts",
+        "axiomancer-mechanics/src/Character/experience.test.ts",
+        "axiomancer-mechanics/src/Character/experience.ts",
+        "axiomancer-mechanics/src/Character/index.ts",
+        "axiomancer-mechanics/src/Combat/combat.measured-truth.test.ts",
+        "axiomancer-mechanics/src/Game/act1-progression.test.ts",
+        "axiomancer-mechanics/src/Game/e2e/game.loop.engine.test.ts",
+        "axiomancer-mechanics/src/Game/e2e/level-curve-migration.engine.test.ts",
+        "axiomancer-mechanics/src/Game/e2e/levelup-unlocks.engine.test.ts",
+        "axiomancer-mechanics/src/Game/game-mechanics.constants.ts",
+        "axiomancer-mechanics/src/Game/game.migrate.ts",
+        "axiomancer-mechanics/src/Game/game.reducer.ts",
+        "axiomancer-mechanics/src/Game/index.ts",
+        "axiomancer-mechanics/src/index.ts",
+        "axiomancer-mobile/app/(tabs)/character/index.tsx",
+        "axiomancer-mobile/components/levelup/LevelReadyStrip.tsx",
+        "axiomancer-mobile/components/levelup/LevelUpModal.tsx",
+        "axiomancer-mobile/components/levelup/__tests__/LevelReadyStrip.test.tsx",
+        "axiomancer-mobile/components/levelup/__tests__/LevelUpModal.test.tsx",
+        "axiomancer-mobile/state/e2e/character.engine.test.ts",
+        "axiomancer-mobile/state/persistence/e2e/migrations.engine.test.ts",
+        "axiomancer-mobile/state/presenters/character.engine.ts",
+        "docs/game-model.md",
+        "docs/reports/measured/history.jsonl",
+        "docs/reports/measured/latest.md",
+        "plan/lessons.md",
+        "plan/steps/01_build_plan.md",
+        "telemetry/2026-10-15_fbe3f058-75ea-40db-9408-b32354bf1f92.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-15T21:02:54Z",
+          "finishedAt": "2026-10-15T21:02:54Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mechanics",
+          "path": ".github/workflows/verify-mechanics.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-15T21:02:38Z",
+          "finishedAt": "2026-10-15T21:14:47Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-15T21:02:38Z",
+          "finishedAt": "2026-10-15T21:13:26Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mechanics.yml",
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [
+        "docs/game-model.md"
+      ],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
+      }
+    },
+    {
+      "number": 573,
+      "title": "refactor(mobile): delete the encounter-overlay era, labyrinth combat e2e — phase CR1b",
+      "mergedAt": "2026-10-16T01:33:32Z",
+      "head": "eb7e416e1874a3cb565dfda440f2c02069c37ca1",
+      "mergeCommit": "eec2e4236f9d8481804ceb313d30a1fef360685d",
+      "files": [
+        ".github/workflows/verify-mechanics.yml",
+        ".github/workflows/verify-mobile.yml",
+        "axiomancer-mobile/README.md",
+        "axiomancer-mobile/app/(tabs)/_layout.tsx",
+        "axiomancer-mobile/app/event/index.tsx",
+        "axiomancer-mobile/components/DebugEnemyPicker.tsx",
+        "axiomancer-mobile/components/DebugTriggerEncounter.tsx",
+        "axiomancer-mobile/components/EventGate.tsx",
+        "axiomancer-mobile/components/LabyrinthGate.tsx",
+        "axiomancer-mobile/components/__tests__/EventGate.test.tsx",
+        "axiomancer-mobile/components/__tests__/LabyrinthGate.test.tsx",
+        "axiomancer-mobile/components/combat/encounter/CombatEncounterPanel.tsx",
+        "axiomancer-mobile/components/event/ChainBarFixed.tsx",
+        "axiomancer-mobile/components/event/EncounterModalOverlay.tsx",
+        "axiomancer-mobile/components/event/ModalRivet.tsx",
+        "axiomancer-mobile/components/event/__tests__/ChainBarFixed.test.tsx",
+        "axiomancer-mobile/components/event/__tests__/EncounterModalOverlay.test.tsx",
+        "axiomancer-mobile/components/event/__tests__/ModalRivet.test.tsx",
+        "axiomancer-mobile/components/event/aftermath/CombatVictoryPanel.tsx",
+        "axiomancer-mobile/docs/E2E_INVENTORY.md",
+        "axiomancer-mobile/docs/combat.md",
+        "axiomancer-mobile/docs/perf/combat-drag-baseline.md",
+        "axiomancer-mobile/docs/playtest-guides/combat.md",
+        "axiomancer-mobile/docs/playtest-guides/map.md",
+        "axiomancer-mobile/package.json",
+        "axiomancer-mobile/scripts/labyrinth-combat-roundtrip-e2e.mjs",
+        "axiomancer-mobile/state/combat-mode.tsx",
+        "axiomancer-mobile/state/dev/enemy-picker.ts",
+        "axiomancer-mobile/state/e2e/combat-mode.engine.test.tsx",
+        "axiomancer-mobile/state/e2e/event.engine.test.ts",
+        "axiomancer-mobile/state/e2e/exploration.engine.test.ts",
+        "axiomancer-mobile/state/presenters/__tests__/encounter-seal.engine.test.ts",
+        "axiomancer-mobile/state/presenters/encounter-seal.engine.ts",
+        "axiomancer-mobile/state/presenters/event.engine.ts",
+        "axiomancer-mobile/state/presenters/roman.ts",
+        "axiomancer-mobile/test-utils/withAllProviders.tsx",
+        "plan/PHASE_CANDIDATES.md",
+        "plan/lessons.md",
+        "plan/steps/01_build_plan.md",
+        "scripts/ci-e2e-scope.mjs",
+        "telemetry/2026-10-15_79a36020-9739-455d-b066-113e6cad849a.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-15T21:37:08Z",
+          "finishedAt": "2026-10-15T21:37:08Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mechanics",
+          "path": ".github/workflows/verify-mechanics.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-15T21:36:43Z",
+          "finishedAt": "2026-10-15T21:49:30Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-15T21:36:43Z",
+          "finishedAt": "2026-10-15T21:48:37Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mechanics.yml",
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
+      }
+    },
+    {
+      "number": 576,
+      "title": "eval: do the tests fail on the parent — phase EV1b",
+      "mergedAt": "2026-10-16T01:34:04Z",
+      "head": "a0660adad072c535ece43a408a953f2e2e798a7b",
+      "mergeCommit": "6b5e2b6d803b18348acac8cfa61eac3210180278",
+      "files": [
+        "docs/reports/eval/latest.md",
+        "docs/reports/eval/parent-replay.json",
+        "package.json",
+        "plan/lessons.md",
+        "plan/steps/01_build_plan.md",
+        "scripts/eval/parent-replay-lib.mjs",
+        "scripts/eval/parent-replay.mjs",
+        "scripts/eval/parent-replay.test.mjs",
+        "telemetry/2026-10-16_6a853e50-c113-48d7-9e40-ebfba040f2bd.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-16T01:29:28Z",
+          "finishedAt": "2026-10-16T01:29:28Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-mobile.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [
+        "package.json",
+        "scripts/eval/parent-replay-lib.mjs",
+        "scripts/eval/parent-replay.mjs",
+        "scripts/eval/parent-replay.test.mjs"
+      ],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
+      }
+    },
+    {
+      "number": 579,
+      "title": "eval: planted defects, mutation scores and the miss-rate table — phase EV1c",
+      "mergedAt": "2026-10-16T12:19:56Z",
+      "head": "0a95567c86fdd9b6a106bd62a2b37272ac7ea40e",
+      "mergeCommit": "a3df0db62acbcda242b2ae1aa69e24586f95a5c3",
+      "files": [
+        "axiomancer-mechanics/package.json",
+        "axiomancer-mobile/package.json",
+        "docs/reports/eval/latest.md",
+        "docs/reports/eval/miss-rates.json",
+        "docs/reports/eval/mutation.json",
+        "docs/reports/eval/seeded.json",
+        "package-lock.json",
+        "package.json",
+        "plan/lessons.md",
+        "plan/steps/01_build_plan.md",
+        "scripts/eval/miss-rates-lib.mjs",
+        "scripts/eval/miss-rates.mjs",
+        "scripts/eval/miss-rates.test.mjs",
+        "scripts/eval/mutation-lib.mjs",
+        "scripts/eval/mutation.mjs",
+        "scripts/eval/seeded-lib.mjs",
+        "scripts/eval/seeded-replay.mjs",
+        "scripts/eval/stryker/mechanics.config.mjs",
+        "scripts/eval/stryker/mobile.config.mjs",
+        "skills/ship-a-phase.md",
+        "telemetry/2026-10-16_bb451442-fa93-4133-a883-760f058b3a50.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-16T07:54:11Z",
+          "finishedAt": "2026-10-16T07:54:11Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mechanics",
+          "path": ".github/workflows/verify-mechanics.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T07:54:00Z",
+          "finishedAt": "2026-10-16T08:06:33Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T07:54:00Z",
+          "finishedAt": "2026-10-16T08:05:22Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mechanics.yml",
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [
+        "package.json",
+        "scripts/eval/miss-rates-lib.mjs",
+        "scripts/eval/miss-rates.mjs",
+        "scripts/eval/miss-rates.test.mjs",
+        "scripts/eval/mutation-lib.mjs",
+        "scripts/eval/mutation.mjs",
+        "scripts/eval/seeded-lib.mjs",
+        "scripts/eval/seeded-replay.mjs",
+        "scripts/eval/stryker/mechanics.config.mjs",
+        "scripts/eval/stryker/mobile.config.mjs",
+        "skills/ship-a-phase.md"
+      ],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
+      }
+    },
+    {
+      "number": 581,
+      "title": "feat: hazard puzzle layout and one-round session — phase B3a",
+      "mergedAt": "2026-10-16T12:20:17Z",
+      "head": "ea9b16b0c26ee195e379e07e9ef376d2cc7ef4f5",
+      "mergeCommit": "4f29f34ef8725c4c67cdfed2c92090ece3ea0224",
+      "files": [
+        "axiomancer-mechanics/src/World/Hazard/index.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/e2e/hazard-puzzle.layouts.mock.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/e2e/hazard-puzzle.session.engine.test.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/hazard-puzzle.session.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/hazard-puzzle.types.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/hazard-puzzle.validate.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/index.ts",
+        "axiomancer-mechanics/src/index.ts",
+        "plan/lessons.md",
+        "plan/steps/01_build_plan.md",
+        "telemetry/2026-10-16_fbb710f8-ea59-406b-bbc9-e160738ade25.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-16T08:57:37Z",
+          "finishedAt": "2026-10-16T08:57:37Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mechanics",
+          "path": ".github/workflows/verify-mechanics.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T08:57:28Z",
+          "finishedAt": "2026-10-16T09:09:36Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-prose",
+          "path": ".github/workflows/verify-prose.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T08:57:28Z",
+          "finishedAt": "2026-10-16T08:57:40Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mobile.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
+      }
+    },
+    {
+      "number": 583,
+      "title": "eval: ranked fixes, success evidence and the /messy dump — phase EV1d",
+      "mergedAt": "2026-10-16T14:08:57Z",
+      "head": "c33dca650751457081fce3c075fc3c878ef9478b",
+      "mergeCommit": "8cbdf1404af9212204cb78436f8ccd9fc2e0026a",
+      "files": [
+        "docs/reports/eval/fixes.json",
+        "docs/reports/eval/frozen-set.json",
+        "docs/reports/eval/latest.md",
+        "docs/truth-sources.md",
+        "package.json",
+        "plan/lessons.md",
+        "plan/steps/01_build_plan.md",
+        "scripts/eval/fixes-lib.mjs",
+        "scripts/eval/fixes.mjs",
+        "scripts/eval/fixes.test.mjs",
+        "telemetry/2026-10-16_b39e139c-12db-4be0-849e-4301baad49fb.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:08:24Z",
+          "finishedAt": "2026-10-16T14:08:24Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-mobile.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [
+        "docs/truth-sources.md",
+        "package.json",
+        "scripts/eval/fixes-lib.mjs",
+        "scripts/eval/fixes.mjs",
+        "scripts/eval/fixes.test.mjs"
+      ],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
+      }
+    },
+    {
+      "number": 584,
+      "title": "feat: hazard puzzle solver and band check — phase B3b",
+      "mergedAt": "2026-10-16T14:04:53Z",
+      "head": "9215b1b38a0bd028fc2b273ef3f6e14a95dd9418",
+      "mergeCommit": "2547f33d3c2fe1fddac55b2730be6ba67e399fef",
+      "files": [
+        "axiomancer-mechanics/src/World/Hazard/puzzle/e2e/hazard-puzzle.layouts.mock.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/e2e/hazard-puzzle.library.engine.test.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/e2e/hazard-puzzle.solver.engine.test.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/hazard-puzzle.band.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/hazard-puzzle.solver.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/hazard-puzzle.tuning.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/index.ts",
+        "axiomancer-mechanics/src/index.ts",
+        "plan/PHASE_CANDIDATES.md",
+        "plan/lessons.md",
+        "plan/steps/01_build_plan.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-16T13:17:16Z",
+          "finishedAt": "2026-10-16T13:17:16Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mechanics",
+          "path": ".github/workflows/verify-mechanics.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T13:17:06Z",
+          "finishedAt": "2026-10-16T13:28:29Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-prose",
+          "path": ".github/workflows/verify-prose.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T13:17:05Z",
+          "finishedAt": "2026-10-16T13:17:17Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mobile.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
+      }
+    },
+    {
+      "number": 587,
+      "title": "feat: hazard puzzle outcome and claim — phase B3c",
+      "mergedAt": "2026-10-16T14:36:41Z",
+      "head": "2dfa7b89ced5d7cd0407edf15132d5b1bc5ea353",
+      "mergeCommit": "9c0e3a7f53a3c80baa7e589af3e37853f4190094",
+      "files": [
+        "axiomancer-mechanics/src/Game/actions.types.ts",
+        "axiomancer-mechanics/src/Game/game.reducer.ts",
+        "axiomancer-mechanics/src/Game/hazard-puzzle.claim.ts",
+        "axiomancer-mechanics/src/Game/index.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/e2e/hazard-puzzle.outcome.engine.test.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/hazard-puzzle.outcome.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/hazard-puzzle.region.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/hazard-puzzle.tuning.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/index.ts",
+        "axiomancer-mechanics/src/index.ts",
+        "axiomancer-mobile/state/hazard/__tests__/scar-flag-prefix.test.ts",
+        "plan/lessons.md",
+        "plan/steps/01_build_plan.md",
+        "telemetry/2026-10-16_2f8f25eb-6cca-4ec3-9cec-783d75b677eb.md",
+        "telemetry/2026-10-16_be5e920e-504d-482f-88f3-641a03310039.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:09:00Z",
+          "finishedAt": "2026-10-16T14:09:00Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mechanics",
+          "path": ".github/workflows/verify-mechanics.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:08:48Z",
+          "finishedAt": "2026-10-16T14:21:16Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:08:48Z",
+          "finishedAt": "2026-10-16T14:11:36Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-prose",
+          "path": ".github/workflows/verify-prose.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:08:48Z",
+          "finishedAt": "2026-10-16T14:08:59Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mechanics.yml",
+        "verify-mobile.yml",
+        "verify-prose.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
+      }
+    },
+    {
+      "number": 588,
+      "title": "feat: hazard puzzle stat unlocks — phase B3d",
+      "mergedAt": "2026-10-16T15:01:17Z",
+      "head": "c81b8258b1c5b24c186597ddc03b9a6bda42c406",
+      "mergeCommit": "8c8d3578a851bdd24f39dd71dcd9ba682ec7f4cb",
+      "files": [
+        "axiomancer-mechanics/src/World/Hazard/puzzle/e2e/hazard-puzzle.layouts.mock.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/e2e/hazard-puzzle.library.engine.test.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/e2e/hazard-puzzle.solver.engine.test.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/e2e/hazard-puzzle.unlocks.engine.test.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/hazard-puzzle.band.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/hazard-puzzle.session.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/hazard-puzzle.solver.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/hazard-puzzle.unlocks.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/hazard-puzzle.validate.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/index.ts",
+        "axiomancer-mechanics/src/index.ts",
+        "plan/steps/01_build_plan.md",
+        "telemetry/2026-10-16_d44c8303-ab3b-47fe-970d-2b0c3840e2c4.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:38:55Z",
+          "finishedAt": "2026-10-16T14:38:55Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mechanics",
+          "path": ".github/workflows/verify-mechanics.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:38:31Z",
+          "finishedAt": "2026-10-16T14:50:53Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-prose",
+          "path": ".github/workflows/verify-prose.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:38:31Z",
+          "finishedAt": "2026-10-16T14:38:42Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mobile.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
+      }
+    },
+    {
+      "number": 592,
+      "title": "feat: three hazard demo puzzles and the dev-menu board — phase B3e",
+      "mergedAt": "2026-10-16T17:06:44Z",
+      "head": "3e632b5b2d9f5b0721247f068283f333a60aebfb",
+      "mergeCommit": "8d89b0c4bc8b52aa9e0d6fc798b99b65d92d9e56",
+      "files": [
+        "axiomancer-mechanics/src/World/Hazard/puzzle/e2e/hazard-puzzle.layouts.mock.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/e2e/hazard-puzzle.library.engine.test.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/e2e/hazard-puzzle.session.engine.test.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/hazard-puzzle.library.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/hazard-puzzle.tuning.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/hazard-puzzle.types.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/hazard-puzzle.validate.ts",
+        "axiomancer-mechanics/src/World/Hazard/puzzle/index.ts",
+        "axiomancer-mechanics/src/index.ts",
+        "axiomancer-mobile/app/_layout.tsx",
+        "axiomancer-mobile/app/devpuzzle/index.tsx",
+        "axiomancer-mobile/components/DebugHazardPuzzlesButton.tsx",
+        "axiomancer-mobile/components/__tests__/DebugHazardPuzzlesButton.test.tsx",
+        "axiomancer-mobile/components/dev/DevToolsSections.tsx",
+        "axiomancer-mobile/components/hazard/puzzle/HazardPuzzleBoardView.tsx",
+        "axiomancer-mobile/components/hazard/puzzle/HazardPuzzleDemo.tsx",
+        "axiomancer-mobile/components/hazard/puzzle/HazardPuzzleOutcomePanel.tsx",
+        "axiomancer-mobile/components/hazard/puzzle/__tests__/HazardPuzzleDemo.test.tsx",
+        "axiomancer-mobile/components/hazard/puzzle/useHazardPuzzleClock.ts",
+        "axiomancer-mobile/docs/dev-tools.md",
+        "axiomancer-mobile/lib/platform/router.ts",
+        "axiomancer-mobile/screenshots/baseline/README.md",
+        "axiomancer-mobile/screenshots/baseline/devpuzzle-board.png",
+        "axiomancer-mobile/screenshots/baseline/devpuzzle-outcome.png",
+        "axiomancer-mobile/scripts/smoke-screens.mjs",
+        "axiomancer-mobile/state/actions.ts",
+        "axiomancer-mobile/state/hazard/puzzle-store-actions.ts",
+        "axiomancer-mobile/state/presenters/__tests__/hazard-puzzle.engine.test.ts",
+        "axiomancer-mobile/state/presenters/hazard-puzzle.copy.ts",
+        "axiomancer-mobile/state/presenters/hazard-puzzle.engine.ts",
+        "axiomancer-mobile/state/presenters/hazard.engine.ts",
+        "docs/game-model.md",
+        "plan/PHASE_CANDIDATES.md",
+        "plan/lessons.md",
+        "plan/steps/01_build_plan.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-16T15:36:06Z",
+          "finishedAt": "2026-10-16T15:36:06Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mechanics",
+          "path": ".github/workflows/verify-mechanics.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T15:35:34Z",
+          "finishedAt": "2026-10-16T15:48:48Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T15:35:34Z",
+          "finishedAt": "2026-10-16T15:47:46Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-prose",
+          "path": ".github/workflows/verify-prose.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T15:35:34Z",
+          "finishedAt": "2026-10-16T15:35:47Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mechanics.yml",
+        "verify-mobile.yml",
+        "verify-prose.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [
+        "docs/game-model.md"
+      ],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
+      }
+    },
+    {
+      "number": 594,
+      "title": "dev: slim the /dev menu — route-local open state, seven leaves cut, the wallet demoted",
+      "mergedAt": "2026-10-16T17:32:36Z",
+      "head": "dd2ed6820ef2ff422dd0411921beff6e08bb5aa2",
+      "mergeCommit": "388eca05d98b8e4eb4a8644d637cd97218440e53",
+      "files": [
+        "axiomancer-mobile/components/DebugBlacksmithButton.tsx",
+        "axiomancer-mobile/components/DebugGetAllRelics.tsx",
+        "axiomancer-mobile/components/DebugHazardDeckRandomize.tsx",
+        "axiomancer-mobile/components/DebugPlayerTierPresets.tsx",
+        "axiomancer-mobile/components/DebugPopulateAllItems.tsx",
+        "axiomancer-mobile/components/DebugPresetPicker.tsx",
+        "axiomancer-mobile/components/DebugQuestState.tsx",
+        "axiomancer-mobile/components/DebugRewardTriggers.tsx",
+        "axiomancer-mobile/components/__tests__/DebugGetAllRelics.test.tsx",
+        "axiomancer-mobile/components/__tests__/DebugHazardDeckRandomize.test.tsx",
+        "axiomancer-mobile/components/__tests__/DebugPlayerTierPresets.test.tsx",
+        "axiomancer-mobile/components/__tests__/DebugPopulateAllItems.test.tsx",
+        "axiomancer-mobile/components/__tests__/DebugPresetPicker.test.tsx",
+        "axiomancer-mobile/components/__tests__/DebugQuestState.test.tsx",
+        "axiomancer-mobile/components/__tests__/DebugRewardTriggers.test.tsx",
+        "axiomancer-mobile/components/dev/DevToolsSections.tsx",
+        "axiomancer-mobile/components/dev/__tests__/DevToolsSections.test.tsx",
+        "axiomancer-mobile/docs/dev-tools.md",
+        "axiomancer-mobile/docs/playtest-guides/hazard.md",
+        "axiomancer-mobile/docs/playtest-guides/minigames.md",
+        "axiomancer-mobile/docs/playtest-guides/narrative.md",
+        "axiomancer-mobile/scripts/combat-round-e2e.mjs",
+        "axiomancer-mobile/scripts/dev-section.mjs",
+        "axiomancer-mobile/state/e2e/dev-presets.engine.test.ts",
+        "telemetry/2026-10-16_26fbb56f-f2ec-5569-aabd-05e9dc220bc4.md",
+        "telemetry/2026-10-16_6396890c-10f3-487e-a717-22138508d02d.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-16T17:20:13Z",
+          "finishedAt": "2026-10-16T17:20:13Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T17:20:11Z",
+          "finishedAt": "2026-10-16T17:30:01Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
+      }
+    },
+    {
+      "number": 596,
+      "title": "ci: verify-gate, one always-reporting check with a derived risk label — phase RV1a",
+      "mergedAt": "2026-10-17T09:28:47Z",
+      "head": "c00058f00236f53ec9c6f6301b9942447c9f155f",
+      "mergeCommit": "68aa1c73fc950a77def534be6c8768882e1efcb4",
+      "files": [
+        ".github/workflows/README.md",
+        ".github/workflows/pr-review.yml",
+        "docs/reports/pr-review-research.md",
+        "package.json",
+        "plan/NEEDS_T.md",
+        "plan/lessons.md",
+        "plan/steps/01_build_plan.md",
+        "scripts/loop-pr.test.mjs",
+        "scripts/pr-gate.mjs",
+        "scripts/pr-gate.test.mjs",
+        "scripts/pr-risk.mjs",
+        "scripts/pr-risk.test.mjs",
+        "skills/march.md",
+        "telemetry/2026-10-16_6f1efd83-f8c8-44fe-bb68-dea1419fc4b8.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-16T18:51:17Z",
+          "finishedAt": "2026-10-16T18:51:17Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "pr-review",
+          "path": ".github/workflows/pr-review.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T18:51:04Z",
+          "finishedAt": "2026-10-16T18:51:51Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-mobile.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [
+        ".github/workflows/README.md",
+        ".github/workflows/pr-review.yml",
+        "package.json",
+        "scripts/loop-pr.test.mjs",
+        "scripts/pr-gate.mjs",
+        "scripts/pr-gate.test.mjs",
+        "scripts/pr-risk.mjs",
+        "scripts/pr-risk.test.mjs",
+        "skills/march.md"
+      ],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
+      }
+    },
+    {
+      "number": 598,
+      "title": "fix: map gesture line tells a mouse to scroll (CRITIQUE pass 91)",
+      "mergedAt": "2026-10-17T09:29:01Z",
+      "head": "36a458791140fe12d6d16b23e03682f5b9105488",
+      "mergeCommit": "90191448b2ee90064c661ce9c6ad9bfd95e4fd09",
+      "files": [
+        "axiomancer-mobile/components/exploration/MapOverlays.tsx",
+        "axiomancer-mobile/components/exploration/__tests__/MapOverlays.test.tsx",
+        "axiomancer-mobile/state/presenters/exploration.engine.ts",
+        "plan/CRITIQUE.md",
+        "telemetry/2026-10-16_8e9db3c4-24e7-4504-ab4c-2da753164767.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-16T22:45:51Z",
+          "finishedAt": "2026-10-16T22:45:51Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "verify-mobile",
+          "path": ".github/workflows/verify-mobile.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T22:45:38Z",
+          "finishedAt": "2026-10-16T22:54:29Z",
+          "finishedAfterMerge": false
+        }
+      ],
+      "triggered": [
+        "verify-mobile.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mechanics.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
+      }
+    },
+    {
+      "number": 600,
+      "title": "fix: level presets hold the stat points their level can bank (CRITIQUE pass 90)",
+      "mergedAt": "2026-10-17T09:30:13Z",
+      "head": "5773052364ea3d56a46984f4ef60aef6c38f4a05",
+      "mergeCommit": "4c8088a1e9be47ad58334363522afb66d5e1b5a4",
+      "files": [
+        "axiomancer-mechanics/src/Character/e2e/presets.engine.test.ts",
+        "axiomancer-mechanics/src/Character/presets.ts",
+        "plan/CRITIQUE.md",
+        "telemetry/2026-10-17_e41da996-5824-433c-a675-536f62030afb.md"
+      ],
+      "ran": [
+        {
+          "name": "Cloudflare Pages: axiomancer",
+          "path": null,
+          "conclusion": "success",
+          "startedAt": "2026-10-17T09:29:25Z",
+          "finishedAt": "2026-10-17T09:29:25Z",
+          "finishedAfterMerge": false
+        },
+        {
+          "name": "pr-review",
+          "path": ".github/workflows/pr-review.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-17T09:29:18Z",
+          "finishedAt": "2026-10-17T09:31:10Z",
+          "finishedAfterMerge": true
+        },
+        {
+          "name": "verify-mechanics",
+          "path": ".github/workflows/verify-mechanics.yml",
+          "conclusion": "success",
+          "startedAt": "2026-10-17T09:29:18Z",
+          "finishedAt": "2026-10-17T09:31:05Z",
+          "finishedAfterMerge": true
+        }
+      ],
+      "triggered": [
+        "verify-mechanics.yml"
+      ],
+      "skipped": [
+        "verify-drift.yml",
+        "verify-mobile.yml",
+        "verify-prose.yml"
+      ],
+      "expectedNotRun": [],
+      "uncovered": [],
+      "followUps": [],
+      "antagonist": {
+        "verdict": "none",
+        "at": null,
+        "mergedOnNotPass": false,
+        "mergeScriptComment": false
+      },
+      "review": {
+        "verdict": "none",
+        "at": null,
+        "medPlus": 0,
+        "mergedOnNotPass": false
       }
     }
   ],
