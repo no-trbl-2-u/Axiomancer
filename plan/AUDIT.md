@@ -132,7 +132,7 @@
 - category: tests
 - impact: 6
 - ease: 8
-- detail: phase RV1c (#<pr>) shipped `node scripts/eval/seeded-replay.mjs
+- detail: phase RV1c (#610) shipped `node scripts/eval/seeded-replay.mjs
   --judge review` and the three lenses in `skills/review.md`, but the
   `review` job runs `main`'s copy of the skill (its `pre_run`), so neither
   the fan-out nor its replay can be measured before T merges RV1c. The
