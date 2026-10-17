@@ -721,15 +721,6 @@
 
 ## Pending
 
-### [LOW] critique / transport — the mobile viewport emulates a mouse, so phone captures show the desktop map gesture line
-- pass: 92 (commit c49902c7)
-- viewport: mobile (375x812)
-- category: infra
-- observation: since #598 the map's gesture line follows `(pointer: fine)`. `critique:drive` opens every context with `hasTouch: false` and no `isMobile`, so headless Chromium reports a fine pointer at 375x812 and the mobile late-game hub capture reads "drag · scroll to zoom", a line no phone shows. Every later pointer-dependent copy or layout will be mis-captured the same way, and a pass reading the mobile screenshot would either file a false finding or miss a real one.
-- evidence: `.critique-artifacts/mobile/11-late-game-hub.png` and `.txt` ("drag · scroll to zoom"); `axiomancer-mobile/scripts/critique-drive.mjs` `driveViewport` (`browser.newContext({ viewport: dims, hasTouch: false })`); `detectMapPointer()` in `components/exploration/MapOverlays.tsx`.
-- suggested fix: give the mobile entry in `VIEWPORTS` `hasTouch: true, isMobile: true` and pass them to `newContext` (desktop keeps the mouse); check the two scripted clicks (`Embark`, `combat-enter`) still land, and pin the context options in `critique-drive.test.mjs`. Tooling only, no game change.
-- source: critique:drive (unattended)
-
 ### [LOW] desktop — the hub drawer and the hazard hand still tell a mouse player to "tap"
 - pass: 92 (commit c49902c7)
 - viewport: desktop (1280x800)
@@ -1078,6 +1069,15 @@
 
 ## Done
 
+### [x] [LOW] critique / transport — the mobile viewport emulates a mouse, so phone captures show the desktop map gesture line — RESOLVED 2026-10-17 (branch loop/iterate-critique-touch-context, 2fe330ad: `contextOptions(viewport)` gives the mobile context `hasTouch` and `isMobile`, desktop keeps the mouse; pinned in critique-drive.test.mjs; the mobile hub capture now reads "drag · pinch")
+- pass: 92 (commit c49902c7)
+- viewport: mobile (375x812)
+- category: infra
+- observation: since #598 the map's gesture line follows `(pointer: fine)`. `critique:drive` opens every context with `hasTouch: false` and no `isMobile`, so headless Chromium reports a fine pointer at 375x812 and the mobile late-game hub capture reads "drag · scroll to zoom", a line no phone shows. Every later pointer-dependent copy or layout will be mis-captured the same way, and a pass reading the mobile screenshot would either file a false finding or miss a real one.
+- evidence: `.critique-artifacts/mobile/11-late-game-hub.png` and `.txt` ("drag · scroll to zoom"); `axiomancer-mobile/scripts/critique-drive.mjs` `driveViewport` (`browser.newContext({ viewport: dims, hasTouch: false })`); `detectMapPointer()` in `components/exploration/MapOverlays.tsx`.
+- suggested fix: give the mobile entry in `VIEWPORTS` `hasTouch: true, isMobile: true` and pass them to `newContext` (desktop keeps the mouse); check the two scripted clicks (`Embark`, `combat-enter`) still land, and pin the context options in `critique-drive.test.mjs`. Tooling only, no game change.
+- source: critique:drive (unattended)
+- issue: #605
 ### [x] [LOW] exploration hub / tooling — the level-15 Sage fixture shows 680 VITAE, twice what a level-15 pilgrim can now reach — RESOLVED 2026-10-17 (branch loop/iterate-preset-stat-curve, 428a91a2: every preset holds exactly 15 + (level - 1) x `STAT_POINTS_PER_LEVEL`, spread in the old proportions; Sage is 8/11/10; pinned by presets.engine.test.ts "stat curve")
 - pass: 90 (commit 6b5e2b6d)
 - viewport: both (375x812 and 1280x800)
