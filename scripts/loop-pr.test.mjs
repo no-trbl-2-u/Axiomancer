@@ -253,6 +253,9 @@ test('the fan-out is behind the tier check: three Sonnet lenses on medium and hi
   const fan = skill.slice(skill.indexOf('### Step 3b'), skill.indexOf('### Lens: Rules'))
   assert.match(fan, /^### Step 3b — Three lenses \(`risk:medium`, `risk:high`\)$/m)
   assert.match(fan, /`model: sonnet`/)
+  // A -p run ends with the turn: a backgrounded lens never reports (PR #610).
+  assert.match(fan, /`run_in_background: false`/)
+  assert.match(fan, /never end the turn\s+waiting/)
   assert.match(fan, /\*\*only\*\*\s+its\s+own lens section/)
   const merge = skill.slice(skill.indexOf('### Step 3c'), skill.indexOf('### Step 4'))
   for (const tag of ['[rules]', '[tests]', '[blast]']) assert.ok(merge.includes(tag), tag)

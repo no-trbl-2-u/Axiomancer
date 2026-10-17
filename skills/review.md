@@ -79,7 +79,8 @@ export, a test that cannot fail, a workflow step that cannot run. Stay
 inside the diff and the code it calls. For a diff over ~400 lines,
 split it by package and spawn one `Task` sub-agent per part, each told
 "report defects only, with file, line, severity and a one-line reason;
-ignore style". Keep findings you can point at a line for; drop
+ignore style". Spawn them in the foreground (Step 3b's
+rule on blocking applies). Keep findings you can point at a line for; drop
 anything you cannot validate from the code.
 
 ### Step 3a — The label profile (`risk:low`)
@@ -106,7 +107,12 @@ Read in this order; each line adds checks, none replaces Step 3.
 ### Step 3b — Three lenses (`risk:medium`, `risk:high`)
 
 Spawn three `Task` sub-agents in one message, so they run at once,
-each with `model: sonnet` (the latest Sonnet). Give each **only** its
+each with `model: sonnet` (the latest Sonnet) and
+`run_in_background: false`. **Block on them; never end the turn
+waiting.** This is a `-p` run: it ends when your turn does, and a
+backgrounded sub-agent's report is discarded with it, so the run posts
+no verdict at all (it happened on PR #610, whose RV1b review split the
+diff into three background sub-agents and exited "once they finish"). Give each **only** its
 own lens section below, copied whole, plus the PR number, the head SHA,
 the tier and the PR's labels. Do not give a lens the other two lenses'
 text or your own reading of the diff: three readers who share a brief
