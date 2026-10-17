@@ -42,3 +42,15 @@ test('the title, onboarding and combat-board screens wait for their entrance to 
     assert.equal(byName['combat-board'].settle, diceSettled)
     assert.match(String(byName.onboarding.prepare), /titleSettled\(page\)/)
 })
+
+// CRITIQUE pass 92: the mobile context must report a touch pointer, or the
+// map's gesture line (and any later pointer-keyed copy) captures as desktop.
+test('the mobile context is a touch device and the desktop context keeps the mouse', async () => {
+    const { contextOptions } = await import('./critique-drive.mjs')
+    assert.deepEqual(contextOptions('mobile'), {
+        viewport: { width: 375, height: 812 }, hasTouch: true, isMobile: true,
+    })
+    assert.deepEqual(contextOptions('desktop'), {
+        viewport: { width: 1280, height: 800 }, hasTouch: false, isMobile: false,
+    })
+})

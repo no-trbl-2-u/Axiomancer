@@ -51,6 +51,15 @@ const VIEWPORTS = {
     desktop: { width: 1280, height: 800 },
 }
 
+// The phone context reports a touch device, so `(pointer: coarse)` and any
+// copy or layout keyed to the pointer render as a phone shows them (CRITIQUE
+// pass 92: with `hasTouch: false` the mobile hub capture read the desktop
+// "drag · scroll to zoom" gesture line). Desktop keeps the mouse.
+export function contextOptions(viewport) {
+    const touch = viewport === 'mobile'
+    return { viewport: VIEWPORTS[viewport], hasTouch: touch, isMobile: touch }
+}
+
 // This driver's own output paths under ARTIFACT_ROOT — the only things it is
 // safe to wipe on start. `.critique-artifacts/` is not exclusively this
 // script's directory (Phase 94 / AUDIT.md [3.2]): the 2026-09-12 fresh-eyes
@@ -324,7 +333,7 @@ async function driveViewport(browser, baseUrl, viewport) {
     for (let i = 0; i < SCREENS.length; i++) {
         // Fresh context per screen = genuine cold, first-time-player state
         // (no leaked onboarding/combat state between screens).
-        const context = await browser.newContext({ viewport: dims, hasTouch: false })
+        const context = await browser.newContext(contextOptions(viewport))
         try {
             entries.push(await captureScreen(context, baseUrl, SCREENS[i], viewport, outDir, i))
         } finally {
