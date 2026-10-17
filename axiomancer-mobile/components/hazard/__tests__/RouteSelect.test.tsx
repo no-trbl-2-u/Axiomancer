@@ -3,7 +3,7 @@ import { Dimensions, StyleSheet } from 'react-native';
 import { fireEvent, render } from '@testing-library/react-native';
 
 import { ROUTE_COLUMN_MAX_WIDTH, RouteSelect, routeFanOverlap } from '../RouteSelect';
-import type { HazardViewModel } from '@/state/presenters/hazard.engine';
+import { HAZARD_HAND_LABEL, type HazardViewModel } from '@/state/presenters/hazard.engine';
 
 // Mock react-native-reanimated
 jest.mock('react-native-reanimated', () => {
@@ -166,6 +166,14 @@ describe('RouteSelect', () => {
         expect(style.alignSelf).toBe('center');
         expect(style.width).toBe('100%');
         expect(column).toContainElement(getByTestId('hazard-opening-hand'));
+    });
+
+    // Critique pass 92: the board runs under a mouse on web, so the hand
+    // header names no touch gesture.
+    it('heads the hand with the presenter copy, pointer-neutral', () => {
+        const { getByText } = render(<RouteSelect {...mockProps} />);
+        expect(getByText(HAZARD_HAND_LABEL)).toBeTruthy();
+        expect(HAZARD_HAND_LABEL).not.toMatch(/\b(TAP|CLICK)\b/i);
     });
 });
 
