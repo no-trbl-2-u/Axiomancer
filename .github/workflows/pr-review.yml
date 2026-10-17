@@ -20,12 +20,31 @@ name: pr-review
 # so labelling cannot loop. Nothing here merges, auto-merges, closes or
 # force-pushes a PR (D86); `scripts/loop-pr.test.mjs` pins all of it.
 #
-# Cost: GitHub-hosted runners, free for this public repo. No Claude run.
+# Job `review` (RV1b) is the shadow reviewer: after a green `verify-gate`,
+# on an open, non-draft, same-repo PR labelled `loop:pr` or `plot`, one
+# Claude run of `skills/review.md` posts inline MED/HIGH findings and one
+# `## Review verdict` comment, and may raise (never lower) the `risk:*`
+# label. It blocks nothing: a not-pass is a comment, and the ruleset
+# requires `verify-gate` only. `review-wanted` decides on a plain runner
+# first (`scripts/pr-review.mjs`: labels, drafts, once per head), so a
+# label-only event costs no Claude run. The reviewer reads, comments and
+# labels; it cannot edit, commit, push, merge or close (grant and deny list
+# below, pinned in `scripts/loop-pr.test.mjs`). The `workflow_dispatch`
+# route reviews one PR on demand (phase RV1c's seeded `eval:seed` drafts).
+#
+# Cost: GitHub-hosted runners, free for this public repo. Claude usage: one
+# run per reviewed head of a `loop:pr` or `plot` PR, at `effort: high`.
 
 on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review, labeled]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: 'PR number to review (loop:pr, plot or eval:seed; drafts allowed)'
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -75,3 +94,61 @@ jobs:
 
       - name: Wait for every triggered verify-* on this head
         run: node scripts/pr-gate.mjs wait --pr "$PR" --head "$HEAD_SHA"
+
+  review-wanted:
+    needs: verify-gate
+    # always(): on workflow_dispatch the gate is skipped, and a skipped
+    # need would skip this job too.
+    if: always() && (github.event_name == 'workflow_dispatch' || needs.verify-gate.result == 'success')
+    runs-on: ubuntu-latest
+    outputs:
+      go: ${{ steps.wanted.outputs.go }}
+      pr: ${{ steps.wanted.outputs.pr }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR: ${{ github.event_name == 'workflow_dispatch' && inputs.pr || github.event.pull_request.number }}
+      DISPATCH: ${{ github.event_name == 'workflow_dispatch' && '--dispatch' || '' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Decide (labels, draft, once per head)
+        id: wanted
+        run: node scripts/pr-review.mjs wanted --pr "$PR" $DISPATCH
+
+  review:
+    needs: review-wanted
+    if: always() && needs.review-wanted.outputs.go == 'true'
+    # Job-level and per PR: a new head's review replaces the old one's.
+    concurrency:
+      group: pr-review-${{ needs.review-wanted.outputs.pr }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      actions: read
+      id-token: write
+    uses: ./.github/workflows/_claude-skill.yml
+    secrets: inherit
+    with:
+      # The PR's head may edit skills/review.md or .claude/; the reviewer
+      # runs main's copies of both when main has them.
+      pre_run: |
+        git fetch --no-tags origin main
+        for p in skills/review.md .claude CLAUDE.md AGENTS.md .mcp.json; do
+          if git cat-file -e "origin/main:$p" 2>/dev/null; then git checkout origin/main -- "$p"; fi
+        done
+      prompt: 'Read skills/review.md end to end and follow it for PR #${{ needs.review-wanted.outputs.pr }}.'
+      allowed_tools: 'Read,Grep,Glob,Task,TodoWrite,Bash(git diff:*),Bash(git show:*),Bash(git log:*),Bash(git fetch:*),Bash(git rev-parse:*),Bash(npm test:*),Bash(node --test:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh pr edit:*),mcp__github_inline_comment__create_inline_comment'
+      # Deny beats the allow list in .claude/settings.json, which a loop
+      # tick needs and a reviewer must not have.
+      extra_claude_args: |
+        -p
+        --disallowedTools "Edit,Write,MultiEdit,NotebookEdit,Bash(git push:*),Bash(git commit:*),Bash(gh pr merge:*),Bash(gh pr close:*),Bash(gh api:*)"
+      effort: 'high'
+      timeout_minutes: 20

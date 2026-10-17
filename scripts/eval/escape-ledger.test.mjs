@@ -11,7 +11,8 @@ import { fileURLToPath } from 'node:url'
 
 import {
   SECTION_END, SECTION_START, antagonistAtMerge, checksOnHead, classifyComment, classifyPaths, detectFollowUps,
-  evaluateSeeds, globToRegExp, parseWorkflowFilter, pathMatches, renderLedgerSection, spliceReport, summarize,
+  countMedPlus, evaluateSeeds, globToRegExp, parseWorkflowFilter, pathMatches, renderLedgerSection, reviewAtMerge, spliceReport,
+  summarize,
 } from './ledger-lib.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -124,6 +125,32 @@ test('classifyComment: markers decide, never the author', () => {
   assert.deepEqual(classifyComment({ author: 'no-trbl-2-u', body: 'Antagonist review: two notes' }), { judge: 'antagonist', verdict: 'review' })
 })
 
+const verdict = (v, rows = '') => `## Review verdict\n<!-- pr-review:verdict ${v} -->\n<!-- pr-review:head ${'a'.repeat(40)} -->\n\n| Severity | Where | Finding |\n|---|---|---|\n${rows}\nRisk: derived \`risk:medium\`.`
+
+test('classifyComment: a pr-review verdict marker is the pr-review judge (RV1b, A6)', () => {
+  assert.deepEqual(classifyComment({ author: 'claude[bot]', body: verdict('pass') }), { judge: 'pr-review', verdict: 'pass' })
+  assert.deepEqual(classifyComment({ author: 'no-trbl-2-u', body: verdict('not-pass') }), { judge: 'pr-review', verdict: 'not-pass' })
+  // A heading alone, or the raise marker alone, is not a verdict.
+  assert.deepEqual(classifyComment({ author: 'claude[bot]', body: '## Review verdict\nno marker' }), { judge: 'workflow', verdict: null })
+  assert.deepEqual(classifyComment({ author: 'x', body: '<!-- pr-review:raised risk:high -->' }), { judge: 'owner-or-unknown', verdict: null })
+})
+
+test('countMedPlus: MED and HIGH table rows only', () => {
+  assert.equal(countMedPlus(verdict('not-pass', '| HIGH | `a.ts:1` | x |\n| MED | `b.ts:2` | y |\n| LOW | `c.ts:3` | z |\n')), 2)
+  assert.equal(countMedPlus('No findings. HIGH and MED in prose do not count.'), 0)
+})
+
+test('reviewAtMerge: the last verdict before the merge, with its MED+ count', () => {
+  const comments = [
+    { author: 'claude[bot]', body: verdict('not-pass', '| HIGH | `a.ts:1` | x |\n'), createdAt: '2026-10-17T01:00:00Z' },
+    { author: 'claude[bot]', body: verdict('pass', '| LOW | `a.ts:1` | x |\n'), createdAt: '2026-10-17T02:00:00Z' },
+    { author: 'claude[bot]', body: verdict('not-pass'), createdAt: '2026-10-17T04:00:00Z' },
+  ]
+  assert.deepEqual(reviewAtMerge(comments, '2026-10-17T03:00:00Z'), { verdict: 'pass', at: '2026-10-17T02:00:00Z', medPlus: 0, mergedOnNotPass: false })
+  assert.deepEqual(reviewAtMerge(comments.slice(0, 1), '2026-10-17T03:00:00Z'), { verdict: 'not-pass', at: '2026-10-17T01:00:00Z', medPlus: 1, mergedOnNotPass: true })
+  assert.equal(reviewAtMerge(comments, '2026-10-17T00:00:00Z').verdict, 'none')
+})
+
 test('antagonistAtMerge: #529 merged on a "not a pass"; later comments do not count', () => {
   const got = antagonistAtMerge(fixture('pr-529-comments.json'), '2026-10-14T03:25:57Z')
   assert.equal(got.verdict, 'not-pass')
@@ -171,11 +198,16 @@ test('summarize and renderLedgerSection: counts and one table row per PR, inside
   ]
   assert.deepEqual(summarize(rows), {
     prs: 2, mergedBeforeChecks: 1, noVerifyRan: 1, withUncovered: 1, expectedNotRun: 0, withFollowUps: 0,
-    antagonistReviewed: 1, mergedOnNotPass: 1,
+    antagonistReviewed: 1, mergedOnNotPass: 1, shadowReviewed: 0, mergedOnReviewNotPass: 0,
   })
   const md = renderLedgerSection({ stamp: { commit: 'abcdef12', date: '2026-10-15' }, window: { from: '2026-10-12', to: '2026-10-15' }, rows, seeds: evaluateSeeds(rows, facts) })
   assert.ok(md.startsWith(SECTION_START) && md.endsWith(SECTION_END))
-  assert.match(md, /\| #529 t \|.*verify-mobile success \(after merge\).*not-pass \(merged anyway\) \|/)
+  assert.match(md, /\| #529 t \|.*verify-mobile success \(after merge\).*not-pass \(merged anyway\) \| none \|/)
+  const reviewed = [row({ number: 600, review: { verdict: 'not-pass', medPlus: 2, mergedOnNotPass: true } })]
+  assert.deepEqual([summarize(reviewed).shadowReviewed, summarize(reviewed).mergedOnReviewNotPass], [1, 1])
+  const md2 = renderLedgerSection({ stamp: { commit: 'abcdef12', date: '2026-10-17' }, window: { from: '2026-10-12', to: '2026-10-17' }, rows: reviewed, seeds: [] })
+  assert.match(md2, /\| #600 t \|.*\| not-pass, 2 MED\+ \(merged anyway\) \|$/m)
+  assert.match(md2, /\| Merged on a shadow review "not-pass" \| 1 \|/)
   assert.match(md, /a\\\|b\.mjs/, 'a pipe in a path is escaped')
   assert.equal(md.split('\n').filter((l) => /^\| S\d \|/.test(l)).length, 6)
 })
