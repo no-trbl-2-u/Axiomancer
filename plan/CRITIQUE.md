@@ -730,16 +730,6 @@
 - suggested fix: give the mobile entry in `VIEWPORTS` `hasTouch: true, isMobile: true` and pass them to `newContext` (desktop keeps the mouse); check the two scripted clicks (`Embark`, `combat-enter`) still land, and pin the context options in `critique-drive.test.mjs`. Tooling only, no game change.
 - source: critique:drive (unattended)
 
-### [LOW] desktop — the hub drawer and the hazard hand still tell a mouse player to "tap"
-- pass: 92 (commit c49902c7)
-- viewport: desktop (1280x800)
-- category: voice
-- observation: #598 taught the chart's gesture line which pointer it is talking to, but the lines beside it did not follow. On desktop the hub drawer under the chart reads "every path beside trodden ground stays open — tap a glowing node to travel." and the hazard hand header reads "YOUR HAND — TAP A CARD TO READ IT, OR CHOOSE YOUR ROUTE BELOW", one line below a chart that now says "scroll to zoom". A mouse player clicks; the screen speaks to two devices at once.
-- evidence: `.critique-artifacts/desktop/11-late-game-hub.png` (drawer line under "drag · scroll to zoom"), `desktop/10-hazard.png` (hand header); `DRAWER_COPY.emptyMessage` in `axiomancer-mobile/state/presenters/exploration.engine.ts`; the hazard hand header is hardcoded at `axiomancer-mobile/components/hazard/RouteSelect.tsx:190`, against the package rule that player-facing copy lives outside components.
-- suggested fix: use pointer-neutral verbs ("choose a glowing node to travel", "choose a card to read it") in both strings (moving the hazard one into its presenter copy) and any test that pins them; copy only, no rule change. (Picking "tap"/"click" off `MapPointer` is the heavier alternative.)
-- source: critique:drive (unattended)
-
-
 ### [LOW] rest / cache — "The node is spent the moment you stopped here" mixes present and past tense
 - pass: 89 (commit 2927472f)
 - viewport: both (375x812 and 1280x800)
@@ -1078,6 +1068,15 @@
 
 ## Done
 
+### [x] [LOW] desktop — the hub drawer and the hazard hand still tell a mouse player to "tap" — RESOLVED 2026-10-17 (branch loop/iterate-pointer-neutral-verbs, c6daa798: "choose" in the drawer line, `HAZARD_HAND_LABEL` in the hazard presenter, and the combat rewards subtitle; pinned in RouteSelect.test.tsx and exploration.engine.test.ts)
+- pass: 92 (commit c49902c7)
+- viewport: desktop (1280x800)
+- category: voice
+- observation: #598 taught the chart's gesture line which pointer it is talking to, but the lines beside it did not follow. On desktop the hub drawer under the chart reads "every path beside trodden ground stays open — tap a glowing node to travel." and the hazard hand header reads "YOUR HAND — TAP A CARD TO READ IT, OR CHOOSE YOUR ROUTE BELOW", one line below a chart that now says "scroll to zoom". A mouse player clicks; the screen speaks to two devices at once.
+- evidence: `.critique-artifacts/desktop/11-late-game-hub.png` (drawer line under "drag · scroll to zoom"), `desktop/10-hazard.png` (hand header); `DRAWER_COPY.emptyMessage` in `axiomancer-mobile/state/presenters/exploration.engine.ts`; the hazard hand header is hardcoded at `axiomancer-mobile/components/hazard/RouteSelect.tsx:190`, against the package rule that player-facing copy lives outside components.
+- suggested fix: use pointer-neutral verbs ("choose a glowing node to travel", "choose a card to read it") in both strings (moving the hazard one into its presenter copy) and any test that pins them; copy only, no rule change. (Picking "tap"/"click" off `MapPointer` is the heavier alternative.)
+- source: critique:drive (unattended)
+- issue: #603
 ### [x] [LOW] exploration hub / tooling — the level-15 Sage fixture shows 680 VITAE, twice what a level-15 pilgrim can now reach — RESOLVED 2026-10-17 (branch loop/iterate-preset-stat-curve, 428a91a2: every preset holds exactly 15 + (level - 1) x `STAT_POINTS_PER_LEVEL`, spread in the old proportions; Sage is 8/11/10; pinned by presets.engine.test.ts "stat curve")
 - pass: 90 (commit 6b5e2b6d)
 - viewport: both (375x812 and 1280x800)
