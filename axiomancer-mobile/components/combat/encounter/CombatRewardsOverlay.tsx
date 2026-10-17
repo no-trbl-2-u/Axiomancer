@@ -58,7 +58,7 @@ export function CombatRewardsOverlay({
             <View style={[styles.panel, { borderColor: AXM.sulfur }]}>
                 <Text style={styles.eyebrow}>✦ SPOILS</Text>
                 <Text style={styles.title}>Add a card to your deck</Text>
-                <Text style={styles.sub}>your deck grows as you fight — tap a card to read it</Text>
+                <Text style={styles.sub}>your deck grows as you fight — choose a card to read it</Text>
 
                 <View style={styles.offerRow}>
                     {offers.map((card) => {

@@ -10,7 +10,7 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 
-import type { HazardCardVM, HazardRouteChoiceVM, HazardViewModel } from '@/state/presenters/hazard.engine';
+import { HAZARD_HAND_LABEL, type HazardCardVM, type HazardRouteChoiceVM, type HazardViewModel } from '@/state/presenters/hazard.engine';
 import type { HazardRouteKey } from '@mechanics';
 import { FONTS, HUE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
@@ -187,7 +187,7 @@ export function RouteSelect({
 
                     {/* opening hand preview — fanned, non-interactive */}
                     <Animated.View entering={FadeInUp.delay(160).duration(320)}>
-                        <Text style={styles.handLabel}>YOUR HAND — TAP A CARD TO READ IT, OR CHOOSE YOUR ROUTE BELOW</Text>
+                        <Text style={styles.handLabel}>{HAZARD_HAND_LABEL}</Text>
                         <View style={styles.handPreview} testID="hazard-opening-hand">
                             {vm.hand.map((card, i) => {
                                 const n = vm.hand.length;
