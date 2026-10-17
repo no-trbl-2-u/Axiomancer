@@ -344,6 +344,13 @@ export const HAZARD_STAT_KEY: HazardStatKeyVM = Object.freeze({
 });
 
 /**
+ * Header over the route screen's opening-hand preview. Pointer-neutral
+ * ("choose", not "tap") because the board runs under a mouse on web too
+ * (critique pass 92).
+ */
+export const HAZARD_HAND_LABEL = 'YOUR HAND — CHOOSE A CARD TO READ IT, OR A ROUTE BELOW';
+
+/**
  * Spoken label for a card's FORCE/ESCAPE number pair, so the two
  * unkeyed micro-glyphs are announced by name.
  *

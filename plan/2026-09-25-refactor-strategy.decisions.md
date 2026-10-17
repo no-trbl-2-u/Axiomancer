@@ -955,6 +955,7 @@ satisfied for exactly these.)
 **D85 — Loop PRs: at most 3 open.** (T, attended, 2026-10-12, R11 ballot b.)
 
 - At 3 open `loop:pr` PRs, `/march` runs triage and critique's audit pass only and reports "waiting on T: PRs #a, #b, #c".
+- **Amended via /oversight 2026-10-17 (T):** the cap is 5, not 3. R11 watch: ~20 of 71 march ticks since 2026-10-11 picked nothing, mostly at the cap with PRs waiting on T.
 - An open `loop:pr` PR is the claim on its row or queue item.
 
 **D86 — T merges loop PRs by hand.** (T, attended, 2026-10-12, R11 ballot c.)

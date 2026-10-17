@@ -4,8 +4,8 @@
 // The escape ledger (phase EV1a, `plan/phases/phase_EV1_loop_eval_ledger.md`
 // A1-A3): every `loop:pr` PR merged since 2026-10-12, the checks that ran on
 // its final head, the `verify-*` workflows its paths skipped, fix or revert
-// follow-ups within 7 days, the antagonist's verdict at merge, and the six
-// seeded escapes. Reads GitHub (`gh`) and git only; writes
+// follow-ups within 7 days, the antagonist's and the shadow reviewer's
+// verdicts at merge, and the six seeded escapes. Reads GitHub (`gh`) and git only; writes
 // `docs/reports/eval/ledger.json` and the ledger section of
 // `docs/reports/eval/latest.md`. The pure parts live in `ledger-lib.mjs`.
 //
@@ -20,7 +20,7 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import {
-  antagonistAtMerge, checksOnHead, classifyPaths, detectFollowUps, evaluateSeeds, parseWorkflowFilter,
+  antagonistAtMerge, checksOnHead, classifyPaths, detectFollowUps, evaluateSeeds, parseWorkflowFilter, reviewAtMerge,
   renderLedgerSection, spliceReport,
 } from './ledger-lib.mjs'
 
@@ -126,10 +126,11 @@ function main() {
       .map((c) => ({ author: c.author?.login ?? '', body: c.body ?? '', createdAt: c.createdAt ?? c.submittedAt }))
       .filter((c) => c.createdAt && c.body)
     const antagonist = antagonistAtMerge(comments, p.mergedAt)
+    const review = reviewAtMerge(comments, p.mergedAt)
     const followUps = detectFollowUps({ mergeCommit, mergedAt: p.mergedAt, files }, history)
     return {
       number: p.number, title: p.title, mergedAt: p.mergedAt, head: p.headRefOid, mergeCommit, files,
-      ran, triggered, skipped, expectedNotRun, uncovered, followUps, antagonist,
+      ran, triggered, skipped, expectedNotRun, uncovered, followUps, antagonist, review,
     }
   })
 

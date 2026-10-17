@@ -159,7 +159,7 @@ so T approves the phase split by merging it. Open PRs ready for
 review, not drafts. **T merges by hand** (D86): never enable auto-merge
 (it is disabled on this repo) and never merge, close or force-push a
 `loop:pr` PR. `pr-autofix` (Haiku, two runs per PR) keeps a red
-`loop:pr` PR green and `pr-resolve` keeps it mergeable (D87); at most 3
+`loop:pr` PR green and `pr-resolve` keeps it mergeable (D87); at most 5
 are open at once (D85).
 
 ## Per-package guides

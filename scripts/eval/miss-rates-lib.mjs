@@ -75,6 +75,16 @@ export function computeMissRates({ ledger, replay, seeded, mutation }) {
       `Denominator: PRs carrying a seeded escape that the antagonist reviewed before merge. It reviewed ${rows.filter((r) => verdict(r) !== 'none').length} of ${rows.length} ledger PRs; ${rows.filter((r) => verdict(r) === 'not-pass').length} drew a "not a pass".`)
     : notMeasured('The antagonist', 'no PR carrying a seeded escape has an antagonist verdict on record.'))
 
+  // The shadow reviewer (RV1b): shadow-reviewed PRs that escaped anyway,
+  // where its last verdict before merge named no MED+ finding.
+  const rv = (r) => r.review?.verdict ?? 'none'
+  const shadowed = rows.filter((r) => rv(r) !== 'none')
+  const escaped = shadowed.filter((r) => escapePrs.has(r.number) || r.followUps.length > 0)
+  out.push(shadowed.length
+    ? row('The shadow reviewer (`pr-review`)', escaped.filter((r) => !r.review.medPlus).map((r) => `#${r.number}`), escaped.length,
+      `Denominator: shadow-reviewed PRs that escaped (a seeded escape, or a fix within 7 days on the same code). A miss is an escape whose last verdict before merge named no MED+ finding. Verdict before merge: ${shadowed.length} of ${rows.length} ledger PRs; "not-pass" merged anyway: ${shadowed.filter((r) => r.review.mergedOnNotPass).map((r) => `#${r.number}`).join(', ') || 'none'}.`)
+    : notMeasured('The shadow reviewer (`pr-review`)', 'no ledger PR has a `pr-review` verdict before its merge yet (the reviewer starts with phase RV1b); the Part 4 shadow table reads 20.'))
+
   // /critique runs after merge on the web build; nothing records what it saw.
   const critiqueFixes = new Set(rows.flatMap((r) => r.followUps).filter((f) => /CRITIQUE/.test(f.subject)).map((f) => f.sha))
   out.push(notMeasured('`/critique`',

@@ -50,9 +50,25 @@ test('computeMissRates: each judge counts its misses over its own denominator', 
   assert.equal(builder.of, 2)
 })
 
+test('computeMissRates: the shadow reviewer row counts escapes with no MED+ finding (RV1b, A6)', () => {
+  const rv = (verdict, medPlus) => ({ verdict, medPlus, mergedOnNotPass: verdict === 'not-pass' })
+  const reviewed = { rows: [
+    pr(600, { review: rv('pass', 0), followUps: [{ sha: 'f2', subject: 'fix: y' }] }),
+    pr(601, { review: rv('not-pass', 2), followUps: [{ sha: 'f3', subject: 'fix: z' }] }),
+    pr(602, { review: rv('pass', 0) }),
+    pr(603),
+  ] }
+  const got = computeMissRates({ ledger: reviewed, replay, seeded, mutation: null }).find((r) => r.judge === 'The shadow reviewer (`pr-review`)')
+  assert.deepEqual([got.misses, got.of, got.rate], [['#600'], 2, 50])
+  assert.match(got.note, /Verdict before merge: 3 of 4 ledger PRs; "not-pass" merged anyway: #601\./)
+  const none = computeMissRates({ ledger: { rows: [pr(602, { review: rv('pass', 0) })] }, replay, seeded, mutation: null })
+    .find((r) => r.judge === 'The shadow reviewer (`pr-review`)')
+  assert.deepEqual([none.misses, none.of, none.rate], [[], 0, null], 'reviewed but nothing escaped: no rate yet')
+})
+
 test('computeMissRates: a judge the evidence cannot score says "not measured" and why', () => {
   const rows = Object.fromEntries(computeMissRates({ ledger, replay: null, seeded: null, mutation: null }).map((r) => [r.judge, r]))
-  for (const judge of ['CI and its path filters', '`verify`', '`/critique`', "The builder's own `[x]`"]) {
+  for (const judge of ['CI and its path filters', '`verify`', '`/critique`', "The builder's own `[x]`", 'The shadow reviewer (`pr-review`)']) {
     assert.equal(rows[judge].misses, null, judge)
     assert.ok(rows[judge].note.length > 20, judge)
   }

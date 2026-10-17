@@ -455,7 +455,7 @@ export const MAP_GESTURE_LINE: Readonly<Record<MapPointer, string>> = Object.fre
 });
 
 const DRAWER_COPY = {
-    emptyMessage: 'every path beside trodden ground stays open — tap a glowing node to travel.',
+    emptyMessage: 'every path beside trodden ground stays open — choose a glowing node to travel.',
     title: '✠ WHITHER, PILGRIM?',
     leaguesLabel: 'LEAGUES',
 } as const;
