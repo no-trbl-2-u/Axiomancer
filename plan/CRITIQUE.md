@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-10-16 at commit ef1d1dd3
-> Pass count: 91
+> Last pass: 2026-10-17 at commit c49902c7
+> Pass count: 92
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -704,7 +704,40 @@
 > gesture line still reads "drag · pinch" on desktop, where #590 made
 > the mouse wheel the zoom.
 
+> **[critique pass 92, 2026-10-17, commit c49902c7] Unattended `/march`
+> tick.** `critique:drive` (`CRITIQUE_VIEWPORT=both`), full 11-screen
+> set: 22 captures, 0 nav trouble, 0 console/page errors. 19 commits
+> after pass 91: B3e hazard demo puzzles (dev-menu board, not in the
+> set), the /dev menu slim, RV1a verify-gate, the map gesture line
+> (#598) and the preset stat curve (#600). Confirmed fixed: pass 90's
+> level-15 Sage now reads 290/290 VITAE in both hub captures, and the
+> desktop chart reads "drag · scroll to zoom". Reconfirmed and not
+> re-filed: pass 89's "you stopped here" tense row (both rest captures),
+> the unfixtured exploration hub bouncing to the title, and the mobile
+> hazard strip's "CHOOSE TO PROC..." (pass 68 trade). Two fresh
+> findings, both born of #598: the transport's mobile viewport reports a
+> mouse, so mobile captures now show the desktop gesture line; and the
+> desktop hub and hazard still tell a mouse player to "tap".
+
 ## Pending
+
+### [LOW] critique / transport — the mobile viewport emulates a mouse, so phone captures show the desktop map gesture line
+- pass: 92 (commit c49902c7)
+- viewport: mobile (375x812)
+- category: infra
+- observation: since #598 the map's gesture line follows `(pointer: fine)`. `critique:drive` opens every context with `hasTouch: false` and no `isMobile`, so headless Chromium reports a fine pointer at 375x812 and the mobile late-game hub capture reads "drag · scroll to zoom", a line no phone shows. Every later pointer-dependent copy or layout will be mis-captured the same way, and a pass reading the mobile screenshot would either file a false finding or miss a real one.
+- evidence: `.critique-artifacts/mobile/11-late-game-hub.png` and `.txt` ("drag · scroll to zoom"); `axiomancer-mobile/scripts/critique-drive.mjs` `driveViewport` (`browser.newContext({ viewport: dims, hasTouch: false })`); `detectMapPointer()` in `components/exploration/MapOverlays.tsx`.
+- suggested fix: give the mobile entry in `VIEWPORTS` `hasTouch: true, isMobile: true` and pass them to `newContext` (desktop keeps the mouse); check the two scripted clicks (`Embark`, `combat-enter`) still land, and pin the context options in `critique-drive.test.mjs`. Tooling only, no game change.
+- source: critique:drive (unattended)
+
+### [LOW] desktop — the hub drawer and the hazard hand still tell a mouse player to "tap"
+- pass: 92 (commit c49902c7)
+- viewport: desktop (1280x800)
+- category: voice
+- observation: #598 taught the chart's gesture line which pointer it is talking to, but the lines beside it did not follow. On desktop the hub drawer under the chart reads "every path beside trodden ground stays open — tap a glowing node to travel." and the hazard hand header reads "YOUR HAND — TAP A CARD TO READ IT, OR CHOOSE YOUR ROUTE BELOW", one line below a chart that now says "scroll to zoom". A mouse player clicks; the screen speaks to two devices at once.
+- evidence: `.critique-artifacts/desktop/11-late-game-hub.png` (drawer line under "drag · scroll to zoom"), `desktop/10-hazard.png` (hand header); `DRAWER_COPY.emptyMessage` in `axiomancer-mobile/state/presenters/exploration.engine.ts`; the hazard hand header is hardcoded at `axiomancer-mobile/components/hazard/RouteSelect.tsx:190`, against the package rule that player-facing copy lives outside components.
+- suggested fix: use pointer-neutral verbs ("choose a glowing node to travel", "choose a card to read it") in both strings (moving the hazard one into its presenter copy) and any test that pins them; copy only, no rule change. (Picking "tap"/"click" off `MapPointer` is the heavier alternative.)
+- source: critique:drive (unattended)
 
 
 ### [LOW] rest / cache — "The node is spent the moment you stopped here" mixes present and past tense
