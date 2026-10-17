@@ -176,17 +176,33 @@ export function detectFollowUps(pr, landings, days = FOLLOW_UP_DAYS) {
     .sort((a, b) => a.date.localeCompare(b.date))
 }
 
+/** The shadow reviewer's verdict marker (phase RV1b, `skills/review.md`). */
+export const REVIEW_VERDICT = /<!--\s*pr-review:verdict (pass|not-pass)\s*-->/
+
+/**
+ * The MED and HIGH rows of a verdict comment's findings table.
+ *
+ * @param {string} body the verdict comment.
+ * @returns {number} the count.
+ * @example countMedPlus('| HIGH | `a.ts:1` | x |\n| LOW | `b.ts:2` | y |') // 1
+ */
+export function countMedPlus(body) {
+  return (body.match(/^\|\s*(HIGH|MED)\s*\|/gm) ?? []).length
+}
+
 /**
  * Who a PR comment speaks for. Every loop agent and T post as one account,
  * so the marker decides, not the author; an unmarked comment is never
  * counted as T's verdict.
  *
  * @param {{ author: string, body: string }} comment a PR comment or review.
- * @returns {{ judge: 'antagonist'|'merge-script'|'workflow'|'owner-or-unknown', verdict: 'pass'|'not-pass'|'review'|null }} the classification.
+ * @returns {{ judge: 'pr-review'|'antagonist'|'merge-script'|'workflow'|'owner-or-unknown', verdict: 'pass'|'not-pass'|'review'|null }} the classification.
  * @example classifyComment({ author: 'x', body: '## Antagonist review (in progress, not a pass)' }).verdict // 'not-pass'
  */
 export function classifyComment(comment) {
   const body = comment.body ?? ''
+  const review = body.match(REVIEW_VERDICT)
+  if (review) return { judge: 'pr-review', verdict: review[1] }
   const head = body.split('\n').find((l) => l.trim() !== '') ?? ''
   if (/^Merged by Claude\b/i.test(head.trim())) return { judge: 'merge-script', verdict: null }
   if (/^#*\s*Antagonist (pass|review)\b/i.test(head.trim())) {
@@ -222,6 +238,25 @@ export function antagonistAtMerge(comments, mergedAt) {
     mergedOnNotPass: last?.verdict === 'not-pass',
     mergeScriptComment: classified.some((c) => c.judge === 'merge-script'),
   }
+}
+
+/**
+ * The shadow reviewer's standing verdict at merge: its last verdict
+ * comment before the merge, with that comment's MED+ finding count.
+ *
+ * @param {{ author: string, body: string, createdAt: string }[]} comments the PR's comments and reviews.
+ * @param {string} mergedAt the merge time.
+ * @returns {{ verdict: 'pass'|'not-pass'|'none', at: string|null, medPlus: number, mergedOnNotPass: boolean }} the summary.
+ * @example reviewAtMerge([], '2026-10-17T00:00:00Z').verdict // 'none'
+ */
+export function reviewAtMerge(comments, mergedAt) {
+  const merged = Date.parse(mergedAt)
+  const last = [...comments]
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+    .filter((c) => classifyComment(c).judge === 'pr-review' && Date.parse(c.createdAt) <= merged)
+    .at(-1)
+  const verdict = last ? classifyComment(last).verdict : 'none'
+  return { verdict, at: last ? last.createdAt : null, medPlus: last ? countMedPlus(last.body) : 0, mergedOnNotPass: verdict === 'not-pass' }
 }
 
 /**
@@ -327,7 +362,7 @@ export const SECTION_END = '<!-- eval:ledger:end -->'
  * Totals over the ledger rows.
  *
  * @param {object[]} rows the ledger rows.
- * @returns {{ prs: number, mergedBeforeChecks: number, noVerifyRan: number, withUncovered: number, expectedNotRun: number, withFollowUps: number, antagonistReviewed: number, mergedOnNotPass: number }} counts.
+ * @returns {{ prs: number, mergedBeforeChecks: number, noVerifyRan: number, withUncovered: number, expectedNotRun: number, withFollowUps: number, antagonistReviewed: number, mergedOnNotPass: number, shadowReviewed: number, mergedOnReviewNotPass: number }} counts.
  */
 export function summarize(rows) {
   return {
@@ -339,6 +374,8 @@ export function summarize(rows) {
     withFollowUps: rows.filter((r) => r.followUps.length > 0).length,
     antagonistReviewed: rows.filter((r) => r.antagonist.verdict !== 'none').length,
     mergedOnNotPass: rows.filter((r) => r.antagonist.mergedOnNotPass).length,
+    shadowReviewed: rows.filter((r) => (r.review?.verdict ?? 'none') !== 'none').length,
+    mergedOnReviewNotPass: rows.filter((r) => r.review?.mergedOnNotPass).length,
   }
 }
 
@@ -364,13 +401,15 @@ export function renderLedgerSection(ledger) {
   out.push(`| A triggered \`verify-*\` workflow absent on the final head | ${s.expectedNotRun} |`)
   out.push(`| A fix or revert touched the same code within ${FOLLOW_UP_DAYS} days | ${s.withFollowUps} |`)
   out.push(`| Antagonist verdict on record at merge | ${s.antagonistReviewed} |`)
-  out.push(`| Merged on an antagonist "not a pass" | ${s.mergedOnNotPass} |`, '')
+  out.push(`| Merged on an antagonist "not a pass" | ${s.mergedOnNotPass} |`)
+  out.push(`| Shadow review (\`pr-review\`) verdict on record at merge | ${s.shadowReviewed} |`)
+  out.push(`| Merged on a shadow review "not-pass" | ${s.mergedOnReviewNotPass} |`, '')
   out.push('### Seeded escapes', '')
   out.push('| ID | Escape | Evidence | Gate that should have caught it | Status |', '|---|---|---|---|---|')
   for (const e of seeds) out.push(`| ${e.id} | ${cell(e.title)} | ${cell(e.evidence.join('; '))} | ${cell(e.gate)} | ${e.status}: ${cell(e.note)} |`)
   out.push('', '### Every PR in the window', '')
   out.push(`A follow-up is a fix or revert landing on \`main\` within ${FOLLOW_UP_DAYS} days that touched one of the PR's non-bookkeeping files. A shared file names a candidate, not a cause. "After merge" means the check finished after the PR merged, so the merge did not wait for it.`, '')
-  out.push('| PR | Merged | Head | Ran on the final head | `verify-*` skipped | Uncovered code | Follow-ups (7d) | Antagonist |', '|---|---|---|---|---|---|---|---|')
+  out.push('| PR | Merged | Head | Ran on the final head | `verify-*` skipped | Uncovered code | Follow-ups (7d) | Antagonist | Review |', '|---|---|---|---|---|---|---|---|---|')
   for (const r of rows) {
     const ran = r.ran.map((c) => `${c.name} ${c.conclusion}${c.finishedAfterMerge ? ' (after merge)' : ''}`).join('; ') || 'nothing'
     const missing = r.expectedNotRun.length ? `; expected, absent: ${r.expectedNotRun.join(', ')}` : ''
@@ -378,7 +417,10 @@ export function renderLedgerSection(ledger) {
     const uncovered = r.uncovered.length ? `${r.uncovered.length}: ${r.uncovered.slice(0, 3).join(', ')}${r.uncovered.length > 3 ? ', ...' : ''}` : 'none'
     const fu = r.followUps.map((f) => `${short(f.sha)} ${f.subject}`).join('; ') || 'none'
     const ant = r.antagonist.verdict + (r.antagonist.mergedOnNotPass ? ' (merged anyway)' : '')
-    out.push(`| #${r.number} ${cell(r.title)} | ${r.mergedAt.slice(0, 16)}Z | ${short(r.head)} | ${cell(ran + missing)} | ${skipped} | ${cell(uncovered)} | ${cell(fu)} | ${ant} |`)
+    const rv = r.review && r.review.verdict !== 'none'
+      ? `${r.review.verdict}, ${r.review.medPlus} MED+${r.review.mergedOnNotPass ? ' (merged anyway)' : ''}`
+      : 'none'
+    out.push(`| #${r.number} ${cell(r.title)} | ${r.mergedAt.slice(0, 16)}Z | ${short(r.head)} | ${cell(ran + missing)} | ${skipped} | ${cell(uncovered)} | ${cell(fu)} | ${ant} | ${rv} |`)
   }
   out.push('', SECTION_END)
   return out.join('\n')

@@ -1,10 +1,10 @@
 {
   "stamp": {
-    "commit": "0c18f2f7",
-    "date": "2026-10-16T07:28:26Z"
+    "commit": "4043ba25",
+    "date": "2026-10-17T10:40:15Z"
   },
   "inputs": {
-    "ledger": "86eea99d",
+    "ledger": "4043ba25",
     "parent replay": "5085b096",
     "planted defects": "b0ac22f8",
     "mutation": "15a2fa76"
@@ -20,7 +20,7 @@
       ],
       "of": 4,
       "rate": 100,
-      "note": "1 of 4 planted defects trigger no `verify-*` workflow (D4). Path coverage: 9 of 26 ledger PRs changed code no filter covers (#505, #507, #509, #520, #523, #526, #535, #543, #549)."
+      "note": "1 of 4 planted defects trigger no `verify-*` workflow (D4). Path coverage: 16 of 42 ledger PRs changed code no filter covers (#505, #507, #509, #520, #523, #526, #535, #543, #549, #565, #571, #576, #579, #583, #592, #596)."
     },
     {
       "judge": "`verify`",
@@ -44,7 +44,14 @@
       ],
       "of": 5,
       "rate": 80,
-      "note": "Denominator: PRs carrying a seeded escape that the antagonist reviewed before merge. It reviewed 6 of 26 ledger PRs; 1 drew a \"not a pass\"."
+      "note": "Denominator: PRs carrying a seeded escape that the antagonist reviewed before merge. It reviewed 6 of 42 ledger PRs; 1 drew a \"not a pass\"."
+    },
+    {
+      "judge": "The shadow reviewer (`pr-review`)",
+      "misses": null,
+      "of": null,
+      "rate": null,
+      "note": "no ledger PR has a `pr-review` verdict before its merge yet (the reviewer starts with phase RV1b); the Part 4 shadow table reads 20."
     },
     {
       "judge": "`/critique`",
@@ -58,10 +65,11 @@
       "misses": [
         "#509",
         "#529",
-        "#541"
+        "#541",
+        "#600"
       ],
-      "of": 26,
-      "rate": 11.5,
+      "of": 42,
+      "rate": 9.5,
       "note": "A miss is a merge before every check on the final head finished, or over an antagonist \"not a pass\" (S1)."
     },
     {

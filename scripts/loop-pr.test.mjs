@@ -6,7 +6,9 @@
 // never push a PR branch's commits to main; and the rule that only T fires
 // /plot and /messy, and that /plot lands its phases by a `plot` PR (D93); and
 // the `verify-gate` job in pr-review.yml (phase RV1a): same-repo
-// `pull_request` only, the only writer of `risk:*`, no merge wiring.
+// `pull_request` only, the only writer of `risk:*`, no merge wiring; and the
+// shadow `review` job (phase RV1b): after the gate, only `loop:pr` / `plot`,
+// a read-comment-label grant with no Edit, Write, push or merge.
 //
 //   node --test scripts/loop-pr.test.mjs
 
@@ -21,8 +23,9 @@ import { hasMarker, isUnionPath, keepCount, unionMerge } from './pr-resolve.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8')
-// Code only: YAML `#` and JS `//` comment lines explain the rules by name.
-const code = (text) => text.split('\n').filter((l) => !/^\s*(#|\/\/)/.test(l)).join('\n')
+// Code only: YAML `#` and JS `//` comment lines explain the rules by name, and
+// a `--disallowedTools` line names what it forbids.
+const code = (text) => text.split('\n').filter((l) => !/^\s*(#|\/\/)/.test(l) && !/--disallowedTools/.test(l)).join('\n')
 const WF = '.github/workflows'
 
 // --- pr-autofix.yml --------------------------------------------------------
@@ -160,6 +163,66 @@ test('a gh pr merge --auto in pr-review is reachable only from a risk:low step',
     assert.match(code(s), /gh pr merge --auto\b/, 'never a plain merge')
     assert.match(s, /\n\s+if: [^\n]*risk:low/, 'gated on risk:low')
   }
+})
+
+// --- pr-review.yml: the shadow reviewer (phase RV1b, A5) ------------------------
+
+test('review runs after a green verify-gate, through review-wanted, on loop:pr and plot only', () => {
+  const wanted = job(review, 'review-wanted')
+  assert.ok(wanted, 'review-wanted job present')
+  assert.match(wanted, /^ {4}needs: verify-gate$/m)
+  assert.match(wanted, /needs\.verify-gate\.result == 'success'/)
+  assert.match(wanted, /node scripts\/pr-review\.mjs wanted --pr "\$PR"/)
+  const rv = job(review, 'review')
+  assert.ok(rv, 'review job present')
+  assert.match(rv, /^ {4}needs: review-wanted$/m)
+  assert.match(rv, /^ {4}if: always\(\) && needs\.review-wanted\.outputs\.go == 'true'$/m)
+  assert.match(rv, /\n {4}concurrency:\n {6}group: pr-review-\$\{\{ needs\.review-wanted\.outputs\.pr \}\}\n {6}cancel-in-progress: true/)
+  assert.match(rv, /uses: \.\/\.github\/workflows\/_claude-skill\.yml/)
+  assert.match(rv, /prompt: 'Read skills\/review\.md end to end/)
+  assert.match(rv, /effort: 'high'/)
+  assert.match(rv, /timeout_minutes: 20/)
+})
+
+test('review-wanted reviews only loop:pr and plot on pull_request, eval:seed only on dispatch', async () => {
+  const { REVIEW_LABELS, DISPATCH_LABELS } = await import('./pr-review.mjs')
+  assert.deepEqual([...REVIEW_LABELS], ['loop:pr', 'plot'])
+  assert.deepEqual([...DISPATCH_LABELS].filter((l) => !REVIEW_LABELS.includes(l)), ['eval:seed'])
+  assert.match(review, /workflow_dispatch:\n {4}inputs:\n {6}pr:/)
+})
+
+test('the reviewer can read, comment and label, and nothing else', () => {
+  const rv = job(review, 'review')
+  const grant = rv.match(/allowed_tools: '([^']+)'/)[1].split(',')
+  for (const t of ['Edit', 'Write', 'MultiEdit', 'NotebookEdit', 'Bash']) assert.ok(!grant.includes(t), `no ${t}`)
+  for (const t of grant.filter((t) => t.startsWith('Bash('))) {
+    assert.match(t, /^Bash\((git (diff|show|log|fetch|rev-parse)|npm test|node --test|gh pr (view|diff|comment|edit)):\*\)$/, t)
+  }
+  assert.ok(grant.includes('mcp__github_inline_comment__create_inline_comment'))
+  const deny = rv.match(/--disallowedTools "([^"]+)"/)[1].split(',')
+  for (const t of ['Edit', 'Write', 'Bash(git push:*)', 'Bash(git commit:*)', 'Bash(gh pr merge:*)', 'Bash(gh pr close:*)', 'Bash(gh api:*)']) {
+    assert.ok(deny.includes(t), `denies ${t}`)
+  }
+  assert.doesNotMatch(rv, /dangerously-skip-permissions/, 'the grant only binds without the bypass flag')
+})
+
+test('the reviewer runs main\'s copy of its own instructions', () => {
+  const rv = job(review, 'review')
+  assert.match(rv, /git fetch --no-tags origin main/)
+  assert.match(rv, /for p in skills\/review\.md \.claude CLAUDE\.md AGENTS\.md \.mcp\.json; do/)
+  assert.match(rv, /git checkout origin\/main -- "\$p"/)
+})
+
+test('skills/review.md writes the markers the ledger and verify-gate read', async () => {
+  const skill = read('skills/review.md')
+  const { REVIEW_VERDICT } = await import('./eval/ledger-lib.mjs')
+  const { RAISE_MARKER } = await import('./pr-risk.mjs')
+  assert.match(skill, /^ {3}## Review verdict$/m)
+  assert.match(skill, REVIEW_VERDICT)
+  assert.match(skill, /<!-- pr-review:verdict not-pass -->/)
+  assert.match(skill, new RegExp(RAISE_MARKER.source))
+  assert.match(skill, /<!-- pr-review:head <full head SHA> -->/)
+  assert.match(skill, /Never lower a tier/)
 })
 
 // --- the telemetry step never pushes across branches -------------------------

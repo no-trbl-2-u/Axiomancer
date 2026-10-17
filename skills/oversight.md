@@ -84,6 +84,11 @@ In parallel where independent:
       "created:>=<date>"` and the count with `loop:pr-stuck`, plus the
       number of `pr-autofix.yml` runs (`gh run list --workflow
       pr-autofix.yml`). Two attempts per PR is the ceiling by design.
+    - **Shadow reviews.** The `pr-review.yml` `review` job's run count for
+      the window beside `pr-autofix`'s (`gh run list --workflow
+      pr-review.yml --json conclusion,createdAt`, counting runs whose
+      `review` job ran), and how many verdicts were `not-pass`. It is
+      the cost check on phase RV1b: one Claude run per reviewed head.
     - **Intake used.** `git log --since=<date> --grep='^phases: plot'` and
       the count of `plan/messy/`-refined specs (commit subjects
       `plan(<topic>):`). Zero after two weeks means the habit didn't take.
