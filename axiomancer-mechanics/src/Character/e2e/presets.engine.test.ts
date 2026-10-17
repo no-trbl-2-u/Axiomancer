@@ -10,8 +10,10 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import {
     apprenticePreset, wandererPreset, sagePreset,
-    characterPresets, getPresetById, buildCharacterFromPreset,
+    characterPresets, levelLadderPresets, getPresetById, buildCharacterFromPreset,
 } from '../presets';
+import { createNewGameState } from '../../Game/game.reducer';
+import { STAT_POINTS_PER_LEVEL } from '../../Game/game-mechanics.constants';
 import { mockSequentialRng } from '../../test-utils/rng';
 import type { Consumable } from '../../Items/types';
 import { STARTING_CARD_IDS } from '../../Combat/combat.rewards';
@@ -61,7 +63,7 @@ describe('buildCharacterFromPreset', () => {
         mockSequentialRng(0.5);
         const player = buildCharacterFromPreset(wandererPreset);
         expect(player.level).toBe(8);
-        expect(player.baseStats).toEqual({ heart: 5, body: 4, mind: 4 });
+        expect(player.baseStats).toEqual({ heart: 7, body: 8, mind: 7 });
         expect(player.knownCards).toEqual([...STARTING_CARD_IDS]); // grey deck at every tier
         // Presets wear the ring and carry NO procedural gear (the ring is the only equipment).
         expect(player.equipment.accessories.map(a => a.id)).toEqual(['relic-disarming-plea']);
@@ -74,7 +76,7 @@ describe('buildCharacterFromPreset', () => {
         mockSequentialRng(0.5);
         const player = buildCharacterFromPreset(sagePreset);
         expect(player.level).toBe(15);
-        expect(player.baseStats).toEqual({ heart: 20, body: 30, mind: 25 });
+        expect(player.baseStats).toEqual({ heart: 8, body: 11, mind: 10 });
         expect(player.knownCards).toEqual([...STARTING_CARD_IDS]); // grey deck at every tier
         // Wears the ring; declared procedural gear does not resolve,
         // so the ring is the only equipment.
@@ -101,24 +103,22 @@ describe('buildCharacterFromPreset', () => {
         expect(a.inventory[0]).toEqual(b.inventory[0]);
     });
 
-    // Stat law compliance
-    describe('stat law compliance (5 points per level)', () => {
-        it('apprentice level 1 has exactly 15 total stats', () => {
-            const { heart, body, mind } = apprenticePreset.baseStats;
-            const total = heart + body + mind;
-            expect(total).toBe(15); // 1 × 5
-        });
+    // Stat curve: a preset holds exactly the points its level banks
+    // (CRITIQUE pass 90). A new game starts at 15; each level after the
+    // first adds STAT_POINTS_PER_LEVEL.
+    describe('stat curve', () => {
+        const startTotal = (() => {
+            const { heart, body, mind } = createNewGameState().player.baseStats;
+            return heart + body + mind;
+        })();
 
-        it('wanderer level 8 has exactly 13 total stats', () => {
-            const { heart, body, mind } = wandererPreset.baseStats;
-            const total = heart + body + mind;
-            expect(total).toBe(13); // Known non-compliant preset
-        });
-
-        it('sage level 15 has exactly 75 total stats', () => {
-            const { heart, body, mind } = sagePreset.baseStats;
-            const total = heart + body + mind;
-            expect(total).toBe(75); // 15 × 5
-        });
+        it.each([...characterPresets, ...levelLadderPresets].map(p => [p.id, p] as const))(
+            '%s holds exactly the stat points its level banks',
+            (_id, preset) => {
+                const { heart, body, mind } = preset.baseStats;
+                const reachable = startTotal + (preset.level - 1) * STAT_POINTS_PER_LEVEL;
+                expect(heart + body + mind).toBe(reachable);
+            },
+        );
     });
 });

@@ -706,15 +706,6 @@
 
 ## Pending
 
-### [LOW] exploration hub / tooling — the level-15 Sage fixture shows 680 VITAE, twice what a level-15 pilgrim can now reach
-- pass: 90 (commit 6b5e2b6d)
-- viewport: both (375x812 and 1280x800)
-- category: comprehension
-- observation: the late-game hub (fixture `sage-bw-door-gate`) heads the screen "Sage · LVL 15 · PILGRIM", VITAE 680/680. Since LV1 a level gives 1 stat point (`STAT_POINTS_PER_LEVEL = 1`), so a level-15 pilgrim holds 15 + 14 = 29 points; every point in BODY gives at most 50 + 19x12 + 5x6 + 5x6 = 338 VITAE. The Sage preset carries 75 points (heart 20, body 30, mind 25). The other level presets miss the curve too: `kid-l15` 38 points (reachable 29), `kid-l30` 78 (44), `kid-l50` 126 (64), and `wanderer` at L8 holds 13, fewer than the 15 a fresh L1 starts with. Every late-game critique pass, and any sim or e2e that boots these presets (`PRESET=sage`), reads numbers no player sees.
-- evidence: `.critique-artifacts/{mobile,desktop}/11-late-game-hub.png` and `.txt` ("LVL 15 · PILGRIM", "680/680"); `axiomancer-mechanics/src/Character/presets.ts:83-198`; `calculateMaxHealth` in `src/Utils/index.ts:143`; `STAT_POINTS_PER_LEVEL` in `src/Game/game-mechanics.constants.ts:49`.
-- suggested fix: set each level preset's `baseStats` to a reachable spread, start stats plus (level - 1) x `STAT_POINTS_PER_LEVEL`, and add a guard test that no preset's stat total exceeds what its level can bank. Dev presets only, no player rule changes; label `review:rules-change` anyway, since sims and e2e read these numbers.
-- source: critique:drive (unattended)
-
 
 ### [LOW] rest / cache — "The node is spent the moment you stopped here" mixes present and past tense
 - pass: 89 (commit 2927472f)
@@ -1054,6 +1045,15 @@
 
 ## Done
 
+### [x] [LOW] exploration hub / tooling — the level-15 Sage fixture shows 680 VITAE, twice what a level-15 pilgrim can now reach — RESOLVED 2026-10-17 (branch loop/iterate-preset-stat-curve, 428a91a2: every preset holds exactly 15 + (level - 1) x `STAT_POINTS_PER_LEVEL`, spread in the old proportions; Sage is 8/11/10; pinned by presets.engine.test.ts "stat curve")
+- pass: 90 (commit 6b5e2b6d)
+- viewport: both (375x812 and 1280x800)
+- category: comprehension
+- observation: the late-game hub (fixture `sage-bw-door-gate`) heads the screen "Sage · LVL 15 · PILGRIM", VITAE 680/680. Since LV1 a level gives 1 stat point (`STAT_POINTS_PER_LEVEL = 1`), so a level-15 pilgrim holds 15 + 14 = 29 points; every point in BODY gives at most 50 + 19x12 + 5x6 + 5x6 = 338 VITAE. The Sage preset carries 75 points (heart 20, body 30, mind 25). The other level presets miss the curve too: `kid-l15` 38 points (reachable 29), `kid-l30` 78 (44), `kid-l50` 126 (64), and `wanderer` at L8 holds 13, fewer than the 15 a fresh L1 starts with. Every late-game critique pass, and any sim or e2e that boots these presets (`PRESET=sage`), reads numbers no player sees.
+- evidence: `.critique-artifacts/{mobile,desktop}/11-late-game-hub.png` and `.txt` ("LVL 15 · PILGRIM", "680/680"); `axiomancer-mechanics/src/Character/presets.ts:83-198`; `calculateMaxHealth` in `src/Utils/index.ts:143`; `STAT_POINTS_PER_LEVEL` in `src/Game/game-mechanics.constants.ts:49`.
+- suggested fix: set each level preset's `baseStats` to a reachable spread, start stats plus (level - 1) x `STAT_POINTS_PER_LEVEL`, and add a guard test that no preset's stat total exceeds what its level can bank. Dev presets only, no player rule changes; label `review:rules-change` anyway, since sims and e2e read these numbers.
+- source: critique:drive (unattended)
+- issue: #599
 ### [x] [LOW] exploration / map — on desktop the gesture line still says "drag · pinch", but a mouse zooms with the wheel since #590 — RESOLVED 2026-10-16 (branch loop/iterate-map-gesture-line, 41a733aa: `MAP_GESTURE_LINE` in the exploration presenter; MapOverlays reads "drag · scroll to zoom" for a fine pointer on web, "drag · pinch" otherwise; pinned in MapOverlays.test.tsx)
 - pass: 91 (commit ef1d1dd3)
 - viewport: desktop (1280x800); mobile is correct

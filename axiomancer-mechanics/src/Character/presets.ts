@@ -49,6 +49,11 @@ export interface CharacterPreset {
     currency: number;
 }
 
+// Every preset's `baseStats` total is exactly what a pilgrim of its level
+// can bank: the 15 points a new game starts with plus
+// `STAT_POINTS_PER_LEVEL` for each level after the first. The guard is
+// `presets.engine.test.ts` "stat curve".
+
 // ─── Preset records ───────────────────────────────────────────────────────────
 
 // Every preset seeds the grey deck a fresh run opens with (Blow 5 / Ward 3 /
@@ -84,7 +89,7 @@ export const wandererPreset: CharacterPreset = {
     name: 'Wanderer',
     summary: 'Mid-game — light armor, mixed-tier cards, a pouch of shillings.',
     level: 8,
-    baseStats: { heart: 5, body: 4, mind: 4 },
+    baseStats: { heart: 7, body: 8, mind: 7 },
     equipment: [
         { templateId: 'iron-blade' },
         { templateId: 'hide-vest' },
@@ -102,7 +107,7 @@ export const sagePreset: CharacterPreset = {
     name: 'Sage',
     summary: 'Late-game — mid-tier kit, every card known, paradox in reach.',
     level: 15,
-    baseStats: { heart: 20, body: 30, mind: 25 },
+    baseStats: { heart: 8, body: 11, mind: 10 },
     equipment: [
         { templateId: 'steel-blade' },
         { templateId: 'chain-mail' },
@@ -146,7 +151,7 @@ export const ladderL15Preset: CharacterPreset = {
     name: 'Ladder · L15',
     summary: 'Mid-tier evidence kit.',
     level: 15,
-    baseStats: { heart: 12, body: 14, mind: 12 },
+    baseStats: { heart: 9, body: 11, mind: 9 },
     equipment: [
         { templateId: 'steel-blade' },
         { templateId: 'chain-mail' },
@@ -168,7 +173,7 @@ export const ladderL30Preset: CharacterPreset = {
     name: 'Ladder · L30',
     summary: 'Late-tier evidence kit.',
     level: 30,
-    baseStats: { heart: 24, body: 28, mind: 26 },
+    baseStats: { heart: 14, body: 16, mind: 14 },
     equipment: [
         { templateId: 'mithril-blade' },
         { templateId: 'plate-mail' },
@@ -195,7 +200,7 @@ export const ladderL50Preset: CharacterPreset = {
     name: 'Ladder · L50',
     summary: 'Endgame evidence kit.',
     level: 50,
-    baseStats: { heart: 40, body: 44, mind: 42 },
+    baseStats: { heart: 21, body: 22, mind: 21 },
     // Top-tier curated affixed L20 variants — the highest requiredLevel
     // rows the library ships — so the build still arrives geared and
     // affix-backed.
