@@ -715,16 +715,6 @@
 - suggested fix: move the line to a copy file and pick it by platform: "drag · pinch" on native, "drag · scroll to zoom" on web; update the two test pins. Copy only, no rule change.
 - source: critique:drive (unattended)
 
-### [LOW] exploration hub / tooling — the level-15 Sage fixture shows 680 VITAE, twice what a level-15 pilgrim can now reach
-- pass: 90 (commit 6b5e2b6d)
-- viewport: both (375x812 and 1280x800)
-- category: comprehension
-- observation: the late-game hub (fixture `sage-bw-door-gate`) heads the screen "Sage · LVL 15 · PILGRIM", VITAE 680/680. Since LV1 a level gives 1 stat point (`STAT_POINTS_PER_LEVEL = 1`), so a level-15 pilgrim holds 15 + 14 = 29 points; every point in BODY gives at most 50 + 19x12 + 5x6 + 5x6 = 338 VITAE. The Sage preset carries 75 points (heart 20, body 30, mind 25). The other level presets miss the curve too: `kid-l15` 38 points (reachable 29), `kid-l30` 78 (44), `kid-l50` 126 (64), and `wanderer` at L8 holds 13, fewer than the 15 a fresh L1 starts with. Every late-game critique pass, and any sim or e2e that boots these presets (`PRESET=sage`), reads numbers no player sees.
-- evidence: `.critique-artifacts/{mobile,desktop}/11-late-game-hub.png` and `.txt` ("LVL 15 · PILGRIM", "680/680"); `axiomancer-mechanics/src/Character/presets.ts:83-198`; `calculateMaxHealth` in `src/Utils/index.ts:143`; `STAT_POINTS_PER_LEVEL` in `src/Game/game-mechanics.constants.ts:49`.
-- suggested fix: set each level preset's `baseStats` to a reachable spread, start stats plus (level - 1) x `STAT_POINTS_PER_LEVEL`, and add a guard test that no preset's stat total exceeds what its level can bank. Dev presets only, no player rule changes; label `review:rules-change` anyway, since sims and e2e read these numbers.
-- source: critique:drive (unattended)
-
-
 ### [LOW] rest / cache — "The node is spent the moment you stopped here" mixes present and past tense
 - pass: 89 (commit 2927472f)
 - viewport: both (375x812 and 1280x800)
@@ -1063,6 +1053,15 @@
 
 ## Done
 
+### [x] [LOW] exploration hub / tooling — the level-15 Sage fixture shows 680 VITAE, twice what a level-15 pilgrim can now reach — RESOLVED 2026-10-17 (branch loop/iterate-preset-stat-curve, 428a91a2: every preset holds exactly 15 + (level - 1) x `STAT_POINTS_PER_LEVEL`, spread in the old proportions; Sage is 8/11/10; pinned by presets.engine.test.ts "stat curve")
+- pass: 90 (commit 6b5e2b6d)
+- viewport: both (375x812 and 1280x800)
+- category: comprehension
+- observation: the late-game hub (fixture `sage-bw-door-gate`) heads the screen "Sage · LVL 15 · PILGRIM", VITAE 680/680. Since LV1 a level gives 1 stat point (`STAT_POINTS_PER_LEVEL = 1`), so a level-15 pilgrim holds 15 + 14 = 29 points; every point in BODY gives at most 50 + 19x12 + 5x6 + 5x6 = 338 VITAE. The Sage preset carries 75 points (heart 20, body 30, mind 25). The other level presets miss the curve too: `kid-l15` 38 points (reachable 29), `kid-l30` 78 (44), `kid-l50` 126 (64), and `wanderer` at L8 holds 13, fewer than the 15 a fresh L1 starts with. Every late-game critique pass, and any sim or e2e that boots these presets (`PRESET=sage`), reads numbers no player sees.
+- evidence: `.critique-artifacts/{mobile,desktop}/11-late-game-hub.png` and `.txt` ("LVL 15 · PILGRIM", "680/680"); `axiomancer-mechanics/src/Character/presets.ts:83-198`; `calculateMaxHealth` in `src/Utils/index.ts:143`; `STAT_POINTS_PER_LEVEL` in `src/Game/game-mechanics.constants.ts:49`.
+- suggested fix: set each level preset's `baseStats` to a reachable spread, start stats plus (level - 1) x `STAT_POINTS_PER_LEVEL`, and add a guard test that no preset's stat total exceeds what its level can bank. Dev presets only, no player rule changes; label `review:rules-change` anyway, since sims and e2e read these numbers.
+- source: critique:drive (unattended)
+- issue: #599
 ### [x] [LOW] combat / a11y — the SACRIFICE-floor callout changes the ring's label but announces nothing — RESOLVED 2026-10-15 (branch loop/iterate-sacfloor-announce, 6974aa46: `flagShortfall` announces `PROGRAM_COPY.floorA11y` once per refusal; the label change stays for focus; pinned in CombatBoard.sacfloor.test.tsx)
 - pass: antagonist on PR #523 (SF1, commit 04e5ebb6)
 - viewport: n/a (screen reader)
