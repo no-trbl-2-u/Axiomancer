@@ -6,7 +6,9 @@
  * every position here resolves against the visible chart rather than the
  * 936x1040 spread.
  *
- * State read: none. It is pure props; the presenter owns the legend's words.
+ * State read: none. It is pure props; the presenter owns the legend's words
+ * and the gesture line's (`MAP_GESTURE_LINE`). Which line shows follows the
+ * pointer: a mouse gets the wheel, a finger the pinch (`detectMapPointer`).
  * Mounted from: `app/(tabs)/exploration/index.tsx`, as `<MapCanvas overlays=…>`.
  *
  * The legend keeps `<MapCanvas>`'s recentre-button corner free (see
@@ -14,25 +16,41 @@
  */
 
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Platform } from 'react-native';
 import { FONTS } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
+import { MAP_GESTURE_LINE } from '@/state/presenters/exploration.engine';
+import type { MapPointer } from '@/state/presenters/exploration.engine';
 
 interface MapOverlaysProps {
     legend: {
         left: string;
         right: string;
     };
+    /** Overrides the detected pointer (tests); defaults to `detectMapPointer()`. */
+    pointer?: MapPointer;
 }
 
-export function MapOverlays({ legend }: MapOverlaysProps) {
+/**
+ * The pointer the chart is driven by. Native is always touch. On web, a fine
+ * primary pointer (a mouse or trackpad) zooms with the wheel; a phone
+ * browser's coarse pointer still pinches, so it keeps the touch line.
+ */
+export function detectMapPointer(): MapPointer {
+    if (Platform.OS !== 'web') return 'touch';
+    const mq = typeof window !== 'undefined' ? window.matchMedia : undefined;
+    return mq?.('(pointer: fine)').matches ? 'mouse' : 'touch';
+}
+
+export function MapOverlays({ legend, pointer }: MapOverlaysProps) {
     const styles = useStyles();
+    const gestureLine = MAP_GESTURE_LINE[pointer ?? detectMapPointer()];
     return (
         <>
             {/* Gesture line. Naming the gesture here keeps "the sheet
                 moves" on screen for the whole run, beside the legend's node
                 count that provokes the question. */}
-            <Text style={styles.gestures}>drag · pinch</Text>
+            <Text style={styles.gestures} testID="map-gesture-line">{gestureLine}</Text>
 
             {/* Legend. Two stacked lines, not two ends of one row — see
                 `legend` in the stylesheet for why the row could not hold. The

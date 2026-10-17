@@ -4,7 +4,8 @@ Two layers live here:
 
 1. **CI and deterministic builds:** `verify-mechanics`, `verify-mobile`,
    `verify-drift`, `verify-prose`, `preview-build`, `build-devlog`,
-   `check-lexicon`, `check-devlog-served`, `perf-audit`. Each package has one owning verify
+   `check-lexicon`, `check-devlog-served`, `perf-audit`, and `pr-review`'s
+   `verify-gate`, the one always-reporting check over the path-filtered `verify-*`. Each package has one owning verify
    workflow: mechanics owns root dependency changes and runs the affected
    mobile consumer gate; mobile runs only for its own paths. Mobile verification installs once, exports once, and reuses that
    inspected export for the affected Hazard / Encounter / Combat
@@ -65,12 +66,50 @@ gets checked.
 | `ci-autofix.yml` | `/fix-ci` | `verify-*` failure on `main` + manual | Red-main first responder. Pushes the fix to `main`. Its own job-level `ci-autofix` concurrency group (R0): skipped runs never queue, so they cannot displace a real one. |
 | `pr-autofix.yml` | `/fix-ci <run> --branch <head>` (Haiku) | `verify-*` failure on a PR branch + manual | Keeps `loop:pr` PRs green (D87). A plain gate job first checks the PR is open, same-repo, labelled `loop:pr` and not `loop:pr-stuck`, and counts its attempt comments; the third red run labels it `loop:pr-stuck` instead of running. The fix job has a job-level `pr-autofix-<PR>` group. Never touches `main`, never force-pushes. |
 | `pr-resolve.yml` | `scripts/pr-resolve.mjs`, then `/fix-ci --resolve` (Haiku, Read + Edit only) | every push to `main` + manual | Keeps `loop:pr` PRs mergeable (D87). Merges `main` into each conflicting same-repo `loop:pr` PR; conflicts only in telemetry shards or the plan queues settle by a union of rows (three-way counted, so an edited row is not doubled); anything else goes to a Haiku run between a scripted prepare and a finish that refuses a leftover marker. The scan starts that Haiku run as a `workflow_dispatch` of this file per conflicted PR (`branch`, `pr` inputs), because `claude-code-action` rejects a `push` event. Job-level `pr-resolve` group for the scan, `pr-resolve-<branch>` per resolve. Push, never force. |
+| `pr-review.yml` | deterministic `scripts/pr-risk.mjs` + `scripts/pr-gate.mjs` (job `verify-gate`) | every same-repo PR into `main`: `opened`, `synchronize`, `reopened`, `ready_for_review`, `labeled` | **The always-reporting gate** (phase RV1a). The `verify-*` workflows are path-filtered, so none can be a required check; `verify-gate` always reports. It labels the PR with the derived `risk:low\|medium\|high` (the only workflow writer of `risk:*`; a reviewer's raise, marked `<!-- pr-review:raised risk:<tier> -->` in a PR comment, is kept), runs the root `npm test` when the diff touches a path no `verify-*` covers, then waits (cap 45 min) for every `verify-*` the diff triggers on the head and is green only when all are. `pull_request`, never `pull_request_target`; labels with the workflow token, so a label starts no run. Job-level `pr-review-gate-<PR>` group, cancel in progress. Required by T's ruleset below (evaluate mode). No Claude invocation; the shadow reviewer joins in RV1b. |
 | `iterate.yml`, `critique.yml`, `expand.yml`, `ship-a-phase.yml`, `plan-a-phase.yml` | same-named | manual only | Direct dispatch = force one run. March dispatches these on its own, except `plan-a-phase`: since R11 only T runs it (by hand or this button), and the loop never writes a brief. `iterate.yml` pins Opus 5.5. |
 | `claude.yml` | — | `@claude` mention in issues/PRs | Interactive responder. |
 
 Skills that need a human in the loop (`/oversight`, `/jot`, `/plot`,
 `/messy`) deliberately have no workflow; `scripts/loop-pr.test.mjs` fails
 if a workflow ever fires `/plot` or `/messy`.
+
+## The `verify-gate` ruleset (T runs this once)
+
+The loop cannot change repository settings, so T creates the ruleset that
+requires `verify-gate` on `main` (phase RV1a, A4). It starts in **evaluate**
+mode: nothing is blocked, and Settings -> Rules -> Insights records what it
+would have blocked. T is on the bypass list (`RepositoryRole` 5 is admin;
+`integration_id` 15368 is GitHub Actions, so only the workflow's own check
+satisfies it).
+
+```bash
+gh api -X POST repos/no-trbl-2-u/Miserere-mei-deus/rulesets --input - <<'EOF'
+{
+  "name": "main requires verify-gate",
+  "target": "branch",
+  "enforcement": "evaluate",
+  "conditions": { "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] } },
+  "rules": [
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "strict_required_status_checks_policy": false,
+        "required_status_checks": [{ "context": "verify-gate", "integration_id": 15368 }]
+      }
+    }
+  ],
+  "bypass_actors": [{ "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" }]
+}
+EOF
+```
+
+If GitHub refuses `"enforcement": "evaluate"` on this plan, run the same call
+with `"enforcement": "active"`: T stays on the bypass list, so it blocks
+nothing T does today, while every other actor (the loop's token included)
+needs a green `verify-gate`. Check it with
+`gh api repos/no-trbl-2-u/Miserere-mei-deus/rulesets`. Flipping evaluate to
+active later is `gh api -X PUT repos/no-trbl-2-u/Miserere-mei-deus/rulesets/<id> -f enforcement=active`.
 
 ## Operating notes
 

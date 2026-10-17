@@ -271,6 +271,10 @@ gh pr checks "loop/<verb>-<slug>" --repo "$GH_REPO" --watch --fail-fast
   own change: fix on the branch (push, never force), up to 3
   same-root-cause tries. Still red when the tick must end: leave it;
   `pr-autofix` takes it (two runs, D87).
+- **`verify-gate`** (`pr-review.yml`, phase RV1a) reports on every PR:
+  green only when every triggered `verify-*` is, and it applies the
+  derived `risk:*` label. The tick never sets a `risk:*` label itself;
+  T merges as before (D86).
 - **Never** enable auto-merge, merge the PR, close it, or force-push
   its branch. T merges (D86).
 - **Check the cap and claims before cutting the branch.**
