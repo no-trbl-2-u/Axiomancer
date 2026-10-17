@@ -258,6 +258,20 @@ them with a design eye, which no reviewer replaces. Chromium's Rubber
 Stamper is the published precedent for the `low` tier: a mechanically
 verifiable class, never a judgement.
 
+<!-- pr-risk:replay:start -->
+
+#### Replay by `scripts/pr-risk.mjs` (phase RV1a, A3)
+
+The last 60 PRs merged before 2026-10-16T12:21:07Z, tiered by the script, not by hand. Stamp: commit `388eca05d` (2026-10-16). Regenerate with `node scripts/pr-risk.mjs --replay --write`; labels are read as they stand today.
+
+| Tier | PRs | Which |
+|---|---|---|
+| `risk:low` | 10 | #567 #566 #560 #550 #502 #498 #483 #430 #429 #428 |
+| `risk:medium` | 27 | #581 #577 #575 #563 #559 #557 #555 #553 #549 #545 #541 #539 #537 #535 #534 #531 #528 #520 #517 #516 #514 #512 #510 #497 #484 #447 #412 |
+| `risk:high` | 23 | #579 #576 #573 #571 #569 #565 #562 #551 #547 #546 #543 #529 #526 #523 #521 #509 #507 #505 #503 #501 #500 #499 #486 |
+
+<!-- pr-risk:replay:end -->
+
 ### Stage 0: the mechanical gate (free, no Claude)
 
 New file `.github/workflows/pr-review.yml`, job `verify-gate`:

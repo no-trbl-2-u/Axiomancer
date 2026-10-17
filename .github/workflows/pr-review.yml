@@ -1,0 +1,77 @@
+name: pr-review
+
+# The PR review pipeline (phase RV1, `plan/phases/phase_RV1_pr_review_pipeline.md`;
+# design in `docs/reports/pr-review-research.md` Part 3).
+#
+# Job `verify-gate` (RV1a) is the one always-reporting check on every
+# same-repo PR into main. The `verify-*` workflows are path-filtered, so
+# none of them can be a required check (a required `verify-mobile` that
+# never runs on a mechanics-only PR blocks it forever). `verify-gate`
+# always reports: it labels the PR with the risk tier `scripts/pr-risk.mjs`
+# derives, runs the root `npm test` when the diff touches a path no
+# `verify-*` covers, then waits for every `verify-*` the diff triggers on
+# this head and is green only when all of them are (`scripts/pr-gate.mjs`).
+# A ruleset in evaluate mode requires it; T creates that ruleset with the
+# command in `.github/workflows/README.md`.
+#
+# `pull_request`, never `pull_request_target`: a fork's head never sees a
+# secret, and this file only ever runs for heads in this repo. The label is
+# written with the workflow's own token, which starts no new workflow run,
+# so labelling cannot loop. Nothing here merges, auto-merges, closes or
+# force-pushes a PR (D86); `scripts/loop-pr.test.mjs` pins all of it.
+#
+# Cost: GitHub-hosted runners, free for this public repo. No Claude run.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: read
+
+jobs:
+  verify-gate:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    # Job-level and per PR: a new push or label supersedes the gate on the old state.
+    concurrency:
+      group: pr-review-gate-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR: ${{ github.event.pull_request.number }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - name: Checkout full history (the risk tier diffs package.json at the merge base)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Label the derived risk tier
+        run: node scripts/pr-risk.mjs --pr "$PR" --apply
+
+      - name: Classify the diff against the verify-* path filters
+        id: classify
+        run: node scripts/pr-gate.mjs classify --pr "$PR"
+
+      - name: Install dependencies (uncovered paths only)
+        if: steps.classify.outputs.uncovered == 'true'
+        run: npm ci --no-audit --no-fund
+
+      - name: Root npm test (uncovered paths only)
+        if: steps.classify.outputs.uncovered == 'true'
+        run: npm test
+
+      - name: Wait for every triggered verify-* on this head
+        run: node scripts/pr-gate.mjs wait --pr "$PR" --head "$HEAD_SHA"
