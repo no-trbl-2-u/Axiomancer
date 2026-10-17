@@ -260,7 +260,7 @@ ambiguity.)
 - **THE LOOP SINCE R11 (T, attended session 2026-10-12, D84–D90).**
   - **Code lands by PR; T merges.** A tick whose diff touches anything
     outside `plan/`, `telemetry/`, `docs/reports/` or `devlog/entries/` opens a `loop:pr` PR
-    onto `main` (D84); at most 3 are open, after which `/march` reports
+    onto `main` (D84); at most 5 are open (raised from 3 via /oversight 2026-10-17), after which `/march` reports
     "waiting on T" (D85); T merges by hand, never auto-merge, and a PR
     open 7 days is flagged, never closed (D86). `pr-autofix` (Haiku, two
     runs per PR, then `loop:pr-stuck`) keeps them green and `pr-resolve`

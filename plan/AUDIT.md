@@ -156,7 +156,7 @@
 - detail: Leg 4 logged P-07b ("DEAL all the VITAE you lost this combat (max 30). EXILE.") paid plays dealing 114 (seq 3063, a Float-Eye at ld-11, after far less than 114 VITAE lost), 114 again on the Doorwarden (seq 3428), 48 and 32. Printed numbers elsewhere scale with stats, but the cap does not scale and 114 is not a scaled 30 either. Printed must equal applied.
 - next (`/iterate`): find where the card program resolves "VITAE lost this combat" and its cap in `axiomancer-mechanics/src/Combat/` (P-07b in the Blood Price library); check whether the cap is skipped on the paid line or scaled after capping; pin it with an engine test at the printed cap. Card numbers are D37-held: fix the code to match the printed card, never the card text.
 
-### [loop-call] A DEAL of VITAE lost lands unscaled; other derived DEALs still body-scale (2026-10-13)
+### [x] [loop-call] A DEAL of VITAE lost lands unscaled; other derived DEALs still body-scale (2026-10-13) — RATIFIED via /oversight 2026-10-17
 - category: contract
 - impact: 4
 - ease: -
@@ -188,7 +188,7 @@
 - detail: Leg 4: a lost hazard (ld-4 North Aqueduct) applied Scarred (-5 max VITAE, 302 to 297). Act 1 has no inn. Two rest nodes (ld-10, ld-2) and a reload left max VITAE at 297. In practice the scar is permanent, and the gloss names a place the game does not have.
 - next (`/iterate`): decide in code what lifts a scar in Act 1 (any REST node is the reading closest to the gloss), make it so and update the gloss to match; test it. If lifting it needs a design call, file a `[loop-call]` with the choice made.
 
-### [loop-call] A hazard scar mends at any rest; the inn keeps only its wording (2026-10-15)
+### [x] [loop-call] A hazard scar mends at any rest; the inn keeps only its wording (2026-10-15) — RATIFIED via /oversight 2026-10-17
 - category: contract
 - impact: 4
 - ease: -
@@ -1724,7 +1724,7 @@ present. Row stays open until that session runs.
   cheap fix covers the observed failure, and a real lock is a bigger change to
   a flow that is otherwise working.
 
-### [loop-call] Timing perf budgets hold only on the CPU they were seeded on (2026-10-11)
+### [x] [loop-call] Timing perf budgets hold only on the CPU they were seeded on (2026-10-11) — RATIFIED via /oversight 2026-10-17
 - category: perf
 - impact: 5
 - ease: 8

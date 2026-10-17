@@ -146,7 +146,7 @@ open_prs=$(gh pr list --repo "$GH_REPO" --state open --label loop:pr \
 count=$(echo "$open_prs" | jq 'length')
 ```
 
-At **3 or more** the cap is reached: the tick runs triage (Step 1)
+At **5 or more** (D85, raised from 3 via /oversight 2026-10-17) the cap is reached: the tick runs triage (Step 1)
 and, if due, critique (it files findings only and pushes `main`),
 then reports
 `waiting on T: PRs #a, #b, #c` and ends. Every tick, capped or not,
