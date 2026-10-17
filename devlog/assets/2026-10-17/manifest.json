@@ -1,0 +1,23 @@
+{
+  "generated_by": "scripts/devlog-shots.mjs",
+  "date": "2026-10-17",
+  "since": "dcf2f981",
+  "sinceDate": "2026-10-15",
+  "shots": [
+    {
+      "screen": "combat-encounter",
+      "before": true,
+      "ratio": 0.06506865961842265
+    },
+    {
+      "screen": "devpuzzle-board",
+      "before": false,
+      "ratio": null
+    },
+    {
+      "screen": "devpuzzle-outcome",
+      "before": false,
+      "ratio": null
+    }
+  ]
+}
