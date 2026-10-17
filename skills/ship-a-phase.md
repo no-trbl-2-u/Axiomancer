@@ -111,7 +111,7 @@ git switch main 2>/dev/null; git pull --ff-only
 ```
 
 If divergence, stop per §10. Then check the PR cap
-(`skills/march.md` §3 "PR cap"): at 3 open `loop:pr` PRs, report
+(`skills/march.md` §3 "PR cap"): at 5 open `loop:pr` PRs, report
 "waiting on T" and return without building.
 
 ### Step 1 — Pick the phase
